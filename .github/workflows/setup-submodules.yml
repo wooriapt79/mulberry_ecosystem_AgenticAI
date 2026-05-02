@@ -23,7 +23,11 @@ jobs:
       - name: Clean and re-add submodules
         run: |
           git submodule deinit -f --all 2>/dev/null || true
-          git rm --cached -r mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex Mulberry-Agent-Team-Formation-System 2>/dev/null || true
+          git rm --cached -r mulberry-research-lab 2>/dev/null || true
+          git rm --cached -r agency-agents 2>/dev/null || true
+          git rm --cached -r everything-claude-code 2>/dev/null || true
+          git rm --cached -r mulberry-research-lab-pageindex 2>/dev/null || true
+          git rm --cached -r Mulberry-Agent-Team-Formation-System 2>/dev/null || true
           rm -rf .git/modules/mulberry-research-lab .git/modules/agency-agents .git/modules/everything-claude-code .git/modules/mulberry-research-lab-pageindex ".git/modules/Mulberry-Agent-Team-Formation-System"
           rm -rf mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex Mulberry-Agent-Team-Formation-System
           echo -n > .gitmodules
