@@ -1,0 +1,12 @@
+[submodule "mulberry-research-lab"]
+	path = mulberry-research-lab
+	url = https://github.com/wooriapt79/mulberry-research-lab.git
+[submodule "agency-agents"]
+	path = agency-agents
+	url = https://github.com/wooriapt79/agency-agents.git
+[submodule "everything-claude-code"]
+	path = everything-claude-code
+	url = https://github.com/wooriapt79/everything-claude-code.git
+[submodule "mulberry-research-lab-pageindex"]
+	path = mulberry-research-lab-pageindex
+	url = https://github.com/wooriapt79/mulberry-research-lab-pageindex.git
