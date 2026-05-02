@@ -17,21 +17,24 @@ on:
                                                                     git config user.name "github-actions[bot]"
                                                                               git config user.email "github-actions[bot]@users.noreply.github.com"
 
-                                                                                    - name: Remove old .gitmodules
+                                                                                    - name: Remove existing directories and old .gitmodules
                                                                                             run: |
-                                                                                                      if [ -f .gitmodules ]; then
-                                                                                                                  git rm .gitmodules || rm .gitmodules
-                                                                                                                            fi
-                                                                                                                            
-                                                                                                                                  - name: Add Submodules
-                                                                                                                                          run: |
-                                                                                                                                                    git submodule add https://github.com/wooriapt79/mulberry-research-lab.git mulberry-research-lab || echo "already exists"
-                                                                                                                                                              git submodule add https://github.com/wooriapt79/agency-agents.git agency-agents || echo "already exists"
-                                                                                                                                                                        git submodule add https://github.com/wooriapt79/everything-claude-code.git everything-claude-code || echo "already exists"
-                                                                                                                                                                                  git submodule add https://github.com/wooriapt79/mulberry-research-lab-pageindex.git mulberry-research-lab-pageindex || echo "already exists"
-                                                                                                                                                                                  
-                                                                                                                                                                                        - name: Commit and Push
-                                                                                                                                                                                                run: |
-                                                                                                                                                                                                          git add .
-                                                                                                                                                                                                                    git commit -m "feat: submodule 4개 자동 연결 (GitHub Actions)" || echo "nothing to commit"
-                                                                                                                                                                                                                              git push
+                                                                                                      git rm -r --cached mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex 2>/dev/null || true
+                                                                                                                rm -rf mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex
+                                                                                                                          if [ -f .gitmodules ]; then
+                                                                                                                                      git rm -f .gitmodules 2>/dev/null || rm -f .gitmodules
+                                                                                                                                                fi
+                                                                                                                                                
+                                                                                                                                                      - name: Add Submodules
+                                                                                                                                                              run: |
+                                                                                                                                                                        git submodule add https://github.com/wooriapt79/mulberry-research-lab.git mulberry-research-lab
+                                                                                                                                                                                  git submodule add https://github.com/wooriapt79/agency-agents.git agency-agents
+                                                                                                                                                                                            git submodule add https://github.com/wooriapt79/everything-claude-code.git everything-claude-code
+                                                                                                                                                                                                      git submodule add https://github.com/wooriapt79/mulberry-research-lab-pageindex.git mulberry-research-lab-pageindex
+                                                                                                                                                                                                      
+                                                                                                                                                                                                            - name: Commit and Push
+                                                                                                                                                                                                                    run: |
+                                                                                                                                                                                                                              git add .
+                                                                                                                                                                                                                                        git commit -m "feat: submodule 4 connected (mulberry ecosystem)" || echo "nothing to commit"
+                                                                                                                                                                                                                                                  git push
+                                                                                                                                                                                                                                                  
