@@ -22,8 +22,8 @@ jobs:
 
       - name: Remove existing dirs and gitmodules
         run: |
-          git rm -r --cached mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex 2>/dev/null || true
-          rm -rf mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex
+          git rm -r --cached mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex Mulberry-Agent-Team-Formation-System 2>/dev/null || true
+          rm -rf mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex Mulberry-Agent-Team-Formation-System
           if [ -f .gitmodules ]; then git rm -f .gitmodules 2>/dev/null || rm -f .gitmodules; fi
 
       - name: Add Submodules
@@ -32,9 +32,10 @@ jobs:
           git submodule add https://github.com/wooriapt79/agency-agents.git agency-agents
           git submodule add https://github.com/wooriapt79/everything-claude-code.git everything-claude-code
           git submodule add https://github.com/wooriapt79/mulberry-research-lab-pageindex.git mulberry-research-lab-pageindex
+          git submodule add https://github.com/wooriapt79/Mulberry-Agent-Team-Formation-System.git Mulberry-Agent-Team-Formation-System
 
       - name: Commit and Push
         run: |
           git add .
-          git commit -m "feat: submodule 4 connected" || echo "nothing to commit"
+          git commit -m "feat: submodule 5 connected (add Formation System)" || echo "nothing to commit"
           git push
