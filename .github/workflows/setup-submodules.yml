@@ -20,11 +20,15 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Remove existing dirs and gitmodules
+      - name: Clean existing submodules
         run: |
-          git rm -r --cached mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex Mulberry-Agent-Team-Formation-System 2>/dev/null || true
-          rm -rf mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex Mulberry-Agent-Team-Formation-System
-          if [ -f .gitmodules ]; then git rm -f .gitmodules 2>/dev/null || rm -f .gitmodules; fi
+          git submodule deinit -f --all 2>/dev/null || true
+          for mod in mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex Mulberry-Agent-Team-Formation-System; do
+            git rm -rf $mod 2>/dev/null || true
+            rm -rf .git/modules/$mod
+            rm -rf $mod
+          done
+          rm -f .gitmodules
 
       - name: Add Submodules
         run: |
