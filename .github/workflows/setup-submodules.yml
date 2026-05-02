@@ -20,18 +20,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Clean existing submodules
+      - name: Clean and re-add submodules
         run: |
           git submodule deinit -f --all 2>/dev/null || true
-          for mod in mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex Mulberry-Agent-Team-Formation-System; do
-            git rm -rf $mod 2>/dev/null || true
-            rm -rf .git/modules/$mod
-            rm -rf $mod
-          done
-          rm -f .gitmodules
-
-      - name: Add Submodules
-        run: |
+          git rm --cached -r mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex Mulberry-Agent-Team-Formation-System 2>/dev/null || true
+          rm -rf .git/modules/mulberry-research-lab .git/modules/agency-agents .git/modules/everything-claude-code .git/modules/mulberry-research-lab-pageindex ".git/modules/Mulberry-Agent-Team-Formation-System"
+          rm -rf mulberry-research-lab agency-agents everything-claude-code mulberry-research-lab-pageindex Mulberry-Agent-Team-Formation-System
+          echo -n > .gitmodules
           git submodule add https://github.com/wooriapt79/mulberry-research-lab.git mulberry-research-lab
           git submodule add https://github.com/wooriapt79/agency-agents.git agency-agents
           git submodule add https://github.com/wooriapt79/everything-claude-code.git everything-claude-code
@@ -41,5 +36,5 @@ jobs:
       - name: Commit and Push
         run: |
           git add .
-          git commit -m "feat: submodule 5 connected (add Formation System)" || echo "nothing to commit"
+          git commit -m "feat: 5 submodules connected" || echo "nothing to commit"
           git push
