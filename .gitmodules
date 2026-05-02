@@ -10,3 +10,6 @@
 [submodule "mulberry-research-lab-pageindex"]
 	path = mulberry-research-lab-pageindex
 	url = https://github.com/wooriapt79/mulberry-research-lab-pageindex.git
+[submodule "Mulberry-Agent-Team-Formation-System"]
+	path = Mulberry-Agent-Team-Formation-System
+	url = https://github.com/wooriapt79/Mulberry-Agent-Team-Formation-System.git
