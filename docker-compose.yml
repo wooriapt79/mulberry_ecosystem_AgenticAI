@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  page-index:
+    build:
+      context: ./mulberry-research-lab-page_index
+      dockerfile:Dockerfil
+    ports:
+      - "3000:3000"
+    environment:
+      - AGENT_ORCHESTRATOR_URL=http://agent-hub:50051
+      - SPIRIT_SCORE_API_KEY=${SPIRIT_SCORE_API_KEY:-dummy}
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      agent-hub:
+        condition: service_healthy
+    restart: unless-stopped
+    # network_mode: "host" # ← 제거 (포트 충돌 방지)
+
+  agent-hub:
+    build:
+      context: ./agency-agents
+      dockerfile: Dockerfile
+    ports:
+      - "50051:50051"
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/mulberry
+      - QWEN_API_KEY=${QWEN_API_KEY:-dummy}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-dummy}
+      - EDGE_SYNC_MODE=async
+      - BUSINESS_HOURS=09:00-18:00
+    volumes:
+      - ./archive:/app/archive
+      - ./logs:/app/logs
+      - ./edge_data:/app/data  # ← 사투리/큐 데이터 영구 저장
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  tool-library:
+    build:
+      context: ./everything-claude-code
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - API_KEY=${TOOLS_API_KEY:-dummy}
+    volumes:
+      - ./templates:/app/templates
+      - ./snippets:/app/snippets
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: mulberry_ecosystem
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mulberry_ecosystem"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  redis_data:
+  postgres_data:
