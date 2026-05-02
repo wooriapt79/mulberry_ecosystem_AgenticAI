@@ -3,6 +3,9 @@ name: Setup Submodules
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   setup-submodules:
     runs-on: ubuntu-latest
