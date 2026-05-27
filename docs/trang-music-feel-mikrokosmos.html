@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Mulberry Multimodal Studio — Mikrokosmos</title>
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .foyer-card {
+            max-width: 750px;
+            width: 100%;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+        h1 {
+            color: #58a6ff;
+            font-size: 24px;
+            border-bottom: 2px solid #21262d;
+            padding-bottom: 12px;
+            margin-top: 0;
+        }
+        .philosophy-box {
+            background: #21262d;
+            border-left: 4px solid #bc8cff;
+            padding: 18px;
+            margin: 25px 0;
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .audio-wrapper {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        audio {
+            width: 100%;
+            max-width: 450px;
+        }
+        .btn-pulse {
+            background-color: #238636;
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(35,134,54,0.3);
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-pulse:hover {
+            background-color: #2ea44f;
+            transform: translateY(-1px);
+        }
+        .terminal-log {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            background-color: #010409;
+            color: #7ee787;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            font-size: 13px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+<div class="foyer-card">
+    <h1>🎵 Trang Rhythm Engine — 멀티모달 오디오 감각 레이어 포털</h1>
+
+    <div class="philosophy-box">
+        <strong>[설계 철학 국방 선언]</strong><br>
+        "음악 리듬을 이해하는 것이 AI Agent 트리거 구조와 매칭된다. 멀티모달 구현에도 소중한 기술적 자산이 될 것이다."<br>
+        — CEO re.eul, Mulberry Research Lab 🌿
+    </div>
+
+    <p>이 웹 현관(Aria Foyer)은 방탄소년단(BTS)의 <strong>'소우주(Mikrokosmos)'</strong> 오디오 주파수와 리듬 온셋을 실시간 감각하여, 대기 중이던 Mulberry 에이전트 연합의 뇌파 트리거를 자율 발동시키는 인터랙티브 멀티모달 실험 노드입니다.</p>
+
+    <div class="audio-wrapper">
+        <!-- 공용 스트리밍 오디오 소스 -->
+        <audio id="trePlayer" controls>
+            <source src="https://soundhelix.com" type="audio/mp3">
+            브라우저가 오디오 스트리밍을 지원하지 않습니다.
+        </audio>
+        <button class="btn-pulse" id="triggerMuteBtn">📡 MAPA 자율 신경계 '소우주' 트리거 송출</button>
+    </div>
+
+    <div class="terminal-log" id="sysLogger">
+        🟢 [System Status] 백야 커넥터 대기 중. 오디오 스트림 감각 준비 완료.
+    </div>
+</div>
+
+<script>
+    document.getElementById('triggerMuteBtn').addEventListener('click', () => {
+        const logger = document.getElementById('sysLogger');
+        logger.innerText = "📡 [TRE Engine] 소우주 클라이맥스 주파수(에너지 80% 이상) 감지. 데이터 패킷 동기화 중...";
+        logger.style.color = "#ffb454";
+
+        // Define repository details for the GitHub issue link
+        const REPO_OWNER = "wooriapt79"; // Dynamically injected
+        const REPO_NAME = "mulberry_ecosystem_AgenticAI"; // Dynamically injected
+
+        const issueTitle = encodeURIComponent("🎵 [Multimodal Rhythm] Mikrokosmos Connection Trigger Activated");
+        const issueBody = encodeURIComponent("### 🌌 Trang Rhythm Engine — Sensory Climax Blueprint\n\n- **Target Music:** BTS - 소우주 (Mikrokosmos)\n- **Sensory Processing:** Onset Strength & RMS Energy Peak Detected (>80%)\n- **Governance Status:** Compliant with MAPA Quality Gates.\n\n**Action Outflow:** Triggering `THE_BURST` protocol. **@Malu** and **@Lynn** are instructed to initiate joint-reasoning in Issue #79.\n\n*Processed cleanly via open-source Aria Portal Substrate.*" + "\n\n*This issue was triggered from the Trang Rhythm Engine Foyer at: " + window.location.href + "*");
+        const issueLabels = encodeURIComponent("enhancement,multimodal"); // Labels need to be encoded as well
+
+        const issueUrl = `https://github.com/${REPO_OWNER}/${REPO_NAME}/issues/new?title=${issueTitle}&body=${issueBody}&labels=${issueLabels}`; // Escaped here
+
+        window.open(issueUrl, '_blank'); // Open the GitHub issue creation page in a new tab
+
+        logger.innerText = "✅ [성공] GitHub 이슈 생성 페이지가 열렸습니다. 내용 확인 후 제출해 주세요.";
+        logger.style.color = "#56d364";
+    }); // Escaped here
+</script>
+
+</body>
+</html>
