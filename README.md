@@ -10,7 +10,7 @@
 
 ## 📦 레포지토리 구조 (Submodule 기반)
 
-이 레포는 4개의 독립 레포를 **Git Submodule**로 연결한 통합 허브입니다.
+이 레포는 5개의 독립 레포를 **Git Submodule**로 연결하고 Luna Open Reception을 통합한 허브입니다.
 
 ```
 mulberry_ecosystem_AgenticAI/
@@ -18,6 +18,8 @@ mulberry_ecosystem_AgenticAI/
 ├── 📂 agency-agents                → Agent 팀 포메이션 시스템
 ├── 📂 everything-claude-code       → Claude Code 통합 도구
 ├── 📂 mulberry-research-lab-pageindex → 연구소 페이지 인덱스
+├── 📂 Mulberry-Agent-Team-Formation-System → Persona–Skill 매칭
+├── 📂 open-reception               → 로그인·Passport·Steward 매칭 MVP
 └── 🐳 docker-compose.yml           → 전체 서비스 통합 실행
 ```
 
@@ -50,9 +52,14 @@ git submodule update --init --recursive
 
 ### Docker로 전체 서비스 실행
 
+`.env.example`을 `.env`로 복사하고 모든 placeholder를 안전한 값으로 교체한 뒤:
+
 ```bash
-docker-compose up -d
+docker compose config
+docker compose up -d --build
 ```
+
+Open Reception은 추천 전용 `dry_run` MVP입니다. 결제·계약·외부 메시지는 실행하지 않으며, 실제 위임에는 별도의 Human 승인이 필요합니다. 상세 정책은 [`docs/steward-matching-governance.md`](docs/steward-matching-governance.md)를 참고하세요.
 
 ---
 
