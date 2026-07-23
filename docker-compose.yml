@@ -1,37 +1,37 @@
-version: '3.8'
-
 services:
   page-index:
     build:
-      context: ./mulberry-research-lab-page_index
-      dockerfile:Dockerfil
+      context: ./mulberry-research-lab-pageindex
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "${PAGE_INDEX_PORT:-3000}:3000"
     environment:
-      - AGENT_ORCHESTRATOR_URL=http://agent-hub:50051
-      - SPIRIT_SCORE_API_KEY=${SPIRIT_SCORE_API_KEY:-dummy}
+      AGENT_ORCHESTRATOR_URL: http://agent-hub:50051
+      SPIRIT_SCORE_API_KEY: ${SPIRIT_SCORE_API_KEY:?set SPIRIT_SCORE_API_KEY}
     volumes:
       - ./logs:/app/logs
     depends_on:
       agent-hub:
         condition: service_healthy
     restart: unless-stopped
-    # network_mode: "host" # ← 제거 (포트 충돌 방지)
+    networks:
+      - frontend
+      - backend
 
   agent-hub:
     build:
       context: ./agency-agents
       dockerfile: Dockerfile
     ports:
-      - "50051:50051"
-      - "8000:8000"
+      - "${AGENT_GRPC_PORT:-50051}:50051"
+      - "${AGENT_HTTP_PORT:-8000}:8000"
     environment:
-      - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgresql://user:pass@postgres:5432/mulberry
-      - QWEN_API_KEY=${QWEN_API_KEY:-dummy}
-      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-dummy}
-      - EDGE_SYNC_MODE=async
-      - BUSINESS_HOURS=09:00-18:00
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER:?set POSTGRES_USER}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:?set POSTGRES_DB}
+      QWEN_API_KEY: ${QWEN_API_KEY:?set QWEN_API_KEY}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:?set DEEPSEEK_API_KEY}
+      EDGE_SYNC_MODE: async
+      BUSINESS_HOURS: 09:00-18:00
     volumes:
       - ./archive:/app/archive
       - ./logs:/app/logs
@@ -43,28 +43,61 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - backend
+      - data
 
   tool-library:
     build:
       context: ./everything-claude-code
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "${TOOLS_PORT:-8080}:8080"
     environment:
-      - API_KEY=${TOOLS_API_KEY:-dummy}
+      API_KEY: ${TOOLS_API_KEY:?set TOOLS_API_KEY}
     volumes:
       - ./templates:/app/templates
       - ./snippets:/app/snippets
     restart: unless-stopped
+    networks:
+      - frontend
+      - backend
+
+  open-reception:
+    build:
+      context: ./open-reception
+    ports:
+      - "${OPEN_RECEPTION_PORT:-8088}:8088"
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:?set POSTGRES_USER}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:?set POSTGRES_DB}
+      SESSION_TTL_MINUTES: ${SESSION_TTL_MINUTES:-60}
+      DRY_RUN: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8088/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - frontend
+      - data
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
@@ -74,24 +107,35 @@ services:
       interval: 5s
       timeout: 3s
       retries: 3
+    networks:
+      - data
 
   postgres:
     image: postgres:15-alpine
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: mulberry_ecosystem
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d mulberry_ecosystem"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 3s
       retries: 5
+    networks:
+      - data
 
 volumes:
   redis_data:
   postgres_data:
+
+networks:
+  frontend:
+  backend:
+    internal: true
+  data:
+    internal: true
