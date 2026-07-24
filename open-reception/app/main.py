@@ -250,7 +250,12 @@ def verify_audit_chain(db: Session) -> bool:
             return False
         previous_hash = event.event_hash
         expected_sequence += 1
-    return True
+    head = db.get(AuditChainHead, "global")
+    return (
+        head is not None
+        and head.sequence == expected_sequence - 1
+        and hmac.compare_digest(head.event_hash, previous_hash)
+    )
 
 
 def current_session(
