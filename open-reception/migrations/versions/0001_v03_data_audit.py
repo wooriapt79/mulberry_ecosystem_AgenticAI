@@ -217,23 +217,47 @@ def upgrade():
         batch.alter_column("event_hash", existing_type=sa.String(64), nullable=False)
     if bind.dialect.name == "postgresql":
         op.execute("""
-        CREATE OR REPLACE FUNCTION reject_audit_event_mutation()
+        CREATE OR REPLACE FUNCTION reject_append_only_mutation()
         RETURNS trigger LANGUAGE plpgsql AS $$
         BEGIN
-          RAISE EXCEPTION 'audit_events is append-only';
+          RAISE EXCEPTION '% is append-only', TG_TABLE_NAME;
         END $$;
         DROP TRIGGER IF EXISTS audit_events_append_only ON audit_events;
         CREATE TRIGGER audit_events_append_only
         BEFORE UPDATE OR DELETE ON audit_events
-        FOR EACH ROW EXECUTE FUNCTION reject_audit_event_mutation();
+        FOR EACH ROW EXECUTE FUNCTION reject_append_only_mutation();
+        DROP TRIGGER IF EXISTS human_passport_status_history_append_only
+          ON human_passport_status_history;
+        CREATE TRIGGER human_passport_status_history_append_only
+        BEFORE UPDATE OR DELETE ON human_passport_status_history
+        FOR EACH ROW EXECUTE FUNCTION reject_append_only_mutation();
         """)
+    elif bind.dialect.name == "sqlite":
+        for table in ("audit_events", "human_passport_status_history"):
+            for operation in ("UPDATE", "DELETE"):
+                trigger = f"{table}_reject_{operation.lower()}"
+                op.execute(f"""
+                CREATE TRIGGER IF NOT EXISTS {trigger}
+                BEFORE {operation} ON {table}
+                BEGIN
+                  SELECT RAISE(ABORT, '{table} is append-only');
+                END
+                """)
 
 
 def downgrade():
     bind = op.get_bind()
     if bind.dialect.name == "postgresql":
         op.execute("DROP TRIGGER IF EXISTS audit_events_append_only ON audit_events")
-        op.execute("DROP FUNCTION IF EXISTS reject_audit_event_mutation()")
+        op.execute("""
+        DROP TRIGGER IF EXISTS human_passport_status_history_append_only
+          ON human_passport_status_history
+        """)
+        op.execute("DROP FUNCTION IF EXISTS reject_append_only_mutation()")
+    elif bind.dialect.name == "sqlite":
+        for table in ("audit_events", "human_passport_status_history"):
+            for operation in ("update", "delete"):
+                op.execute(f"DROP TRIGGER IF EXISTS {table}_reject_{operation}")
     inspector = sa.inspect(bind)
     if "human_passport_status_history" in inspector.get_table_names():
         op.drop_table("human_passport_status_history")
