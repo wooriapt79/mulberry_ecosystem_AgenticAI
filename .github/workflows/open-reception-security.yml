@@ -70,3 +70,6 @@ jobs:
           python -m pytest -q \
             tests/test_security.py::test_postgresql_failed_login_increment_is_atomic \
             tests/test_security.py::test_postgresql_bootstrap_claim_is_atomic
+
+      - name: Verify PostgreSQL migration round trip
+        run: python scripts/verify_migration_roundtrip.py
