@@ -10,7 +10,8 @@ from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, String, create_engine, select
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, case, create_engine, select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 
@@ -29,7 +30,16 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String)
     role: Mapped[str] = mapped_column(String, default="member")
     disabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    failed_login_count: Mapped[int] = mapped_column(Integer, default=0)
+    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class BootstrapConsumption(Base):
+    __tablename__ = "bootstrap_consumptions"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    consumed_by: Mapped[str] = mapped_column(String)
+    consumed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
 class LoginSession(Base):
@@ -39,6 +49,9 @@ class LoginSession(Base):
     token_hash: Mapped[str] = mapped_column(String, unique=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     revoked: Mapped[bool] = mapped_column(Boolean, default=False)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    revoke_reason: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
 class HumanPassport(Base):
@@ -112,7 +125,14 @@ engine_args = {"connect_args": {"check_same_thread": False}} if DATABASE_URL.sta
 engine = create_engine(DATABASE_URL, **engine_args)
 SessionLocal = sessionmaker(engine, expire_on_commit=False)
 
-app = FastAPI(title="Luna Open Reception", version="0.1.0")
+app = FastAPI(title="Luna Open Reception", version="0.2.0")
+
+ADMIN_PERMISSIONS = {
+    "security_admin": {"session:revoke", "account:disable"},
+    "steward_reviewer": {"steward:review"},
+    "safety_operator": {"kill_switch:change"},
+    "admin": {"session:revoke", "account:disable", "steward:review", "kill_switch:change"},
+}
 
 
 def db_session():
@@ -132,33 +152,69 @@ def password_valid(password: str, encoded: str) -> bool:
     return hmac.compare_digest(actual.hex(), expected)
 
 
+# Run the same expensive password-verification path for unknown accounts to reduce
+# account-enumeration signal from response timing.
+DUMMY_PASSWORD_HASH = password_hash(secrets.token_urlsafe(32))
+
+
 def token_hash(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
+
+
+def setting_int(name: str, default: int) -> int:
+    try:
+        return max(int(os.getenv(name, str(default))), 1)
+    except ValueError as exc:
+        raise RuntimeError(f"{name} must be an integer") from exc
+
+
+def aware(value: datetime) -> datetime:
+    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
 
 
 def audit(db: Session, actor: str, action: str, target_type: str, target_id: str, detail: dict | None = None):
     db.add(AuditEvent(actor_id=actor, action=action, target_type=target_type, target_id=target_id, detail=detail or {}))
 
 
-def current_user(
+def current_session(
     authorization: Annotated[str | None, Header()] = None,
     db: Session = Depends(db_session),
-) -> User:
+) -> LoginSession:
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Bearer token required")
     session = db.scalar(select(LoginSession).where(LoginSession.token_hash == token_hash(authorization[7:])))
-    if not session or session.revoked or session.expires_at.replace(tzinfo=timezone.utc) <= now():
+    if not session or session.revoked or aware(session.expires_at) <= now():
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired session")
+    return session
+
+
+def current_user(session: LoginSession = Depends(current_session), db: Session = Depends(db_session)) -> User:
     user = db.get(User, session.user_id)
     if not user or user.disabled:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Account disabled")
     return user
 
 
-def require_admin(user: User = Depends(current_user)) -> User:
-    if user.role != "admin":
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Human administrator approval required")
-    return user
+def require_permission(permission: str):
+    def dependency(user: User = Depends(current_user), db: Session = Depends(db_session)) -> User:
+        if permission not in ADMIN_PERMISSIONS.get(user.role, set()):
+            audit(db, user.id, "authorization.denied", "permission", permission, {"role": user.role})
+            db.commit()
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Insufficient Human administrator permission")
+        return user
+    return dependency
+
+
+def revoke_sessions(db: Session, user_id: str, actor_id: str, reason: str) -> int:
+    sessions = db.scalars(select(LoginSession).where(
+        LoginSession.user_id == user_id, LoginSession.revoked.is_(False)
+    )).all()
+    for login_session in sessions:
+        login_session.revoked = True
+        login_session.revoked_at = now()
+        login_session.revoked_by = actor_id
+        login_session.revoke_reason = reason
+    return len(sessions)
 
 
 def enforce_kill_switch(db: Session):
@@ -197,6 +253,17 @@ class KillInput(BaseModel):
     reason: str = Field(min_length=3, max_length=500)
 
 
+class RevokeInput(BaseModel):
+    reason: str = Field(min_length=3, max_length=500)
+    disable_account: bool = False
+
+
+class BootstrapInput(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=16, max_length=256)
+    bootstrap_token: str = Field(min_length=32, max_length=512)
+
+
 @app.on_event("startup")
 def startup():
     Base.metadata.create_all(engine)
@@ -221,7 +288,32 @@ def startup():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "dry_run": True}
+    return {"status": "ok", "dry_run": True, "version": "0.2.0"}
+
+
+@app.post("/auth/bootstrap", status_code=201)
+def bootstrap_admin(payload: BootstrapInput, db: Session = Depends(db_session)):
+    configured = os.getenv("ADMIN_BOOTSTRAP_TOKEN")
+    if not configured or not hmac.compare_digest(payload.bootstrap_token, configured):
+        audit(db, "anonymous", "bootstrap.denied", "user", payload.email.lower())
+        db.commit()
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Bootstrap denied")
+    if db.scalar(select(User).where(User.email == payload.email.lower())):
+        raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
+    user = User(email=payload.email.lower(), password_hash=password_hash(payload.password), role="admin")
+    try:
+        db.add(user)
+        db.flush()
+        # The fixed primary key is the durable, database-enforced one-time claim.
+        # Concurrent transactions cannot both flush this row.
+        db.add(BootstrapConsumption(id="admin", consumed_by=user.id))
+        db.flush()
+        audit(db, user.id, "bootstrap.admin_created", "user", user.id)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status.HTTP_409_CONFLICT, "Bootstrap already consumed")
+    return {"id": user.id, "role": user.role, "bootstrap_consumed": True}
 
 
 @app.post("/auth/register", status_code=201)
@@ -240,16 +332,109 @@ def register(payload: Credentials, db: Session = Depends(db_session)):
 @app.post("/auth/login")
 def login(payload: Credentials, db: Session = Depends(db_session)):
     user = db.scalar(select(User).where(User.email == payload.email.lower()))
-    if not user or not password_valid(payload.password, user.password_hash):
+    candidate_hash = user.password_hash if user else DUMMY_PASSWORD_HASH
+    password_matches = password_valid(payload.password, candidate_hash)
+    request_time = now()
+    if user and user.locked_until and aware(user.locked_until) > request_time:
+        audit(db, user.id, "login.blocked_locked", "user", user.id)
+        db.commit()
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")
+    if not user or not password_matches:
+        if user:
+            threshold = setting_int("LOGIN_MAX_FAILURES", 5)
+            lock_until = request_time + timedelta(minutes=setting_int("LOGIN_LOCKOUT_MINUTES", 15))
+            incremented = db.execute(
+                update(User)
+                .where(
+                    User.id == user.id,
+                    (User.locked_until.is_(None)) | (User.locked_until <= request_time),
+                )
+                .values(
+                    failed_login_count=User.failed_login_count + 1,
+                    locked_until=case(
+                        (User.failed_login_count + 1 >= threshold, lock_until),
+                        else_=User.locked_until,
+                    ),
+                )
+                .returning(User.failed_login_count, User.locked_until)
+            ).one_or_none()
+            if incremented is None:
+                audit(db, user.id, "login.blocked_locked", "user", user.id)
+            else:
+                failure_count, updated_locked_until = incremented
+                if updated_locked_until and aware(updated_locked_until) > request_time:
+                    audit(db, user.id, "account.locked", "user", user.id)
+                audit(db, user.id, "login.failed", "user", user.id, {"failure_count": failure_count})
+        else:
+            email_hash = hashlib.sha256(payload.email.lower().encode()).hexdigest()
+            audit(db, "anonymous", "login.failed_unknown", "email_hash", email_hash)
+        db.commit()
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")
+    if user.disabled:
+        audit(db, user.id, "login.blocked_disabled", "user", user.id)
+        db.commit()
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Account disabled")
+    reset = db.execute(
+        update(User)
+        .where(
+            User.id == user.id,
+            (User.locked_until.is_(None)) | (User.locked_until <= request_time),
+        )
+        .values(failed_login_count=0, locked_until=None)
+        .returning(User.id)
+    ).one_or_none()
+    if reset is None:
+        audit(db, user.id, "login.blocked_locked", "user", user.id)
+        db.commit()
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")
     token = secrets.token_urlsafe(32)
-    ttl = int(os.getenv("SESSION_TTL_MINUTES", "60"))
+    ttl = setting_int("SESSION_TTL_MINUTES", 60)
     login_session = LoginSession(user_id=user.id, token_hash=token_hash(token), expires_at=now() + timedelta(minutes=ttl))
     db.add(login_session)
     db.flush()
     audit(db, user.id, "session.created", "session", login_session.id)
     db.commit()
     return {"access_token": token, "token_type": "bearer", "expires_in": ttl * 60}
+
+
+@app.post("/auth/logout", status_code=204)
+def logout(session: LoginSession = Depends(current_session), db: Session = Depends(db_session)):
+    session.revoked, session.revoked_at = True, now()
+    session.revoked_by, session.revoke_reason = session.user_id, "logout"
+    audit(db, session.user_id, "session.revoked", "session", session.id, {"reason": "logout"})
+    db.commit()
+
+
+@app.post("/auth/logout-all")
+def logout_all(user: User = Depends(current_user), db: Session = Depends(db_session)):
+    count = revoke_sessions(db, user.id, user.id, "logout_all")
+    audit(db, user.id, "sessions.revoked_all", "user", user.id, {"count": count})
+    db.commit()
+    return {"revoked_sessions": count}
+
+
+@app.post("/admin/users/{user_id}/revoke")
+def admin_revoke(
+    user_id: str,
+    payload: RevokeInput,
+    admin: User = Depends(require_permission("session:revoke")),
+    db: Session = Depends(db_session),
+):
+    target = db.get(User, user_id)
+    if not target:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+    if payload.disable_account and "account:disable" not in ADMIN_PERMISSIONS.get(admin.role, set()):
+        audit(db, admin.id, "authorization.denied", "permission", "account:disable", {"role": admin.role})
+        db.commit()
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Insufficient Human administrator permission")
+    count = revoke_sessions(db, target.id, admin.id, payload.reason)
+    if payload.disable_account:
+        target.disabled = True
+    audit(db, admin.id, "admin.user_revoked", "user", target.id, {
+        "sessions": count, "disabled": payload.disable_account, "reason": payload.reason,
+    })
+    db.commit()
+    return {"user_id": target.id, "revoked_sessions": count, "disabled": target.disabled}
 
 
 @app.put("/passport/human")
@@ -280,7 +465,7 @@ def apply_steward(payload: ApplicationInput, user: User = Depends(current_user),
 
 
 @app.post("/admin/steward-human/applications/{application_id}/review")
-def review_steward(application_id: str, payload: ReviewInput, admin: User = Depends(require_admin), db: Session = Depends(db_session)):
+def review_steward(application_id: str, payload: ReviewInput, admin: User = Depends(require_permission("steward:review")), db: Session = Depends(db_session)):
     application = db.get(StewardApplication, application_id)
     if not application or application.status != "pending":
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Pending application not found")
@@ -323,7 +508,7 @@ def recommend(payload: MatchInput, user: User = Depends(current_user), db: Sessi
 
 
 @app.post("/admin/kill-switch")
-def set_kill_switch(payload: KillInput, admin: User = Depends(require_admin), db: Session = Depends(db_session)):
+def set_kill_switch(payload: KillInput, admin: User = Depends(require_permission("kill_switch:change")), db: Session = Depends(db_session)):
     switch = db.get(KillSwitch, "global")
     switch.active, switch.reason, switch.changed_by, switch.changed_at = payload.active, payload.reason, admin.id, now()
     audit(db, admin.id, "kill_switch.changed", "kill_switch", "global", {"active": payload.active, "reason": payload.reason})
