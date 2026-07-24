@@ -2,8 +2,6 @@ import os
 from pathlib import Path
 
 db_file = Path(__file__).parent / "test.sqlite3"
-if db_file.exists():
-    db_file.unlink()
 os.environ.setdefault("DATABASE_URL", f"sqlite:///{db_file}")
 os.environ.setdefault("ADMIN_BOOTSTRAP_TOKEN", "bootstrap-token-for-tests-only-000000")
 os.environ.setdefault("LOGIN_MAX_FAILURES", "3")

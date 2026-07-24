@@ -59,6 +59,9 @@ jobs:
           assert os.environ["DATABASE_URL"].startswith("postgresql+psycopg://")
           PY
 
+      - name: Upgrade database migrations
+        run: python -m alembic upgrade head
+
       - name: Run full PostgreSQL suite
         run: python -m pytest -q
 
