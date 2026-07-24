@@ -10,7 +10,8 @@ from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, create_engine, select
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, case, create_engine, select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 
@@ -32,6 +33,13 @@ class User(Base):
     failed_login_count: Mapped[int] = mapped_column(Integer, default=0)
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class BootstrapConsumption(Base):
+    __tablename__ = "bootstrap_consumptions"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    consumed_by: Mapped[str] = mapped_column(String)
+    consumed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
 class LoginSession(Base):
@@ -290,15 +298,21 @@ def bootstrap_admin(payload: BootstrapInput, db: Session = Depends(db_session)):
         audit(db, "anonymous", "bootstrap.denied", "user", payload.email.lower())
         db.commit()
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Bootstrap denied")
-    if db.scalar(select(User).where(User.role == "admin")):
-        raise HTTPException(status.HTTP_409_CONFLICT, "Bootstrap already consumed")
     if db.scalar(select(User).where(User.email == payload.email.lower())):
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
     user = User(email=payload.email.lower(), password_hash=password_hash(payload.password), role="admin")
-    db.add(user)
-    db.flush()
-    audit(db, user.id, "bootstrap.admin_created", "user", user.id)
-    db.commit()
+    try:
+        db.add(user)
+        db.flush()
+        # The fixed primary key is the durable, database-enforced one-time claim.
+        # Concurrent transactions cannot both flush this row.
+        db.add(BootstrapConsumption(id="admin", consumed_by=user.id))
+        db.flush()
+        audit(db, user.id, "bootstrap.admin_created", "user", user.id)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status.HTTP_409_CONFLICT, "Bootstrap already consumed")
     return {"id": user.id, "role": user.role, "bootstrap_consumed": True}
 
 
@@ -318,19 +332,39 @@ def register(payload: Credentials, db: Session = Depends(db_session)):
 @app.post("/auth/login")
 def login(payload: Credentials, db: Session = Depends(db_session)):
     user = db.scalar(select(User).where(User.email == payload.email.lower()))
-    if user and user.locked_until and aware(user.locked_until) > now():
-        audit(db, user.id, "login.blocked_locked", "user", user.id)
-        db.commit()
-        raise HTTPException(status.HTTP_423_LOCKED, "Account temporarily locked")
     candidate_hash = user.password_hash if user else DUMMY_PASSWORD_HASH
     password_matches = password_valid(payload.password, candidate_hash)
+    request_time = now()
+    if user and user.locked_until and aware(user.locked_until) > request_time:
+        audit(db, user.id, "login.blocked_locked", "user", user.id)
+        db.commit()
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")
     if not user or not password_matches:
         if user:
-            user.failed_login_count += 1
-            if user.failed_login_count >= setting_int("LOGIN_MAX_FAILURES", 5):
-                user.locked_until = now() + timedelta(minutes=setting_int("LOGIN_LOCKOUT_MINUTES", 15))
-                audit(db, user.id, "account.locked", "user", user.id)
-            audit(db, user.id, "login.failed", "user", user.id, {"failure_count": user.failed_login_count})
+            threshold = setting_int("LOGIN_MAX_FAILURES", 5)
+            lock_until = request_time + timedelta(minutes=setting_int("LOGIN_LOCKOUT_MINUTES", 15))
+            incremented = db.execute(
+                update(User)
+                .where(
+                    User.id == user.id,
+                    (User.locked_until.is_(None)) | (User.locked_until <= request_time),
+                )
+                .values(
+                    failed_login_count=User.failed_login_count + 1,
+                    locked_until=case(
+                        (User.failed_login_count + 1 >= threshold, lock_until),
+                        else_=User.locked_until,
+                    ),
+                )
+                .returning(User.failed_login_count, User.locked_until)
+            ).one_or_none()
+            if incremented is None:
+                audit(db, user.id, "login.blocked_locked", "user", user.id)
+            else:
+                failure_count, updated_locked_until = incremented
+                if updated_locked_until and aware(updated_locked_until) > request_time:
+                    audit(db, user.id, "account.locked", "user", user.id)
+                audit(db, user.id, "login.failed", "user", user.id, {"failure_count": failure_count})
         else:
             email_hash = hashlib.sha256(payload.email.lower().encode()).hexdigest()
             audit(db, "anonymous", "login.failed_unknown", "email_hash", email_hash)
@@ -340,7 +374,19 @@ def login(payload: Credentials, db: Session = Depends(db_session)):
         audit(db, user.id, "login.blocked_disabled", "user", user.id)
         db.commit()
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Account disabled")
-    user.failed_login_count, user.locked_until = 0, None
+    reset = db.execute(
+        update(User)
+        .where(
+            User.id == user.id,
+            (User.locked_until.is_(None)) | (User.locked_until <= request_time),
+        )
+        .values(failed_login_count=0, locked_until=None)
+        .returning(User.id)
+    ).one_or_none()
+    if reset is None:
+        audit(db, user.id, "login.blocked_locked", "user", user.id)
+        db.commit()
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")
     token = secrets.token_urlsafe(32)
     ttl = setting_int("SESSION_TTL_MINUTES", 60)
     login_session = LoginSession(user_id=user.id, token_hash=token_hash(token), expires_at=now() + timedelta(minutes=ttl))
