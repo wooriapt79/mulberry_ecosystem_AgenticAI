@@ -4,8 +4,9 @@ Status: implementation draft. This document does not authorize production deploy
 
 ## Implemented controls
 
-- One-time first-administrator bootstrap guarded by `ADMIN_BOOTSTRAP_TOKEN`
-- Login failure auditing, configurable lockout threshold and lockout duration
+- One-time first-administrator bootstrap guarded by `ADMIN_BOOTSTRAP_TOKEN` and a
+  durable, database-enforced singleton consumption record
+- Atomic failed-login increments with configurable lockout threshold and lockout duration
 - Constant-work password verification for unknown accounts to reduce timing enumeration
 - Positive session TTL normalization and explicit account-disable permission enforcement
 - Current-session logout and all-session logout
@@ -21,7 +22,8 @@ runtime, and removed or rotated immediately after successful bootstrap. The endp
 permanently single-use once any `admin` exists.
 
 `LOGIN_MAX_FAILURES` defaults to `5`. `LOGIN_LOCKOUT_MINUTES` defaults to `15`.
-Responses do not disclose whether an unknown account exists.
+Locked and unknown accounts perform password verification and return the same `401`
+response. Lock state remains visible only through internal audit events.
 
 ## Permission map
 
