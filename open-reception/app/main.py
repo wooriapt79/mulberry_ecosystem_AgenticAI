@@ -144,6 +144,11 @@ def password_valid(password: str, encoded: str) -> bool:
     return hmac.compare_digest(actual.hex(), expected)
 
 
+# Run the same expensive password-verification path for unknown accounts to reduce
+# account-enumeration signal from response timing.
+DUMMY_PASSWORD_HASH = password_hash(secrets.token_urlsafe(32))
+
+
 def token_hash(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
@@ -317,7 +322,9 @@ def login(payload: Credentials, db: Session = Depends(db_session)):
         audit(db, user.id, "login.blocked_locked", "user", user.id)
         db.commit()
         raise HTTPException(status.HTTP_423_LOCKED, "Account temporarily locked")
-    if not user or not password_valid(payload.password, user.password_hash):
+    candidate_hash = user.password_hash if user else DUMMY_PASSWORD_HASH
+    password_matches = password_valid(payload.password, candidate_hash)
+    if not user or not password_matches:
         if user:
             user.failed_login_count += 1
             if user.failed_login_count >= setting_int("LOGIN_MAX_FAILURES", 5):
@@ -335,7 +342,7 @@ def login(payload: Credentials, db: Session = Depends(db_session)):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Account disabled")
     user.failed_login_count, user.locked_until = 0, None
     token = secrets.token_urlsafe(32)
-    ttl = int(os.getenv("SESSION_TTL_MINUTES", "60"))
+    ttl = setting_int("SESSION_TTL_MINUTES", 60)
     login_session = LoginSession(user_id=user.id, token_hash=token_hash(token), expires_at=now() + timedelta(minutes=ttl))
     db.add(login_session)
     db.flush()
@@ -370,6 +377,10 @@ def admin_revoke(
     target = db.get(User, user_id)
     if not target:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+    if payload.disable_account and "account:disable" not in ADMIN_PERMISSIONS.get(admin.role, set()):
+        audit(db, admin.id, "authorization.denied", "permission", "account:disable", {"role": admin.role})
+        db.commit()
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Insufficient Human administrator permission")
     count = revoke_sessions(db, target.id, admin.id, payload.reason)
     if payload.disable_account:
         target.disabled = True
