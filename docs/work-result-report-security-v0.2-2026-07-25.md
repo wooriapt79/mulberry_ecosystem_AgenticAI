@@ -18,8 +18,8 @@ v0.2 Security 단계다. `main` 자동 병합, 운영 배포, 실제 관리자 �
 
 | 영역 | 구현 |
 |---|---|
-| 관리자 Bootstrap | 런타임 토큰 검증, 최초 `admin` 1회 생성, 재사용 차단, 감사 이벤트 |
-| 인증 방어 | 실패 횟수 기록, 임계치 잠금, 잠금 중 로그인 차단, 성공 시 실패 상태 초기화, 미등록 계정 동일 해시 검증 |
+| 관리자 Bootstrap | 런타임 토큰 검증, 영구 단일 소비 레코드의 DB 원자적 선점, 재사용 차단, 감사 이벤트 |
+| 인증 방어 | PostgreSQL 원자적 `UPDATE … RETURNING` 실패 횟수 증가·잠금, 잠금 계정의 동일 `401` 응답, 성공 시 실패 상태 초기화, 미등록 계정 동일 해시 검증 |
 | 세션 회수 | 현재 로그아웃, 사용자 전체 로그아웃, 관리자 긴급 일괄 회수 |
 | 계정 차단 | 세션 회수와 별개인 `account:disable` 권한의 명시적 재검증 |
 | RBAC | 검토·Kill Switch·세션 회수·계정 차단 권한 분리 |
@@ -40,8 +40,9 @@ Kill Switch API는 호환성을 유지한다.
 
 ## 4. 데이터 변화
 
-`users`에 실패 횟수와 잠금 종료 시각을, `sessions`에 회수 시각·행위자·사유를
-추가했다. 이 단계는 v0.1의 `create_all` 방식을 유지하므로 기존 PostgreSQL에
+`users`에 실패 횟수와 잠금 종료 시각을, `sessions`에 회수 시각·행위자·사유를,
+`bootstrap_consumptions`에 영구적인 최초 관리자 Bootstrap 소비 상태를 추가했다.
+이 단계는 v0.1의 `create_all` 방식을 유지하므로 기존 PostgreSQL에
 자동 컬럼 변경을 적용하지 않는다. 실제 기존 DB 반영은 v0.3의 버전형 migration
 완료 전까지 운영에 사용할 수 없다.
 
@@ -65,20 +66,24 @@ Kill Switch API는 호환성을 유지한다.
 python -m pytest -q
 ```
 
-결과: 전체 `9 passed`, 보안 테스트 단독 `7 passed`.
+결과: SQLite 전체 `11 passed`, PostgreSQL 전용 동시성 테스트 `2 skipped`.
 
 검증 항목:
 
 - v0.1 회원가입·Passport·Steward 신청·추천 회귀
 - Human 관리자 Bootstrap과 Kill Switch
 - Bootstrap 재사용 차단
+- 관리자 역할 변경 후에도 Bootstrap 영구 소비 유지
 - 단일 세션 및 전체 세션 회수 후 토큰 재사용 차단
 - 로그인 3회 실패 후 잠금 및 감사 이벤트
+- 잠긴 계정과 미등록 계정의 외부 `401` 응답·본문 동일성
 - 일반회원의 관리자 API 접근 차단
 - 관리자 긴급 회수·계정 비활성화
 - 미등록 계정 로그인도 비밀번호 해시 검증을 수행하는지 확인
 - 세션 TTL 0 입력을 안전한 양수로 정규화
 - `account:disable` 권한이 없을 때 계정 비활성화와 세션 회수가 함께 거절되는지 확인
+- PostgreSQL 동시 Bootstrap 요청 중 정확히 1건만 성공하는 통합 테스트 정의
+- PostgreSQL 동시 로그인 실패가 모두 누적되고 임계치에서 잠기는 통합 테스트 정의
 
 추가 정적 검증:
 
@@ -91,6 +96,8 @@ python -m pytest -q
 
 - 현재 실행환경에는 Docker CLI가 없어 `docker compose config`, 이미지 build,
   전체 스택 기동 및 PostgreSQL 통합 검증을 실행하지 못했다.
+- PostgreSQL 전용 동시성 테스트 2건은 구현했으나 실제 PostgreSQL 연결이 없어
+  이번 로컬 검증에서는 명시적으로 skip됐다.
 - 로그인 잠금은 계정 단위 방어다. 다중 인스턴스·IP/디바이스 기반의 분산 rate
   limiter는 운영 전 추가해야 한다.
 - MFA/Passkey와 Secret Provider는 인터페이스만 있으며 실제 공급자 연결은 없다.
