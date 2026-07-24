@@ -1,3 +1,13 @@
+import os
+from pathlib import Path
+
+db_file = Path(__file__).parent / "security.sqlite3"
+if db_file.exists():
+    db_file.unlink()
+os.environ.setdefault("DATABASE_URL", f"sqlite:///{db_file}")
+os.environ.setdefault("ADMIN_BOOTSTRAP_TOKEN", "bootstrap-token-for-tests-only-000000")
+os.environ.setdefault("LOGIN_MAX_FAILURES", "3")
+
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
@@ -10,8 +20,18 @@ def login(client, email, password):
     return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
 
+def ensure_admin(client):
+    response = client.post("/auth/bootstrap", json={
+        "email": "admin@example.org",
+        "password": "administrator-pass",
+        "bootstrap_token": os.environ["ADMIN_BOOTSTRAP_TOKEN"],
+    })
+    assert response.status_code in (201, 409)
+
+
 def test_bootstrap_is_single_use():
     with TestClient(app) as client:
+        ensure_admin(client)
         response = client.post("/auth/bootstrap", json={
             "email": "another-admin@example.org",
             "password": "another-administrator-pass",
@@ -54,6 +74,7 @@ def test_login_lockout_is_audited():
 
 def test_rbac_and_emergency_revoke():
     with TestClient(app) as client:
+        ensure_admin(client)
         client.post("/auth/register", json={
             "email": "victim@example.org", "password": "correct-horse-battery",
         })
