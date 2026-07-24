@@ -5,9 +5,11 @@ db_file = Path(__file__).parent / "test.sqlite3"
 if db_file.exists():
     db_file.unlink()
 os.environ["DATABASE_URL"] = f"sqlite:///{db_file}"
+os.environ["ADMIN_BOOTSTRAP_TOKEN"] = "bootstrap-token-for-tests-only-000000"
+os.environ["LOGIN_MAX_FAILURES"] = "3"
 
 from fastapi.testclient import TestClient
-from app.main import Base, SessionLocal, User, app, engine, password_hash
+from app.main import app
 
 
 def test_login_passport_application_and_matching_flow():
@@ -40,10 +42,12 @@ def test_login_passport_application_and_matching_flow():
 
 def test_admin_kill_switch_blocks_matching():
     with TestClient(app) as client:
-        with SessionLocal() as db:
-            admin = User(email="admin@example.org", password_hash=password_hash("administrator-pass"), role="admin")
-            db.add(admin)
-            db.commit()
+        bootstrap = client.post("/auth/bootstrap", json={
+            "email": "admin@example.org",
+            "password": "administrator-pass",
+            "bootstrap_token": os.environ["ADMIN_BOOTSTRAP_TOKEN"],
+        })
+        assert bootstrap.status_code == 201
         login = client.post("/auth/login", json={"email": "admin@example.org", "password": "administrator-pass"}).json()
         headers = {"Authorization": f"Bearer {login['access_token']}"}
         assert client.post("/admin/kill-switch", headers=headers, json={"active": True, "reason": "safety drill"}).status_code == 200
