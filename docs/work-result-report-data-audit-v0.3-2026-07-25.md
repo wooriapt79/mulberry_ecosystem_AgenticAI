@@ -45,19 +45,23 @@ Human 최종 권한을 유지한다.
 
 로컬 SQLite 검증을 연속 2회 실행했다.
 
-- 각 실행: `14 passed, 3 skipped`
-- 3개 skip: PostgreSQL 전용 동시성 2건과 감사 불변성 1건
+- 각 실행: `17 passed, 2 skipped`
+- 2개 skip: PostgreSQL 전용 동시성 2건
+- SQLite 감사 이벤트·Passport 상태 이력 UPDATE/DELETE 거부: 통과
+- 독립 DB migration `upgrade → downgrade → upgrade`: 통과
 - Python compile: 통과
 - `git diff --check`: 통과
 
 GitHub Actions PostgreSQL 15:
 
 - workflow: `Open Reception Security`
-- run: `30133230795`
+- run: `30134047910`
 - migration upgrade: 통과
-- 전체 PostgreSQL suite: `17 passed`
+- 전체 PostgreSQL suite: `19 passed`
 - 동시성 게이트 명시 재실행: `2 passed`
-- 감사 이벤트 UPDATE/DELETE 거부: 통과
+- 감사 이벤트·Passport 상태 이력 UPDATE/DELETE 거부: 통과
+- Audit chain과 chain-head 종단 일치·변조 탐지: 통과
+- 실제 PostgreSQL `downgrade → upgrade` 왕복: 통과
 
 ## 5. 잔여 위험과 후속 범위
 
