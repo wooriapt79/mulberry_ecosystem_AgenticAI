@@ -1,4 +1,4 @@
-import os
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
@@ -6,6 +6,7 @@ from sqlalchemy import select, text
 from sqlalchemy.exc import DBAPIError
 
 from app.main import (
+    AuditChainHead,
     AuditEvent,
     HumanPassport,
     HumanPassportStatusHistory,
@@ -32,6 +33,41 @@ def test_audit_hash_chain_verifies():
         assert events
         assert all(event.event_hash and event.previous_hash for event in events)
         assert verify_audit_chain(db) is True
+
+
+def test_audit_chain_rejects_chain_head_tampering():
+    with TestClient(app) as client:
+        client.post("/auth/register", json={
+            "email": "audit-head@example.org", "password": "correct-horse-battery",
+        })
+    with SessionLocal() as db:
+        head = db.get(AuditChainHead, "global")
+        original_sequence = head.sequence
+        head.sequence += 1
+        db.flush()
+        assert verify_audit_chain(db) is False
+        head.sequence = original_sequence
+        head.event_hash = "f" * 64
+        db.flush()
+        assert verify_audit_chain(db) is False
+        db.rollback()
+
+
+def test_empty_audit_chain_requires_zeroed_head():
+    class EmptyAuditSession:
+        def __init__(self, event_hash):
+            self.head = SimpleNamespace(sequence=0, event_hash=event_hash)
+
+        def scalars(self, _statement):
+            return SimpleNamespace(all=lambda: [])
+
+        def get(self, model, identifier):
+            assert model is AuditChainHead
+            assert identifier == "global"
+            return self.head
+
+    assert verify_audit_chain(EmptyAuditSession("0" * 64)) is True
+    assert verify_audit_chain(EmptyAuditSession("f" * 64)) is False
 
 
 def test_human_passport_status_transition_and_history():
@@ -78,15 +114,16 @@ def test_human_passport_status_transition_and_history():
         assert [entry.to_status for entry in history] == ["active", "suspended", "expired"]
 
 
-@pytest.mark.skipif(
-    not os.environ["DATABASE_URL"].startswith("postgresql"),
-    reason="requires PostgreSQL append-only enforcement",
-)
-def test_postgresql_audit_rows_reject_update_and_delete():
+def test_append_only_rows_reject_update_and_delete():
     with TestClient(app) as client:
         client.post("/auth/register", json={
             "email": "immutable-audit@example.org", "password": "correct-horse-battery",
         })
+        owner = _login(client, "immutable-audit@example.org", "correct-horse-battery")
+        issued = client.put("/passport/human", headers=owner, json={
+            "display_name": "Immutable History", "domains": ["food-desert"],
+        })
+        assert issued.status_code == 200
     with SessionLocal() as db:
         event_id = db.scalar(select(AuditEvent.id).where(
             AuditEvent.action == "user.registered",
@@ -96,6 +133,23 @@ def test_postgresql_audit_rows_reject_update_and_delete():
             db.execute(text(
                 "UPDATE audit_events SET action = 'tampered' WHERE id = :event_id"
             ), {"event_id": event_id})
+            db.commit()
+        db.rollback()
+        history_id = db.scalar(select(HumanPassportStatusHistory.id).where(
+            HumanPassportStatusHistory.passport_id == issued.json()["id"]
+        ))
+        assert history_id is not None
+        with pytest.raises(DBAPIError, match="append-only"):
+            db.execute(text("""
+                UPDATE human_passport_status_history
+                SET reason = 'tampered' WHERE id = :history_id
+            """), {"history_id": history_id})
+            db.commit()
+        db.rollback()
+        with pytest.raises(DBAPIError, match="append-only"):
+            db.execute(text("""
+                DELETE FROM human_passport_status_history WHERE id = :history_id
+            """), {"history_id": history_id})
             db.commit()
         db.rollback()
         with pytest.raises(DBAPIError, match="append-only"):
