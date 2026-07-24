@@ -66,7 +66,12 @@ Kill Switch API는 호환성을 유지한다.
 python -m pytest -q
 ```
 
-결과: SQLite 전체 `11 passed`, PostgreSQL 전용 동시성 테스트 `2 skipped`.
+결과:
+
+- 로컬 SQLite 전체: `11 passed`, PostgreSQL 전용 `2 skipped`
+- GitHub Actions PostgreSQL 15 전체: `13 passed`
+- PostgreSQL 동시성 게이트 재실행: `2 passed`
+- CI 실행: `Open Reception Security` run `30130621393`
 
 검증 항목:
 
@@ -82,8 +87,10 @@ python -m pytest -q
 - 미등록 계정 로그인도 비밀번호 해시 검증을 수행하는지 확인
 - 세션 TTL 0 입력을 안전한 양수로 정규화
 - `account:disable` 권한이 없을 때 계정 비활성화와 세션 회수가 함께 거절되는지 확인
-- PostgreSQL 동시 Bootstrap 요청 중 정확히 1건만 성공하는 통합 테스트 정의
-- PostgreSQL 동시 로그인 실패가 모두 누적되고 임계치에서 잠기는 통합 테스트 정의
+- PostgreSQL 동시 Bootstrap 요청 중 정확히 1건만 성공: 통과
+- PostgreSQL 동시 로그인 실패가 모두 누적되고 임계치에서 잠김: 통과
+- 외부 `DATABASE_URL`을 테스트 수집 과정에서 SQLite로 덮어쓰지 않음
+- Bootstrap 동시성 테스트의 소비 레코드·관리자 상태 격리 및 복원
 
 추가 정적 검증:
 
@@ -94,10 +101,10 @@ python -m pytest -q
 
 ## 7. 미실행·잔여 위험
 
-- 현재 실행환경에는 Docker CLI가 없어 `docker compose config`, 이미지 build,
-  전체 스택 기동 및 PostgreSQL 통합 검증을 실행하지 못했다.
-- PostgreSQL 전용 동시성 테스트 2건은 구현했으나 실제 PostgreSQL 연결이 없어
-  이번 로컬 검증에서는 명시적으로 skip됐다.
+- GitHub Actions의 PostgreSQL 15 서비스 컨테이너에서 API 전체 테스트와
+  동시성 테스트 2건을 실행해 통과했다.
+- 전체 애플리케이션 Compose build/up/healthcheck와 기존 DB migration 검증은
+  아직 실행하지 않았다.
 - 로그인 잠금은 계정 단위 방어다. 다중 인스턴스·IP/디바이스 기반의 분산 rate
   limiter는 운영 전 추가해야 한다.
 - MFA/Passkey와 Secret Provider는 인터페이스만 있으며 실제 공급자 연결은 없다.
