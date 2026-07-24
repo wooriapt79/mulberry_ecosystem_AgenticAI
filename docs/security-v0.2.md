@@ -6,6 +6,8 @@ Status: implementation draft. This document does not authorize production deploy
 
 - One-time first-administrator bootstrap guarded by `ADMIN_BOOTSTRAP_TOKEN`
 - Login failure auditing, configurable lockout threshold and lockout duration
+- Constant-work password verification for unknown accounts to reduce timing enumeration
+- Positive session TTL normalization and explicit account-disable permission enforcement
 - Current-session logout and all-session logout
 - Human administrator emergency session revocation and optional account disable
 - Permission-based administrative gates for review, safety and security actions
