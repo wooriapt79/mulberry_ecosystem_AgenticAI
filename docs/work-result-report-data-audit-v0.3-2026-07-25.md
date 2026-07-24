@@ -24,10 +24,10 @@ Human 최종 권한을 유지한다.
 |---|---|
 | DB migration | Alembic 도입, 빈 DB 생성, 기존 v0.2 DB upgrade/backfill/downgrade |
 | 앱 시작 절차 | 런타임 `create_all` 제거, Compose migration 선행 서비스 추가 |
-| 감사 무결성 | 전역 순번, 이전 해시, SHA-256 이벤트 해시, 체인 검증 |
-| 감사 불변성 | PostgreSQL UPDATE/DELETE 거부 트리거 |
-| Human Passport | `active/suspended/expired/revoked` 상태 전이와 사유·행위자 이력 |
-| CI | PostgreSQL 15에서 migration, 전체 회귀, 동시성, append-only 검증 |
+| 감사 무결성 | 전역 순번, 이전 해시, SHA-256 이벤트 해시, 체인 및 chain-head 종단 검증 |
+| 감사 불변성 | PostgreSQL·SQLite UPDATE/DELETE 거부 트리거 |
+| Human Passport | 상태 전이와 사유·행위자 이력, PostgreSQL·SQLite append-only 통제 |
+| CI | PostgreSQL 15에서 migration 왕복, 전체 회귀, 동시성, append-only 검증 |
 
 ## 3. 표준 추적성
 
