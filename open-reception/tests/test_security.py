@@ -12,10 +12,18 @@ os.environ.setdefault("ADMIN_BOOTSTRAP_TOKEN", "bootstrap-token-for-tests-only-0
 os.environ.setdefault("LOGIN_MAX_FAILURES", "3")
 
 from fastapi.testclient import TestClient
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 import app.main as main_module
-from app.main import ADMIN_PERMISSIONS, AuditEvent, BootstrapConsumption, SessionLocal, User, app
+from app.main import (
+    ADMIN_PERMISSIONS,
+    AuditEvent,
+    BootstrapConsumption,
+    LoginSession,
+    SessionLocal,
+    User,
+    app,
+)
 
 
 def login(client, email, password):
@@ -31,6 +39,21 @@ def ensure_admin(client):
         "bootstrap_token": os.environ["ADMIN_BOOTSTRAP_TOKEN"],
     })
     assert response.status_code in (201, 409)
+
+
+def reset_bootstrap_state():
+    """Give the PostgreSQL concurrency test an independent bootstrap state."""
+    with SessionLocal() as db:
+        admin_ids = db.scalars(
+            select(User.id).where(
+                (User.role == "admin") | (User.email.like("concurrent-admin-%@example.org"))
+            )
+        ).all()
+        if admin_ids:
+            db.execute(delete(LoginSession).where(LoginSession.user_id.in_(admin_ids)))
+            db.execute(delete(User).where(User.id.in_(admin_ids)))
+        db.execute(delete(BootstrapConsumption).where(BootstrapConsumption.id == "admin"))
+        db.commit()
 
 
 def test_bootstrap_is_single_use():
@@ -185,6 +208,7 @@ def test_postgresql_failed_login_increment_is_atomic():
 )
 def test_postgresql_bootstrap_claim_is_atomic(monkeypatch):
     monkeypatch.setenv("ADMIN_BOOTSTRAP_TOKEN", "concurrent-bootstrap-token-000000000")
+    reset_bootstrap_state()
 
     def bootstrap(index):
         with TestClient(app) as client:
