@@ -1,5 +1,8 @@
 import os
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+import pytest
 
 db_file = Path(__file__).parent / "security.sqlite3"
 if db_file.exists():
@@ -12,7 +15,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 import app.main as main_module
-from app.main import ADMIN_PERMISSIONS, AuditEvent, SessionLocal, User, app
+from app.main import ADMIN_PERMISSIONS, AuditEvent, BootstrapConsumption, SessionLocal, User, app
 
 
 def login(client, email, password):
@@ -39,6 +42,26 @@ def test_bootstrap_is_single_use():
             "bootstrap_token": "bootstrap-token-for-tests-only-000000",
         })
         assert response.status_code == 409
+
+
+def test_bootstrap_consumption_survives_admin_role_change():
+    with TestClient(app) as client:
+        ensure_admin(client)
+        with SessionLocal() as db:
+            admin = db.scalar(select(User).where(User.email == "admin@example.org"))
+            admin.role = "member"
+            db.commit()
+            assert db.get(BootstrapConsumption, "admin")
+        response = client.post("/auth/bootstrap", json={
+            "email": "replacement-admin@example.org",
+            "password": "replacement-administrator-pass",
+            "bootstrap_token": os.environ["ADMIN_BOOTSTRAP_TOKEN"],
+        })
+        assert response.status_code == 409
+        with SessionLocal() as db:
+            admin = db.scalar(select(User).where(User.email == "admin@example.org"))
+            admin.role = "admin"
+            db.commit()
 
 
 def test_logout_and_logout_all_revoke_tokens():
@@ -68,7 +91,7 @@ def test_login_lockout_is_audited():
             assert response.status_code == 401
         assert client.post("/auth/login", json={
             "email": "locked@example.org", "password": "correct-horse-battery",
-        }).status_code == 423
+        }).status_code == 401
         with SessionLocal() as db:
             assert db.scalar(select(AuditEvent).where(AuditEvent.action == "account.locked"))
 
@@ -109,6 +132,74 @@ def test_unknown_account_uses_password_verification(monkeypatch):
         })
     assert response.status_code == 401
     assert calls == [main_module.DUMMY_PASSWORD_HASH]
+
+
+def test_locked_and_unknown_accounts_have_same_external_response():
+    with TestClient(app) as client:
+        client.post("/auth/register", json={
+            "email": "oracle-target@example.org", "password": "correct-horse-battery",
+        })
+        for _ in range(3):
+            client.post("/auth/login", json={
+                "email": "oracle-target@example.org", "password": "wrong-password",
+            })
+        locked = client.post("/auth/login", json={
+            "email": "oracle-target@example.org", "password": "wrong-password",
+        })
+        unknown = client.post("/auth/login", json={
+            "email": "not-registered@example.org", "password": "wrong-password",
+        })
+    assert (locked.status_code, locked.json()) == (unknown.status_code, unknown.json())
+    assert locked.status_code == 401
+
+
+@pytest.mark.skipif(
+    not os.environ["DATABASE_URL"].startswith("postgresql"),
+    reason="requires the PostgreSQL integration test environment",
+)
+def test_postgresql_failed_login_increment_is_atomic():
+    email = "concurrent-failures@example.org"
+    with TestClient(app) as client:
+        client.post("/auth/register", json={
+            "email": email, "password": "correct-horse-battery",
+        })
+
+    def invalid_login(_):
+        with TestClient(app) as client:
+            return client.post("/auth/login", json={
+                "email": email, "password": "wrong-password",
+            }).status_code
+
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        statuses = list(pool.map(invalid_login, range(3)))
+    assert statuses == [401, 401, 401]
+    with SessionLocal() as db:
+        user = db.scalar(select(User).where(User.email == email))
+        assert user.failed_login_count == 3
+        assert user.locked_until is not None
+
+
+@pytest.mark.skipif(
+    not os.environ["DATABASE_URL"].startswith("postgresql"),
+    reason="requires the PostgreSQL integration test environment",
+)
+def test_postgresql_bootstrap_claim_is_atomic(monkeypatch):
+    monkeypatch.setenv("ADMIN_BOOTSTRAP_TOKEN", "concurrent-bootstrap-token-000000000")
+
+    def bootstrap(index):
+        with TestClient(app) as client:
+            return client.post("/auth/bootstrap", json={
+                "email": f"concurrent-admin-{index}@example.org",
+                "password": "concurrent-administrator-pass",
+                "bootstrap_token": os.environ["ADMIN_BOOTSTRAP_TOKEN"],
+            }).status_code
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        statuses = list(pool.map(bootstrap, range(2)))
+    assert sorted(statuses) == [201, 409]
+    with SessionLocal() as db:
+        assert db.get(BootstrapConsumption, "admin")
+        assert len(db.scalars(select(User).where(User.role == "admin")).all()) == 1
 
 
 def test_session_ttl_is_clamped_to_safe_positive_value(monkeypatch):
