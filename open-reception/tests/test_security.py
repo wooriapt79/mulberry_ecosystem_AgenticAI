@@ -62,7 +62,7 @@ def test_bootstrap_is_single_use():
         response = client.post("/auth/bootstrap", json={
             "email": "another-admin@example.org",
             "password": "another-administrator-pass",
-            "bootstrap_token": "bootstrap-token-for-tests-only-000000",
+            "bootstrap_token": os.environ["ADMIN_BOOTSTRAP_TOKEN"],
         })
         assert response.status_code == 409
 
@@ -224,6 +224,15 @@ def test_postgresql_bootstrap_claim_is_atomic(monkeypatch):
     with SessionLocal() as db:
         assert db.get(BootstrapConsumption, "admin")
         assert len(db.scalars(select(User).where(User.role == "admin")).all()) == 1
+    # Restore the standard administrator fixture expected by later RBAC tests.
+    reset_bootstrap_state()
+    with TestClient(app) as client:
+        response = client.post("/auth/bootstrap", json={
+            "email": "admin@example.org",
+            "password": "administrator-pass",
+            "bootstrap_token": os.environ["ADMIN_BOOTSTRAP_TOKEN"],
+        })
+        assert response.status_code == 201
 
 
 def test_session_ttl_is_clamped_to_safe_positive_value(monkeypatch):
