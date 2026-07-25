@@ -551,7 +551,11 @@ def change_human_passport_status(
     admin: User = Depends(require_permission("passport:manage")),
     db: Session = Depends(db_session),
 ):
-    passport = db.get(HumanPassport, passport_id)
+    passport = db.scalar(
+        select(HumanPassport)
+        .where(HumanPassport.id == passport_id)
+        .with_for_update()
+    )
     if not passport:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Human Passport not found")
     allowed = {
