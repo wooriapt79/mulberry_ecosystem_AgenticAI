@@ -152,29 +152,29 @@ def test_postgresql_human_passport_status_transitions_are_serialized():
             "administrator-pass",
         )
 
-    def change_status(target_status):
+    def suspend_passport(request_number):
         with TestClient(app) as client:
             return client.post(
                 f"/admin/passports/human/{issued.json()['id']}/status",
                 headers=admin,
                 json={
-                    "status": target_status,
-                    "reason": f"concurrent transition to {target_status}",
+                    "status": "suspended",
+                    "reason": f"concurrent suspension request {request_number}",
                 },
             ).status_code
 
     with ThreadPoolExecutor(max_workers=2) as pool:
-        statuses = list(pool.map(change_status, ("suspended", "expired")))
-    assert statuses == [200, 200]
+        statuses = list(pool.map(suspend_passport, range(2)))
+    assert sorted(statuses) == [200, 409]
 
     with SessionLocal() as db:
         history = db.scalars(select(HumanPassportStatusHistory).where(
             HumanPassportStatusHistory.passport_id == issued.json()["id"]
         ).order_by(HumanPassportStatusHistory.changed_at)).all()
-        assert len(history) == 3
+        assert len(history) == 2
         assert history[0].from_status is None
-        for previous, current in zip(history, history[1:]):
-            assert current.from_status == previous.to_status
+        assert history[1].from_status == history[0].to_status == "active"
+        assert history[1].to_status == "suspended"
         passport = db.get(HumanPassport, issued.json()["id"])
         assert passport.status == history[-1].to_status
 
