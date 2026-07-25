@@ -5,7 +5,7 @@
 - 기준: PR #2 병합 커밋 `e5cfdce`
 - 작업 브랜치: `agent/luna-data-audit-v0.3`
 - 대상 PR: #3
-- 문서 상태: Draft PR 검토용
+- 문서 상태: Ready for review
 - 수행 주체: Mulberry Project · CSA KeBin
 
 ## 1. 목적과 승인 경계
@@ -27,7 +27,8 @@ Human 최종 권한을 유지한다.
 | 감사 무결성 | 전역 순번, 이전 해시, SHA-256 이벤트 해시, 체인 및 chain-head 종단 검증 |
 | 감사 불변성 | PostgreSQL·SQLite UPDATE/DELETE 거부 트리거 |
 | Human Passport | 상태 전이와 사유·행위자 이력, PostgreSQL·SQLite append-only 통제 |
-| CI | PostgreSQL 15에서 migration 왕복, 전체 회귀, 동시성, append-only 검증 |
+| P1 안정성 보완 | migration 이미지에 Alembic 파일 포함, Passport 전이 전 PostgreSQL 행 잠금 |
+| CI | migration 컨테이너 실행, PostgreSQL 15 migration 왕복·전체 회귀·동시성·append-only 검증 |
 
 ## 3. 표준 추적성
 
@@ -45,8 +46,8 @@ Human 최종 권한을 유지한다.
 
 로컬 SQLite 검증을 연속 2회 실행했다.
 
-- 각 실행: `17 passed, 2 skipped`
-- 2개 skip: PostgreSQL 전용 동시성 2건
+- 각 실행: `17 passed, 3 skipped`
+- 3개 skip: PostgreSQL 전용 동시성 3건
 - SQLite 감사 이벤트·Passport 상태 이력 UPDATE/DELETE 거부: 통과
 - 독립 DB migration `upgrade → downgrade → upgrade`: 통과
 - Python compile: 통과
@@ -55,17 +56,19 @@ Human 최종 권한을 유지한다.
 GitHub Actions PostgreSQL 15:
 
 - workflow: `Open Reception Security`
-- run: `30134047910`
+- 최종 run: `30142076397`
 - migration upgrade: 통과
-- 전체 PostgreSQL suite: `19 passed`
-- 동시성 게이트 명시 재실행: `2 passed`
+- Docker migration 이미지 build 및 컨테이너 `alembic upgrade head`: 통과
+- 전체 PostgreSQL suite: `20 passed`
+- 동시성 게이트 명시 재실행: `3 passed`
+- 동일 Passport 동시 상태 전이: 행 잠금 후 `200/409` 직렬화·이력 일관성 통과
 - 감사 이벤트·Passport 상태 이력 UPDATE/DELETE 거부: 통과
 - Audit chain과 chain-head 종단 일치·변조 탐지: 통과
 - 실제 PostgreSQL `downgrade → upgrade` 왕복: 통과
 
 ## 5. 잔여 위험과 후속 범위
 
-- Compose 전체 build/up/healthcheck와 운영 DB 백업·복구 훈련은 아직 수행하지 않았다.
+- Compose 전체 애플리케이션 build/up/healthcheck와 운영 DB 백업·복구 훈련은 아직 수행하지 않았다.
 - 분산 Redis rate limiter, MFA/Passkey 공급자, Secret Manager 연동은 후속 묶음이다.
 - 중요 관리자 작업의 이중승인과 역할 생애주기는 후속 묶음이다.
 - 독립 보안 리뷰와 침투 테스트는 운영 승인 전에 필요하다.
