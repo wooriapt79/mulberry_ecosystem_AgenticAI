@@ -28,7 +28,7 @@ Human 최종 권한을 유지한다.
 | 감사 불변성 | PostgreSQL·SQLite UPDATE/DELETE 거부 트리거 |
 | Human Passport | 상태 전이와 사유·행위자 이력, PostgreSQL·SQLite append-only 통제 |
 | P1 안정성 보완 | migration 이미지에 Alembic 파일 포함, Passport 전이 전 PostgreSQL 행 잠금 |
-| P2 안정성 보완 | 감사 timestamp UTC 정규화, chain-head 선행 잠금, 기존 Passport 생애주기 backfill |
+| P2 안정성 보완 | 감사 timestamp UTC 정규화, PostgreSQL 행 잠금·SQLite 쓰기 잠금, 기존 Passport 생애주기 backfill |
 | CI | migration 컨테이너 실행, PostgreSQL 15 migration 왕복·전체 회귀·동시성·append-only 검증 |
 
 ## 3. 표준 추적성
@@ -47,9 +47,10 @@ Human 최종 권한을 유지한다.
 
 로컬 SQLite 검증을 연속 2회 실행했다.
 
-- 각 실행: `17 passed, 5 skipped`
+- 각 실행: `18 passed, 5 skipped`
 - 5개 skip: PostgreSQL 전용 동시성·시간대 검증 5건
 - SQLite 감사 이벤트·Passport 상태 이력 UPDATE/DELETE 거부: 통과
+- SQLite 동시 감사 append 순번 직렬화·chain-head 종단 일치: 통과
 - 독립 DB migration `upgrade → downgrade → upgrade`: 통과
 - Python compile: 통과
 - `git diff --check`: 통과
@@ -57,7 +58,7 @@ Human 최종 권한을 유지한다.
 GitHub Actions PostgreSQL 15:
 
 - workflow: `Open Reception Security`
-- 최종 run: `30142661381`
+- 최종 run: `30143448609`
 - migration upgrade: 통과
 - Docker migration 이미지 build 및 컨테이너 `alembic upgrade head`: 통과
 - 전체 PostgreSQL suite: `22 passed`
@@ -73,6 +74,7 @@ GitHub Actions PostgreSQL 15:
 ## 5. 잔여 위험과 후속 범위
 
 - Compose 전체 애플리케이션 build/up/healthcheck와 운영 DB 백업·복구 훈련은 아직 수행하지 않았다.
+- SQLite는 로컬·개발·단일 인스턴스 용도이며 다중 프로세스 운영은 PostgreSQL을 사용한다.
 - 분산 Redis rate limiter, MFA/Passkey 공급자, Secret Manager 연동은 후속 묶음이다.
 - 중요 관리자 작업의 이중승인과 역할 생애주기는 후속 묶음이다.
 - 독립 보안 리뷰와 침투 테스트는 운영 승인 전에 필요하다.
