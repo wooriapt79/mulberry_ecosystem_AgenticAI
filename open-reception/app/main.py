@@ -145,7 +145,11 @@ class KillSwitch(Base):
 
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./open_reception.sqlite3")
-engine_args = {"connect_args": {"check_same_thread": False}} if DATABASE_URL.startswith("sqlite") else {}
+engine_args = (
+    {"connect_args": {"check_same_thread": False, "timeout": 30}}
+    if DATABASE_URL.startswith("sqlite")
+    else {}
+)
 engine = create_engine(DATABASE_URL, **engine_args)
 SessionLocal = sessionmaker(engine, expire_on_commit=False)
 
@@ -198,8 +202,21 @@ def aware(value: datetime) -> datetime:
     return value.astimezone(timezone.utc)
 
 
+def locked_audit_head(db: Session) -> AuditChainHead | None:
+    if db.bind.dialect.name == "sqlite":
+        # SQLite ignores SELECT FOR UPDATE. This no-op write acquires the
+        # database write lock before the caller reads and advances the head.
+        db.execute(
+            update(AuditChainHead)
+            .where(AuditChainHead.id == "global")
+            .values(sequence=AuditChainHead.sequence)
+        )
+        return db.get(AuditChainHead, "global")
+    return db.get(AuditChainHead, "global", with_for_update=True)
+
+
 def audit(db: Session, actor: str, action: str, target_type: str, target_id: str, detail: dict | None = None):
-    head = db.get(AuditChainHead, "global", with_for_update=True)
+    head = locked_audit_head(db)
     if head is None:
         head = AuditChainHead(id="global")
         db.add(head)
@@ -233,7 +250,7 @@ def verify_audit_chain(db: Session) -> bool:
     # Audit writers serialize on this same row. Locking it before reading the
     # events prevents a concurrent append from advancing the head between the
     # event scan and the terminal head comparison.
-    head = db.get(AuditChainHead, "global", with_for_update=True)
+    head = locked_audit_head(db)
     if head is None:
         return False
     previous_hash = "0" * 64
