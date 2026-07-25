@@ -34,6 +34,13 @@ def test_existing_v02_database_upgrade_and_downgrade(tmp_path, monkeypatch):
             )
         """))
         connection.execute(text("""
+            INSERT INTO human_passports
+            (id, user_id, display_name, domains, status, policy_version, created_at)
+            VALUES
+            ('legacy-passport', 'legacy-user', 'Legacy Steward', '[]',
+             'suspended', '2026-01', :created_at)
+        """), {"created_at": datetime(2026, 7, 24, 15, 0, tzinfo=timezone.utc)})
+        connection.execute(text("""
             INSERT INTO audit_events
             (id, actor_id, action, target_type, target_id, detail, created_at)
             VALUES
@@ -53,6 +60,27 @@ def test_existing_v02_database_upgrade_and_downgrade(tmp_path, monkeypatch):
         assert migrated["sequence"] == 1
         assert migrated["previous_hash"] == "0" * 64
         assert len(migrated["event_hash"]) == 64
+        passport = connection.execute(text("""
+            SELECT status, status_changed_at FROM human_passports
+            WHERE id = 'legacy-passport'
+        """)).mappings().one()
+        history = connection.execute(text("""
+            SELECT from_status, to_status, reason, changed_by, changed_at
+            FROM human_passport_status_history
+            WHERE passport_id = 'legacy-passport'
+        """)).mappings().one()
+        assert passport["status"] == "suspended"
+        assert passport["status_changed_at"] is not None
+        assert history["from_status"] is None
+        assert history["to_status"] == "suspended"
+        assert history["reason"] == "migration backfill"
+        assert history["changed_by"] == "system:migration"
+        assert history["changed_at"] == passport["status_changed_at"]
+    status_changed_at = next(
+        column for column in inspect(engine).get_columns("human_passports")
+        if column["name"] == "status_changed_at"
+    )
+    assert status_changed_at["nullable"] is False
 
     command.downgrade(config, "base")
     columns = {column["name"] for column in inspect(engine).get_columns("audit_events")}
