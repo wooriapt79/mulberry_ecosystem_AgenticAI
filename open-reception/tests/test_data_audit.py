@@ -1,4 +1,6 @@
+from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
+import os
 
 import pytest
 from fastapi.testclient import TestClient
@@ -112,6 +114,69 @@ def test_human_passport_status_transition_and_history():
             HumanPassportStatusHistory.passport_id == passport.id
         ).order_by(HumanPassportStatusHistory.changed_at)).all()
         assert [entry.to_status for entry in history] == ["active", "suspended", "expired"]
+
+
+@pytest.mark.skipif(
+    not os.environ["DATABASE_URL"].startswith("postgresql"),
+    reason="requires the PostgreSQL integration test environment",
+)
+def test_postgresql_human_passport_status_transitions_are_serialized():
+    with TestClient(app) as client:
+        client.post("/auth/register", json={
+            "email": "passport-concurrency-owner@example.org",
+            "password": "correct-horse-battery",
+        })
+        owner = _login(
+            client,
+            "passport-concurrency-owner@example.org",
+            "correct-horse-battery",
+        )
+        issued = client.put("/passport/human", headers=owner, json={
+            "display_name": "Concurrent Passport Owner",
+            "domains": ["food-desert"],
+        })
+        assert issued.status_code == 200
+        client.post("/auth/register", json={
+            "email": "passport-concurrency-admin@example.org",
+            "password": "administrator-pass",
+        })
+        with SessionLocal() as db:
+            security_admin = db.scalar(select(User).where(
+                User.email == "passport-concurrency-admin@example.org"
+            ))
+            security_admin.role = "security_admin"
+            db.commit()
+        admin = _login(
+            client,
+            "passport-concurrency-admin@example.org",
+            "administrator-pass",
+        )
+
+    def change_status(target_status):
+        with TestClient(app) as client:
+            return client.post(
+                f"/admin/passports/human/{issued.json()['id']}/status",
+                headers=admin,
+                json={
+                    "status": target_status,
+                    "reason": f"concurrent transition to {target_status}",
+                },
+            ).status_code
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        statuses = list(pool.map(change_status, ("suspended", "expired")))
+    assert statuses == [200, 200]
+
+    with SessionLocal() as db:
+        history = db.scalars(select(HumanPassportStatusHistory).where(
+            HumanPassportStatusHistory.passport_id == issued.json()["id"]
+        ).order_by(HumanPassportStatusHistory.changed_at)).all()
+        assert len(history) == 3
+        assert history[0].from_status is None
+        for previous, current in zip(history, history[1:]):
+            assert current.from_status == previous.to_status
+        passport = db.get(HumanPassport, issued.json()["id"])
+        assert passport.status == history[-1].to_status
 
 
 def test_append_only_rows_reject_update_and_delete():
