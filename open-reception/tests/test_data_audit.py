@@ -61,6 +61,9 @@ def test_empty_audit_chain_requires_zeroed_head():
     class EmptyAuditSession:
         def __init__(self, event_hash):
             self.head = SimpleNamespace(sequence=0, event_hash=event_hash)
+            self.bind = SimpleNamespace(
+                dialect=SimpleNamespace(name="postgresql")
+            )
 
         def scalars(self, _statement):
             return SimpleNamespace(all=lambda: [])
@@ -73,6 +76,45 @@ def test_empty_audit_chain_requires_zeroed_head():
 
     assert verify_audit_chain(EmptyAuditSession("0" * 64)) is True
     assert verify_audit_chain(EmptyAuditSession("f" * 64)) is False
+
+
+@pytest.mark.skipif(
+    not os.environ["DATABASE_URL"].startswith("sqlite"),
+    reason="requires the SQLite integration test environment",
+)
+def test_sqlite_concurrent_audit_appends_are_serialized():
+    run_id = uuid4().hex
+    worker_count = 8
+
+    def append_event(worker_number):
+        with SessionLocal() as db:
+            from app.main import audit
+            audit(
+                db,
+                f"sqlite-worker-{run_id}-{worker_number}",
+                "concurrent.append",
+                "test",
+                run_id,
+            )
+            db.commit()
+
+    with ThreadPoolExecutor(max_workers=worker_count) as pool:
+        list(pool.map(append_event, range(worker_count)))
+
+    with SessionLocal() as db:
+        events = db.scalars(
+            select(AuditEvent)
+            .where(AuditEvent.target_id == run_id)
+            .order_by(AuditEvent.sequence)
+        ).all()
+        assert len(events) == worker_count
+        assert [event.sequence for event in events] == list(
+            range(events[0].sequence, events[0].sequence + worker_count)
+        )
+        head = db.get(AuditChainHead, "global")
+        assert head.sequence == events[-1].sequence
+        assert head.event_hash == events[-1].event_hash
+        assert verify_audit_chain(db) is True
 
 
 @pytest.mark.skipif(
