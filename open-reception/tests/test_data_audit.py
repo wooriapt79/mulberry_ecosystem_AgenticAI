@@ -1,6 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 import os
+from threading import Event, Thread
 from uuid import uuid4
 
 import pytest
@@ -64,13 +65,25 @@ def test_empty_audit_chain_requires_zeroed_head():
         def scalars(self, _statement):
             return SimpleNamespace(all=lambda: [])
 
-        def get(self, model, identifier):
+        def get(self, model, identifier, **kwargs):
             assert model is AuditChainHead
             assert identifier == "global"
+            assert kwargs == {"with_for_update": True}
             return self.head
 
     assert verify_audit_chain(EmptyAuditSession("0" * 64)) is True
     assert verify_audit_chain(EmptyAuditSession("f" * 64)) is False
+
+
+@pytest.mark.skipif(
+    not os.environ["DATABASE_URL"].startswith("postgresql"),
+    reason="requires the PostgreSQL integration test environment",
+)
+def test_postgresql_audit_verifies_outside_utc_session_timezone():
+    with SessionLocal() as db:
+        db.execute(text("SET TIME ZONE 'Asia/Seoul'"))
+        assert verify_audit_chain(db) is True
+        db.rollback()
 
 
 def test_human_passport_status_transition_and_history():
@@ -181,6 +194,41 @@ def test_postgresql_human_passport_status_transitions_are_serialized():
         assert history[1].to_status == "suspended"
         passport = db.get(HumanPassport, issued.json()["id"])
         assert passport.status == history[-1].to_status
+
+
+@pytest.mark.skipif(
+    not os.environ["DATABASE_URL"].startswith("postgresql"),
+    reason="requires the PostgreSQL integration test environment",
+)
+def test_postgresql_audit_verification_waits_for_concurrent_append():
+    writer_ready = Event()
+    allow_commit = Event()
+    verification = []
+
+    def writer():
+        with SessionLocal() as db:
+            from app.main import audit
+            audit(db, "test", "concurrent.append", "test", "snapshot")
+            writer_ready.set()
+            assert allow_commit.wait(timeout=10)
+            db.commit()
+
+    def verifier():
+        with SessionLocal() as db:
+            verification.append(verify_audit_chain(db))
+            db.commit()
+
+    writer_thread = Thread(target=writer)
+    writer_thread.start()
+    assert writer_ready.wait(timeout=10)
+    verifier_thread = Thread(target=verifier)
+    verifier_thread.start()
+    allow_commit.set()
+    writer_thread.join(timeout=10)
+    verifier_thread.join(timeout=10)
+    assert not writer_thread.is_alive()
+    assert not verifier_thread.is_alive()
+    assert verification == [True]
 
 
 def test_append_only_rows_reject_update_and_delete():
