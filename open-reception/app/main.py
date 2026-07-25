@@ -193,7 +193,9 @@ def setting_int(name: str, default: int) -> int:
 
 
 def aware(value: datetime) -> datetime:
-    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
 
 
 def audit(db: Session, actor: str, action: str, target_type: str, target_id: str, detail: dict | None = None):
@@ -228,6 +230,12 @@ def audit(db: Session, actor: str, action: str, target_type: str, target_id: str
 
 
 def verify_audit_chain(db: Session) -> bool:
+    # Audit writers serialize on this same row. Locking it before reading the
+    # events prevents a concurrent append from advancing the head between the
+    # event scan and the terminal head comparison.
+    head = db.get(AuditChainHead, "global", with_for_update=True)
+    if head is None:
+        return False
     previous_hash = "0" * 64
     expected_sequence = 1
     for event in db.scalars(select(AuditEvent).order_by(AuditEvent.sequence)).all():
@@ -250,10 +258,8 @@ def verify_audit_chain(db: Session) -> bool:
             return False
         previous_hash = event.event_hash
         expected_sequence += 1
-    head = db.get(AuditChainHead, "global")
     return (
-        head is not None
-        and head.sequence == expected_sequence - 1
+        head.sequence == expected_sequence - 1
         and hmac.compare_digest(head.event_hash, previous_hash)
     )
 
