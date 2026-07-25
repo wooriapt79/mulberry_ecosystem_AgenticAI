@@ -30,7 +30,21 @@ assert {"sequence", "previous_hash", "event_hash"} <= columns("audit_events")
 assert {"status_reason", "status_changed_at"} <= columns("human_passports")
 assert "human_passport_status_history" in inspect(engine).get_table_names()
 with engine.connect() as connection:
+    passport_count = connection.execute(text(
+        "SELECT COUNT(*) FROM human_passports"
+    )).scalar_one()
+    missing_timestamp_count = connection.execute(text("""
+        SELECT COUNT(*) FROM human_passports WHERE status_changed_at IS NULL
+    """)).scalar_one()
+    backfill_count = connection.execute(text("""
+        SELECT COUNT(*) FROM human_passport_status_history
+        WHERE from_status IS NULL
+          AND reason = 'migration backfill'
+          AND changed_by = 'system:migration'
+    """)).scalar_one()
     revision = connection.execute(text(
         "SELECT version_num FROM alembic_version"
     )).scalar_one()
+assert missing_timestamp_count == 0
+assert backfill_count == passport_count
 assert revision == "0001_v03"
