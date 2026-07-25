@@ -28,6 +28,7 @@ Human 최종 권한을 유지한다.
 | 감사 불변성 | PostgreSQL·SQLite UPDATE/DELETE 거부 트리거 |
 | Human Passport | 상태 전이와 사유·행위자 이력, PostgreSQL·SQLite append-only 통제 |
 | P1 안정성 보완 | migration 이미지에 Alembic 파일 포함, Passport 전이 전 PostgreSQL 행 잠금 |
+| P2 안정성 보완 | 감사 timestamp UTC 정규화, chain-head 선행 잠금, 기존 Passport 생애주기 backfill |
 | CI | migration 컨테이너 실행, PostgreSQL 15 migration 왕복·전체 회귀·동시성·append-only 검증 |
 
 ## 3. 표준 추적성
@@ -46,8 +47,8 @@ Human 최종 권한을 유지한다.
 
 로컬 SQLite 검증을 연속 2회 실행했다.
 
-- 각 실행: `17 passed, 3 skipped`
-- 3개 skip: PostgreSQL 전용 동시성 3건
+- 각 실행: `17 passed, 5 skipped`
+- 5개 skip: PostgreSQL 전용 동시성·시간대 검증 5건
 - SQLite 감사 이벤트·Passport 상태 이력 UPDATE/DELETE 거부: 통과
 - 독립 DB migration `upgrade → downgrade → upgrade`: 통과
 - Python compile: 통과
@@ -56,12 +57,15 @@ Human 최종 권한을 유지한다.
 GitHub Actions PostgreSQL 15:
 
 - workflow: `Open Reception Security`
-- 최종 run: `30142076397`
+- 최종 run: `30142661381`
 - migration upgrade: 통과
 - Docker migration 이미지 build 및 컨테이너 `alembic upgrade head`: 통과
-- 전체 PostgreSQL suite: `20 passed`
-- 동시성 게이트 명시 재실행: `3 passed`
+- 전체 PostgreSQL suite: `22 passed`
+- 동시성·시간대 게이트 명시 재실행: `5 passed`
 - 동일 Passport 동시 상태 전이: 행 잠금 후 `200/409` 직렬화·이력 일관성 통과
+- 비UTC PostgreSQL 세션의 감사 hash 검증: 통과
+- 동시 감사 append 중 chain 검증의 일관성: chain-head 잠금 후 통과
+- 기존 v0.2 Passport의 timestamp·최초 상태 이력 backfill 및 NOT NULL 강화: 통과
 - 감사 이벤트·Passport 상태 이력 UPDATE/DELETE 거부: 통과
 - Audit chain과 chain-head 종단 일치·변조 탐지: 통과
 - 실제 PostgreSQL `downgrade → upgrade` 왕복: 통과
