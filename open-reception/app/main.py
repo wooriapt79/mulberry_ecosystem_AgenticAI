@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import json
 import os
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -62,7 +63,20 @@ class HumanPassport(Base):
     domains: Mapped[list] = mapped_column(JSON, default=list)
     status: Mapped[str] = mapped_column(String, default="active")
     policy_version: Mapped[str] = mapped_column(String, default="2026-07")
+    status_reason: Mapped[str | None] = mapped_column(String, nullable=True)
+    status_changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class HumanPassportStatusHistory(Base):
+    __tablename__ = "human_passport_status_history"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
+    passport_id: Mapped[str] = mapped_column(ForeignKey("human_passports.id"), index=True)
+    from_status: Mapped[str | None] = mapped_column(String, nullable=True)
+    to_status: Mapped[str] = mapped_column(String)
+    reason: Mapped[str] = mapped_column(String)
+    changed_by: Mapped[str] = mapped_column(String)
+    changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
 class StewardApplication(Base):
@@ -108,7 +122,17 @@ class AuditEvent(Base):
     target_type: Mapped[str] = mapped_column(String)
     target_id: Mapped[str] = mapped_column(String)
     detail: Mapped[dict] = mapped_column(JSON, default=dict)
+    sequence: Mapped[int] = mapped_column(Integer, unique=True, index=True)
+    previous_hash: Mapped[str] = mapped_column(String(64))
+    event_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class AuditChainHead(Base):
+    __tablename__ = "audit_chain_heads"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default="global")
+    sequence: Mapped[int] = mapped_column(Integer, default=0)
+    event_hash: Mapped[str] = mapped_column(String(64), default="0" * 64)
 
 
 class KillSwitch(Base):
@@ -121,17 +145,21 @@ class KillSwitch(Base):
 
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./open_reception.sqlite3")
-engine_args = {"connect_args": {"check_same_thread": False}} if DATABASE_URL.startswith("sqlite") else {}
+engine_args = (
+    {"connect_args": {"check_same_thread": False, "timeout": 30}}
+    if DATABASE_URL.startswith("sqlite")
+    else {}
+)
 engine = create_engine(DATABASE_URL, **engine_args)
 SessionLocal = sessionmaker(engine, expire_on_commit=False)
 
-app = FastAPI(title="Luna Open Reception", version="0.2.0")
+app = FastAPI(title="Luna Open Reception", version="0.3.0")
 
 ADMIN_PERMISSIONS = {
-    "security_admin": {"session:revoke", "account:disable"},
+    "security_admin": {"session:revoke", "account:disable", "passport:manage"},
     "steward_reviewer": {"steward:review"},
     "safety_operator": {"kill_switch:change"},
-    "admin": {"session:revoke", "account:disable", "steward:review", "kill_switch:change"},
+    "admin": {"session:revoke", "account:disable", "passport:manage", "steward:review", "kill_switch:change"},
 }
 
 
@@ -169,11 +197,105 @@ def setting_int(name: str, default: int) -> int:
 
 
 def aware(value: datetime) -> datetime:
-    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
+def locked_audit_head(db: Session) -> AuditChainHead | None:
+    if db.bind.dialect.name == "sqlite":
+        # SQLite ignores SELECT FOR UPDATE. This no-op write acquires the
+        # database write lock before the caller reads and advances the head.
+        db.execute(
+            update(AuditChainHead)
+            .where(AuditChainHead.id == "global")
+            .values(sequence=AuditChainHead.sequence)
+        )
+        return db.get(AuditChainHead, "global")
+    return db.get(AuditChainHead, "global", with_for_update=True)
+
+
+def locked_human_passport(db: Session, passport_id: str) -> HumanPassport | None:
+    if db.bind.dialect.name == "sqlite":
+        # SQLite ignores SELECT FOR UPDATE. Acquire its database write lock
+        # before reading so a waiter validates the latest committed status.
+        db.execute(
+            update(HumanPassport)
+            .where(HumanPassport.id == passport_id)
+            .values(status=HumanPassport.status)
+        )
+        return db.get(HumanPassport, passport_id)
+    return db.scalar(
+        select(HumanPassport)
+        .where(HumanPassport.id == passport_id)
+        .with_for_update()
+    )
 
 
 def audit(db: Session, actor: str, action: str, target_type: str, target_id: str, detail: dict | None = None):
-    db.add(AuditEvent(actor_id=actor, action=action, target_type=target_type, target_id=target_id, detail=detail or {}))
+    head = locked_audit_head(db)
+    if head is None:
+        head = AuditChainHead(id="global")
+        db.add(head)
+        db.flush()
+    created_at = now()
+    sequence = head.sequence + 1
+    event_id = str(uuid4())
+    normalized_detail = detail or {}
+    canonical = json.dumps({
+        "id": event_id,
+        "sequence": sequence,
+        "actor_id": actor,
+        "action": action,
+        "target_type": target_type,
+        "target_id": target_id,
+        "detail": normalized_detail,
+        "created_at": created_at.isoformat(),
+        "previous_hash": head.event_hash,
+    }, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    event_hash = hashlib.sha256(canonical.encode()).hexdigest()
+    db.add(AuditEvent(
+        id=event_id, actor_id=actor, action=action, target_type=target_type,
+        target_id=target_id, detail=normalized_detail, sequence=sequence,
+        previous_hash=head.event_hash, event_hash=event_hash, created_at=created_at,
+    ))
+    head.sequence = sequence
+    head.event_hash = event_hash
+
+
+def verify_audit_chain(db: Session) -> bool:
+    # Audit writers serialize on this same row. Locking it before reading the
+    # events prevents a concurrent append from advancing the head between the
+    # event scan and the terminal head comparison.
+    head = locked_audit_head(db)
+    if head is None:
+        return False
+    previous_hash = "0" * 64
+    expected_sequence = 1
+    for event in db.scalars(select(AuditEvent).order_by(AuditEvent.sequence)).all():
+        canonical = json.dumps({
+            "id": event.id,
+            "sequence": event.sequence,
+            "actor_id": event.actor_id,
+            "action": event.action,
+            "target_type": event.target_type,
+            "target_id": event.target_id,
+            "detail": event.detail,
+            "created_at": aware(event.created_at).isoformat(),
+            "previous_hash": event.previous_hash,
+        }, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+        if (
+            event.sequence != expected_sequence
+            or event.previous_hash != previous_hash
+            or not hmac.compare_digest(event.event_hash, hashlib.sha256(canonical.encode()).hexdigest())
+        ):
+            return False
+        previous_hash = event.event_hash
+        expected_sequence += 1
+    return (
+        head.sequence == expected_sequence - 1
+        and hmac.compare_digest(head.event_hash, previous_hash)
+    )
 
 
 def current_session(
@@ -264,9 +386,13 @@ class BootstrapInput(BaseModel):
     bootstrap_token: str = Field(min_length=32, max_length=512)
 
 
+class PassportStatusInput(BaseModel):
+    status: Literal["active", "suspended", "expired", "revoked"]
+    reason: str = Field(min_length=3, max_length=500)
+
+
 @app.on_event("startup")
 def startup():
-    Base.metadata.create_all(engine)
     with SessionLocal() as db:
         if not db.get(KillSwitch, "global"):
             db.add(KillSwitch())
@@ -288,7 +414,7 @@ def startup():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "dry_run": True, "version": "0.2.0"}
+    return {"status": "ok", "dry_run": True, "version": "0.3.0"}
 
 
 @app.post("/auth/bootstrap", status_code=201)
@@ -446,9 +572,57 @@ def upsert_passport(payload: PassportInput, user: User = Depends(current_user), 
         passport = HumanPassport(user_id=user.id, display_name=payload.display_name, domains=payload.domains)
         db.add(passport)
     db.flush()
+    if not db.scalar(select(HumanPassportStatusHistory).where(
+        HumanPassportStatusHistory.passport_id == passport.id
+    )):
+        db.add(HumanPassportStatusHistory(
+            passport_id=passport.id, from_status=None, to_status="active",
+            reason="passport issued", changed_by=user.id,
+        ))
     audit(db, user.id, "human_passport.upserted", "human_passport", passport.id)
     db.commit()
     return {"id": passport.id, "status": passport.status, "policy_version": passport.policy_version}
+
+
+@app.post("/admin/passports/human/{passport_id}/status")
+def change_human_passport_status(
+    passport_id: str,
+    payload: PassportStatusInput,
+    admin: User = Depends(require_permission("passport:manage")),
+    db: Session = Depends(db_session),
+):
+    passport = locked_human_passport(db, passport_id)
+    if not passport:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Human Passport not found")
+    allowed = {
+        "active": {"suspended", "expired", "revoked"},
+        "suspended": {"active", "expired", "revoked"},
+        "expired": {"active", "revoked"},
+        "revoked": set(),
+    }
+    if payload.status not in allowed.get(passport.status, set()):
+        raise HTTPException(status.HTTP_409_CONFLICT, "Invalid Human Passport status transition")
+    previous = passport.status
+    passport.status = payload.status
+    passport.status_reason = payload.reason
+    passport.status_changed_at = now()
+    db.add(HumanPassportStatusHistory(
+        passport_id=passport.id, from_status=previous, to_status=payload.status,
+        reason=payload.reason, changed_by=admin.id,
+    ))
+    audit(db, admin.id, "human_passport.status_changed", "human_passport", passport.id, {
+        "from": previous, "to": payload.status, "reason": payload.reason,
+    })
+    db.commit()
+    return {"id": passport.id, "status": passport.status}
+
+
+@app.get("/admin/audit/verify")
+def audit_verify(
+    admin: User = Depends(require_permission("passport:manage")),
+    db: Session = Depends(db_session),
+):
+    return {"valid": verify_audit_chain(db)}
 
 
 @app.post("/steward-human/applications", status_code=201)
