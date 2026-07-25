@@ -1,6 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 import os
+from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
@@ -121,14 +122,17 @@ def test_human_passport_status_transition_and_history():
     reason="requires the PostgreSQL integration test environment",
 )
 def test_postgresql_human_passport_status_transitions_are_serialized():
+    run_id = uuid4().hex
+    owner_email = f"passport-concurrency-owner-{run_id}@example.org"
+    admin_email = f"passport-concurrency-admin-{run_id}@example.org"
     with TestClient(app) as client:
         client.post("/auth/register", json={
-            "email": "passport-concurrency-owner@example.org",
+            "email": owner_email,
             "password": "correct-horse-battery",
         })
         owner = _login(
             client,
-            "passport-concurrency-owner@example.org",
+            owner_email,
             "correct-horse-battery",
         )
         issued = client.put("/passport/human", headers=owner, json={
@@ -137,18 +141,18 @@ def test_postgresql_human_passport_status_transitions_are_serialized():
         })
         assert issued.status_code == 200
         client.post("/auth/register", json={
-            "email": "passport-concurrency-admin@example.org",
+            "email": admin_email,
             "password": "administrator-pass",
         })
         with SessionLocal() as db:
             security_admin = db.scalar(select(User).where(
-                User.email == "passport-concurrency-admin@example.org"
+                User.email == admin_email
             ))
             security_admin.role = "security_admin"
             db.commit()
         admin = _login(
             client,
-            "passport-concurrency-admin@example.org",
+            admin_email,
             "administrator-pass",
         )
 
