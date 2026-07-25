@@ -75,7 +75,7 @@ jobs:
         run: python -m pytest -q
 
       - name: Run concurrency gates explicitly
-        # P2 regression gates cover non-UTC sessions and concurrent append/verify.
+        # PostgreSQL gates cover non-UTC sessions and concurrent append/verify.
         run: |
           python -m pytest -q \
             tests/test_security.py::test_postgresql_failed_login_increment_is_atomic \
