@@ -3,9 +3,11 @@
 Revision ID: 0001_v03
 """
 from alembic import op
+from datetime import timezone
 import hashlib
 import json
 import sqlalchemy as sa
+from uuid import uuid4
 
 revision = "0001_v03"
 down_revision = None
@@ -15,6 +17,12 @@ depends_on = None
 
 def _columns(inspector, table):
     return {column["name"] for column in inspector.get_columns(table)}
+
+
+def _utc(value):
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
 
 
 def _create_empty_database_baseline(bind):
@@ -140,6 +148,51 @@ def upgrade():
             "ix_human_passport_status_history_passport_id",
             "human_passport_status_history", ["passport_id"],
         )
+    passports = sa.table(
+        "human_passports",
+        sa.column("id", sa.String()),
+        sa.column("status", sa.String()),
+        sa.column("status_changed_at", sa.DateTime(timezone=True)),
+        sa.column("created_at", sa.DateTime(timezone=True)),
+    )
+    passport_history = sa.table(
+        "human_passport_status_history",
+        sa.column("id", sa.String()),
+        sa.column("passport_id", sa.String()),
+        sa.column("from_status", sa.String()),
+        sa.column("to_status", sa.String()),
+        sa.column("reason", sa.String()),
+        sa.column("changed_by", sa.String()),
+        sa.column("changed_at", sa.DateTime(timezone=True)),
+    )
+    for passport in bind.execute(sa.select(passports)).mappings():
+        changed_at = _utc(passport["created_at"])
+        bind.execute(
+            passports.update().where(passports.c.id == passport["id"]).values(
+                status_changed_at=changed_at,
+            )
+        )
+        existing_history = bind.execute(
+            sa.select(passport_history.c.id).where(
+                passport_history.c.passport_id == passport["id"]
+            )
+        ).first()
+        if not existing_history:
+            bind.execute(passport_history.insert().values(
+                id=str(uuid4()),
+                passport_id=passport["id"],
+                from_status=None,
+                to_status=passport["status"],
+                reason="migration backfill",
+                changed_by="system:migration",
+                changed_at=changed_at,
+            ))
+    with op.batch_alter_table("human_passports") as batch:
+        batch.alter_column(
+            "status_changed_at",
+            existing_type=sa.DateTime(timezone=True),
+            nullable=False,
+        )
     if "audit_chain_heads" not in inspector.get_table_names():
         op.create_table(
             "audit_chain_heads",
@@ -175,9 +228,7 @@ def upgrade():
     )).mappings().all()
     for row in rows:
         sequence += 1
-        created_at = row["created_at"]
-        if created_at.tzinfo is None:
-            created_at = created_at.replace(tzinfo=__import__("datetime").timezone.utc)
+        created_at = _utc(row["created_at"])
         canonical = json.dumps({
             "id": row["id"],
             "sequence": sequence,
