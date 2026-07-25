@@ -215,6 +215,23 @@ def locked_audit_head(db: Session) -> AuditChainHead | None:
     return db.get(AuditChainHead, "global", with_for_update=True)
 
 
+def locked_human_passport(db: Session, passport_id: str) -> HumanPassport | None:
+    if db.bind.dialect.name == "sqlite":
+        # SQLite ignores SELECT FOR UPDATE. Acquire its database write lock
+        # before reading so a waiter validates the latest committed status.
+        db.execute(
+            update(HumanPassport)
+            .where(HumanPassport.id == passport_id)
+            .values(status=HumanPassport.status)
+        )
+        return db.get(HumanPassport, passport_id)
+    return db.scalar(
+        select(HumanPassport)
+        .where(HumanPassport.id == passport_id)
+        .with_for_update()
+    )
+
+
 def audit(db: Session, actor: str, action: str, target_type: str, target_id: str, detail: dict | None = None):
     head = locked_audit_head(db)
     if head is None:
@@ -574,11 +591,7 @@ def change_human_passport_status(
     admin: User = Depends(require_permission("passport:manage")),
     db: Session = Depends(db_session),
 ):
-    passport = db.scalar(
-        select(HumanPassport)
-        .where(HumanPassport.id == passport_id)
-        .with_for_update()
-    )
+    passport = locked_human_passport(db, passport_id)
     if not passport:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Human Passport not found")
     allowed = {
