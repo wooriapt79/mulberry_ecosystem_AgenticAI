@@ -79,7 +79,9 @@ jobs:
           python -m pytest -q \
             tests/test_security.py::test_postgresql_failed_login_increment_is_atomic \
             tests/test_security.py::test_postgresql_bootstrap_claim_is_atomic \
-            tests/test_data_audit.py::test_postgresql_human_passport_status_transitions_are_serialized
+            tests/test_data_audit.py::test_postgresql_human_passport_status_transitions_are_serialized \
+            tests/test_data_audit.py::test_postgresql_audit_verifies_outside_utc_session_timezone \
+            tests/test_data_audit.py::test_postgresql_audit_verification_waits_for_concurrent_append
 
       - name: Verify PostgreSQL migration round trip
         run: python scripts/verify_migration_roundtrip.py
