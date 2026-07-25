@@ -173,6 +173,72 @@ def test_human_passport_status_transition_and_history():
 
 
 @pytest.mark.skipif(
+    not os.environ["DATABASE_URL"].startswith("sqlite"),
+    reason="requires the SQLite integration test environment",
+)
+def test_sqlite_human_passport_status_transitions_are_serialized():
+    run_id = uuid4().hex
+    owner_email = f"sqlite-passport-owner-{run_id}@example.org"
+    admin_email = f"sqlite-passport-admin-{run_id}@example.org"
+    with TestClient(app) as client:
+        client.post("/auth/register", json={
+            "email": owner_email,
+            "password": "correct-horse-battery",
+        })
+        owner = _login(client, owner_email, "correct-horse-battery")
+        issued = client.put("/passport/human", headers=owner, json={
+            "display_name": "SQLite Concurrent Passport Owner",
+            "domains": ["food-desert"],
+        })
+        assert issued.status_code == 200
+        client.post("/auth/register", json={
+            "email": admin_email,
+            "password": "administrator-pass",
+        })
+        with SessionLocal() as db:
+            security_admin = db.scalar(select(User).where(
+                User.email == admin_email
+            ))
+            security_admin.role = "security_admin"
+            db.commit()
+        admin = _login(client, admin_email, "administrator-pass")
+
+    def suspend_passport(request_number):
+        with TestClient(app) as client:
+            response = client.post(
+                f"/admin/passports/human/{issued.json()['id']}/status",
+                headers=admin,
+                json={
+                    "status": "suspended",
+                    "reason": f"concurrent SQLite suspension {request_number}",
+                },
+            )
+            return response.status_code
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        statuses = list(pool.map(suspend_passport, range(2)))
+    assert sorted(statuses) == [200, 409]
+
+    with SessionLocal() as db:
+        history = db.scalars(select(HumanPassportStatusHistory).where(
+            HumanPassportStatusHistory.passport_id == issued.json()["id"]
+        ).order_by(HumanPassportStatusHistory.changed_at)).all()
+        assert len(history) == 2
+        assert history[0].from_status is None
+        assert history[1].from_status == history[0].to_status == "active"
+        assert history[1].to_status == "suspended"
+        passport = db.get(HumanPassport, issued.json()["id"])
+        assert passport.status == history[-1].to_status
+        head = db.get(AuditChainHead, "global")
+        latest_event = db.scalar(
+            select(AuditEvent).order_by(AuditEvent.sequence.desc())
+        )
+        assert head.sequence == latest_event.sequence
+        assert head.event_hash == latest_event.event_hash
+        assert verify_audit_chain(db) is True
+
+
+@pytest.mark.skipif(
     not os.environ["DATABASE_URL"].startswith("postgresql"),
     reason="requires the PostgreSQL integration test environment",
 )
