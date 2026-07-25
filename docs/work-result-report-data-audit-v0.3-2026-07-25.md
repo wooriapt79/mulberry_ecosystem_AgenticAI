@@ -27,7 +27,7 @@ Human 최종 권한을 유지한다.
 | 감사 무결성 | 전역 순번, 이전 해시, SHA-256 이벤트 해시, 체인 및 chain-head 종단 검증 |
 | 감사 불변성 | PostgreSQL·SQLite UPDATE/DELETE 거부 트리거 |
 | Human Passport | 상태 전이와 사유·행위자 이력, PostgreSQL·SQLite append-only 통제 |
-| P1 안정성 보완 | migration 이미지에 Alembic 파일 포함, Passport 전이 전 PostgreSQL 행 잠금 |
+| P1 안정성 보완 | migration 이미지에 Alembic 파일 포함, Passport 전이 전 PostgreSQL 행 잠금·SQLite 쓰기 잠금 |
 | P2 안정성 보완 | 감사 timestamp UTC 정규화, PostgreSQL 행 잠금·SQLite 쓰기 잠금, 기존 Passport 생애주기 backfill |
 | CI | migration 컨테이너 실행, PostgreSQL 15 migration 왕복·전체 회귀·동시성·append-only 검증 |
 
@@ -47,10 +47,11 @@ Human 최종 권한을 유지한다.
 
 로컬 SQLite 검증을 연속 2회 실행했다.
 
-- 각 실행: `18 passed, 5 skipped`
+- 각 실행: `19 passed, 5 skipped`
 - 5개 skip: PostgreSQL 전용 동시성·시간대 검증 5건
 - SQLite 감사 이벤트·Passport 상태 이력 UPDATE/DELETE 거부: 통과
 - SQLite 동시 감사 append 순번 직렬화·chain-head 종단 일치: 통과
+- SQLite 동일 Passport 동시 상태 전이: 쓰기 잠금 후 `200/409` 직렬화·선형 이력 통과
 - 독립 DB migration `upgrade → downgrade → upgrade`: 통과
 - Python compile: 통과
 - `git diff --check`: 통과
@@ -58,7 +59,7 @@ Human 최종 권한을 유지한다.
 GitHub Actions PostgreSQL 15:
 
 - workflow: `Open Reception Security`
-- 최종 run: `30143448609`
+- 최종 run: `30147797956`
 - migration upgrade: 통과
 - Docker migration 이미지 build 및 컨테이너 `alembic upgrade head`: 통과
 - 전체 PostgreSQL suite: `22 passed`
