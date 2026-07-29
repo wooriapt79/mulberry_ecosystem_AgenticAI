@@ -1,4 +1,4 @@
-"""Verify that the configured database can downgrade to v0.2 and return to v0.3."""
+"""Verify that the configured database can downgrade to base and return to v0.4."""
 import os
 from pathlib import Path
 
@@ -29,6 +29,11 @@ command.upgrade(config, "head")
 assert {"sequence", "previous_hash", "event_hash"} <= columns("audit_events")
 assert {"status_reason", "status_changed_at"} <= columns("human_passports")
 assert "human_passport_status_history" in inspect(engine).get_table_names()
+assert {
+    "matching_recommendations",
+    "matching_candidates",
+    "matching_decisions",
+} <= set(inspect(engine).get_table_names())
 with engine.connect() as connection:
     passport_count = connection.execute(text(
         "SELECT COUNT(*) FROM human_passports"
@@ -47,4 +52,4 @@ with engine.connect() as connection:
     )).scalar_one()
 assert missing_timestamp_count == 0
 assert backfill_count == passport_count
-assert revision == "0001_v03"
+assert revision == "0002_v04"
