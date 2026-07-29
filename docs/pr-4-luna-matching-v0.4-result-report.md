@@ -4,7 +4,7 @@
 - 기준 브랜치: `main`
 - 정책 버전: `luna-matching-v0.4`
 - Domain Pack: `food-desert-v1`
-- 상태: 구현 및 로컬 검증 완료 / PR 검토 대기
+- 상태: 구현 및 로컬·GitHub Actions 검증 완료 / PR 검토 대기
 
 ## 1. 결과 요약
 
@@ -64,7 +64,10 @@ Steward AI 또는 감독 가능한 jr.Agent를 추천하도록 구현했다. 모
   - 반복 결정 `409 Conflict`
   - 결정 감사 이벤트 1건 생성
 - 기존 보안·Passport·감사 체인·migration 회귀: 통과
-- PostgreSQL 전용 테스트와 migration CI: PR 생성 후 GitHub Actions에서 확인
+- GitHub Actions run `30490087253`: 성공
+- PostgreSQL 전체 pytest: `34 passed, 2 skipped`
+- 명시적 동시성·시간대 게이트: `5 passed`
+- PostgreSQL migration v0.4 downgrade/upgrade 왕복: 통과
 
 ## 5. 유지된 안전 경계
 
@@ -87,6 +90,6 @@ Steward AI 또는 감독 가능한 jr.Agent를 추천하도록 구현했다. 모
 ## 7. 결론
 
 PR #4는 Luna의 접수·검증·추천·Human 결정 흐름을 구현하며, 외부 실행을 열지
-않는다. 로컬 SQLite 검증 기준으로 코드 리뷰 가능한 상태다. GitHub Actions의
-PostgreSQL 및 migration 검증이 성공하고 리뷰 차단 항목이 해결된 뒤 병합 여부를
+않는다. 로컬 SQLite와 GitHub Actions의 PostgreSQL·동시성·migration 검증이
+모두 성공해 코드 리뷰 가능한 상태다. 리뷰 차단 항목이 해결된 뒤 병합 여부를
 판단한다.
