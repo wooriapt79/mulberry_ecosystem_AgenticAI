@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import Literal, Mapping
+from typing import Iterable, Literal, Mapping
 
 
 RiskLevel = Literal["low", "medium", "high"]
@@ -82,3 +82,69 @@ def get_domain_pack(domain: str) -> DomainPack:
         return DOMAIN_PACKS[domain]
     except KeyError as exc:
         raise ValueError(f"Unsupported matching domain: {domain}") from exc
+
+
+RISK_ORDER = {"low": 0, "medium": 1, "high": 2}
+
+
+@dataclass(frozen=True)
+class CandidateEvaluation:
+    eligible: bool
+    score: float | None
+    evidence: Mapping[str, object]
+    exclusion_reasons: tuple[str, ...]
+
+
+def evaluate_candidate(
+    *,
+    policy: RequestPolicy,
+    request_risk: RiskLevel,
+    mandate_permissions: Iterable[str],
+    agent_id: str,
+    agent_level: str,
+    agent_domains: Iterable[str],
+    passport_permissions: Iterable[str],
+    spirit_score: float,
+    agent_status: str,
+    supervisor_active: bool,
+) -> CandidateEvaluation:
+    domains = set(agent_domains)
+    permissions = set(passport_permissions)
+    mandate = set(mandate_permissions)
+    required_permissions = set(policy.required_permissions) | mandate
+    required_competencies = set(policy.required_competencies)
+    reasons: list[str] = []
+
+    if agent_status != "active":
+        reasons.append("agent_inactive")
+    if spirit_score < 0.4:
+        reasons.append("spirit_score_below_threshold")
+    if not required_competencies.issubset(domains):
+        reasons.append("competency_evidence_missing")
+    if not required_permissions.issubset(permissions):
+        reasons.append("permission_scope_mismatch")
+    if RISK_ORDER[request_risk] > RISK_ORDER[policy.maximum_risk]:
+        reasons.append("request_risk_exceeds_policy")
+    if agent_level == "junior":
+        if not policy.junior_eligible:
+            reasons.append("junior_not_eligible")
+        if not supervisor_active:
+            reasons.append("active_supervisor_required")
+
+    evidence = MappingProxyType(
+        {
+            "agent_id": agent_id,
+            "competencies": sorted(required_competencies & domains),
+            "permissions": sorted(required_permissions & permissions),
+            "spirit_score": spirit_score,
+            "request_risk": request_risk,
+            "supervisor_active": supervisor_active,
+        }
+    )
+    if reasons:
+        return CandidateEvaluation(False, None, evidence, tuple(sorted(reasons)))
+
+    level_score = 0.6 if agent_level == "junior" else 1.0
+    risk_score = 1.0 if request_risk == "low" else (0.8 if request_risk == "medium" else 0.6)
+    score = round(0.35 + 0.20 * level_score + 0.20 * risk_score + 0.25 * spirit_score, 3)
+    return CandidateEvaluation(True, score, evidence, ())

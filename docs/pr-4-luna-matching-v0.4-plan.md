@@ -1,6 +1,6 @@
 # PR #4 작업계획 — Luna Matching v0.4
 
-- 상태: 계획 확정 / 구현 전
+- 상태: 구현 완료 / PR 검토 대기
 - 기준 브랜치: `main`
 - 작업 브랜치: `agent/luna-matching-v0.4`
 - 기준 커밋: `ebbb05d` (PR #3 병합)
@@ -207,3 +207,16 @@ Luna는 이 단계에서 업무를 직접 실행하지 않는다.
 7. 범위 제외 항목 유지 여부
 
 이 문서는 PR #4의 독립 실행계획과 검수 기준이다. 전체 프로젝트의 장기 로드맵은 기존 로드맵 문서를 기준으로 하며, 본 문서는 Luna Matching v0.4 블록의 구현과 리뷰에만 사용한다.
+
+## 11. 구현 결과
+
+- Domain Pack 및 버전 고정: 완료
+- 추천·후보·Human 결정 모델과 migration: 완료
+- Spirit Score·권한·감독자 안전 게이트: 완료
+- 결정론적 후보 평가와 항목별 근거 저장: 완료
+- Human 승인·거절·재배정·보류 상태 전이: 완료
+- 추천·결정 감사 체인 연결: 완료
+- SQLite 전체 회귀: `31 passed, 5 skipped`
+- PostgreSQL 검증: PR CI에서 확인
+
+구현 상세와 검증 근거는 `docs/pr-4-luna-matching-v0.4-result-report.md`를 기준으로 한다.
