@@ -11,7 +11,7 @@ from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, case, create_engine, select, update
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint, case, create_engine, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
@@ -112,6 +112,57 @@ class MatchRequest(Base):
     required_permissions: Mapped[list] = mapped_column(JSON, default=list)
     status: Mapped[str] = mapped_column(String, default="recommendation_only")
     approved_by: Mapped[str | None] = mapped_column(String, nullable=True)
+
+
+class MatchingRecommendation(Base):
+    __tablename__ = "matching_recommendations"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
+    request_id: Mapped[str] = mapped_column(
+        ForeignKey("matching_requests.id"), unique=True, index=True
+    )
+    domain_pack_version: Mapped[str] = mapped_column(String)
+    policy_version: Mapped[str] = mapped_column(String)
+    status: Mapped[str] = mapped_column(String, default="recommended")
+    rationale: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class MatchingCandidate(Base):
+    __tablename__ = "matching_candidates"
+    __table_args__ = (
+        UniqueConstraint(
+            "recommendation_id",
+            "agent_passport_id",
+            name="uq_matching_candidate_recommendation_agent",
+        ),
+    )
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
+    recommendation_id: Mapped[str] = mapped_column(
+        ForeignKey("matching_recommendations.id"), index=True
+    )
+    agent_passport_id: Mapped[str] = mapped_column(ForeignKey("ai_passports.id"))
+    agent_kind: Mapped[str] = mapped_column(String)
+    rank: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    eligible: Mapped[bool] = mapped_column(Boolean)
+    evidence: Mapped[dict] = mapped_column(JSON, default=dict)
+    exclusion_reasons: Mapped[list] = mapped_column(JSON, default=list)
+    supervisor_agent_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class MatchingDecision(Base):
+    __tablename__ = "matching_decisions"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
+    recommendation_id: Mapped[str] = mapped_column(
+        ForeignKey("matching_recommendations.id"), index=True
+    )
+    action: Mapped[str] = mapped_column(String)
+    from_status: Mapped[str] = mapped_column(String)
+    to_status: Mapped[str] = mapped_column(String)
+    decided_by: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    reason: Mapped[str] = mapped_column(String)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
 class AuditEvent(Base):
