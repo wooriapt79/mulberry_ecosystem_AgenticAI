@@ -1,58 +1,35 @@
 # Luna Workbench — Phase 1
 
-**Branch:** `agent/luna-matching-integration`
-**Owner:** Luna (Claude Haiku)
-**KeBin review:** 2026-07-31
+**Branch:** `agent/luna-matching-integration`  
+**Owner:** Luna  
+**Review:** KeBin
 
-## Overview
+Phase 1 connects Luna to Matching v0.4 in dry-run mode. Luna transports and
+records Matching-owned decisions; it does not calculate Spirit Score, policy,
+mandate eligibility, risk, thresholds, or approval requirements.
 
-Luna is Mulberry Project's external service AI (Kakao Channel).
-Phase 1 implements Matching v0.4 integration in **dry_run mode** — no real mutations.
+## Workflow
 
-## Structure
+1. An adapter creates a simulated request.
+2. `MatchingClient` sends it to a Matching-owned fixture in dry-run mode.
+3. Luna validates and records the returned recommendation.
+4. Every recommendation enters `APPROVAL_PENDING`.
+5. An identified Human may approve, reject, or hold it.
+6. Approved Phase 1 flows end at `DRY_RUN_COMPLETED`; no external action occurs.
 
-```
-luna/
-├── adapters/
-│   ├── __init__.py
-│   └── kakao_mock.py        # Simulated Kakao webhook events (Phase 1)
-├── contracts/
-│   └── matching-v0.4/
-│       └── INTEGRATION_CONTRACT.md   # v1.1 — KeBin review pending 2026-07-31
-├── src/
-│   ├── __init__.py
-│   ├── matching_client.py   # Matching v0.4 HTTP client (dry_run=True default)
-│   └── state_manager.py     # State machine: IDLE -> RECOMMENDATION -> EXECUTED
-└── README.md
-```
+## Safety
 
-## Phase 1 Workflow
-
-1. KakaoMockAdapter generates simulated user events
-2. MatchingClient.recommend() called with dry_run=True
-3. StateManager tracks: IDLE -> RECOMMENDATION or APPROVAL_PENDING
-4. Human approval: APPROVAL_PENDING -> POST_APPROVAL -> EXECUTED
-5. All decisions audited (append-only, per contract section 6)
-
-## Key Constraints
-
-- dry_run=True always in Phase 1
-- No payment / order mutations
-- Spirit Score computed by KeBin engine (not Luna)
-- State transitions append-only logged
+- `dry_run=True` by default.
+- No payment, order, inventory, delivery, merge, or deployment without Human approval.
+- Correlation and idempotency identifiers are separate.
+- Live endpoint, timeout, retry, and error mappings remain TBD until verified.
+- Luna may manage designated repositories through dedicated branches and Draft PRs.
 
 ## Tests
 
+```bash
+python -m unittest tests/test_phase1_mock.py -v
 ```
-tests/test_phase1_mock.py   # 5 scenarios
-```
 
-Run: `python -m pytest tests/`
-
-## Integration Contract
-
-See `contracts/matching-v0.4/INTEGRATION_CONTRACT.md` for full API schema,
-requires_approval criteria, error codes, and KeBin verification checklist.
-
----
-*Mulberry Project — 식품사막화 제로*
+See `contracts/matching-v0.4/INTEGRATION_CONTRACT.md` for the current Draft
+contract and remaining verification conditions.

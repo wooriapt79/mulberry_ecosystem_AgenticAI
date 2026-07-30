@@ -1,123 +1,79 @@
-"""Phase 1 Mock Testing - Matching v0.4 Integration Tests"""
+"""Phase 1 tests: Luna consumes policy output and enforces Human control."""
 
 import unittest
-import json
-import uuid
-from datetime import datetime
+
+from luna.src.matching_client import MatchingClient
+from luna.src.state_manager import MatchingState, StateManager
 
 
-class MockMatchingClient:
-      """Mock Matching v0.4 API Client for Phase 1 Testing"""
-
-    def __init__(self, dry_run=True):
-              self.dry_run = dry_run
-              self.request_cache = {}
-              self.audit_log = []
-
-    def call_matching_api(self, request_id, correlation_id, user_profile, policy_version):
-              """Call Matching API with correlation_id propagation"""
-              if correlation_id in self.request_cache:
-                            return self.request_cache[correlation_id]
-
-              request = {
-                  "request_id": request_id,
-                  "correlation_id": correlation_id,
-                  "idempotency_key": correlation_id,
-                  "user_profile": user_profile,
-                  "policy_version": policy_version
-              }
-
-        response = self._process_matching_request(request)
-        self.request_cache[correlation_id] = response
-        self.audit_log.append({
-                      "timestamp": datetime.now().isoformat(),
-                      "event": "api_call",
-                      "correlation_id": correlation_id,
-                      "user_id": user_profile.get("user_id")
-        })
-        return response
-
-    def _process_matching_request(self, request):
-              """Mock Matching API processing logic"""
-              user_profile = request["user_profile"]
-              user_id = user_profile.get("user_id")
-
-        if user_id and user_id.startswith("excluded-"):
-                      return {
-                                        "error_code": 403,
-                                        "error_type": "MANDATE",
-                                        "message": "User excluded",
-                                        "correlation_id": request["correlation_id"]
-                      }
-
-        if not user_profile.get("purchase_amount") or user_profile.get("purchase_amount") < 30000:
-                      return {
-                                        "decision_id": f"dec-{uuid.uuid4()}",
-                                        "correlation_id": request["correlation_id"],
-                                        "state": "RECOMMENDATION",
-                                        "recommendation": {
-                                                              "policy_id": "policy-standard-v0.4",
-                                                              "requires_approval": False
-                                        },
-                                        "timestamp": datetime.now().isoformat()
-                      }
-
-        return {
-                      "decision_id": f"dec-{uuid.uuid4()}",
-                      "correlation_id": request["correlation_id"],
-                      "state": "APPROVAL_PENDING",
-                      "recommendation": {
-                                        "policy_id": "policy-high-value-v0.4",
-                                        "requires_approval": True
-                      },
-                      "timestamp": datetime.now().isoformat()
-        }
+def matching_fixture(payload: dict) -> dict:
+    """Approved fixture representing output owned by the Matching service."""
+    return {
+        "decision_id": "dec-fixture-001",
+        "correlation_id": payload["correlation_id"],
+        "state": "APPROVAL_PENDING",
+        "recommendation": {
+            "policy_id": "matching-fixture-v0.4",
+            "reason": "Fixture supplied by Matching boundary",
+            "requires_approval": True,
+            "approval_gate": "HUMAN_REVIEW",
+        },
+        "timestamp": "2026-07-31T00:00:00+00:00",
+    }
 
 
 class Phase1MockTests(unittest.TestCase):
-      """Phase 1 Mock Testing Suite"""
-
     def setUp(self):
-              self.client = MockMatchingClient(dry_run=True)
+        self.client = MatchingClient(dry_run=True, mock_provider=matching_fixture)
 
-    def test_scenario_1_normal_recommendation(self):
-              """정상 추천 -> RECOMMENDATION"""
-              response = self.client.call_matching_api(
-                  request_id=f"req-{uuid.uuid4()}",
-                  correlation_id=str(uuid.uuid4()),
-                  user_profile={"user_id": "user-123", "steward_id": "steward-456"},
-                  policy_version="v0.4"
-              )
-              self.assertEqual(response["state"], "RECOMMENDATION")
-              self.assertFalse(response["recommendation"]["requires_approval"])
+    def test_luna_consumes_matching_fixture(self):
+        response = self.client.recommend(
+            user_id="user-123",
+            steward_id="steward-456",
+            mandate_status="ACTIVE",
+            correlation_id="corr-001",
+            idempotency_key="idem-001",
+        )
+        self.assertEqual(response["state"], "APPROVAL_PENDING")
+        self.assertTrue(response["recommendation"]["requires_approval"])
+        self.assertNotIn("spirit_score", response["recommendation"])
 
-    def test_scenario_2_policy_exclusion(self):
-              """정책 제외 -> 403 MANDATE"""
-              response = self.client.call_matching_api(
-                  request_id=f"req-{uuid.uuid4()}",
-                  correlation_id=str(uuid.uuid4()),
-                  user_profile={"user_id": "excluded-user-789", "steward_id": "steward-456"},
-                  policy_version="v0.4"
-              )
-              self.assertEqual(response["error_code"], 403)
+    def test_correlation_and_idempotency_are_independent(self):
+        self.client.recommend(
+            "user-123", "steward-456", "ACTIVE", "corr-002", "idem-002"
+        )
+        event = self.client.audit_log[-1]
+        self.assertEqual(event["correlation_id"], "corr-002")
+        self.assertEqual(event["idempotency_key"], "idem-002")
 
-    def test_scenario_3_idempotency(self):
-              """중복 요청 -> Idempotent"""
-              correlation_id = str(uuid.uuid4())
-              response_1 = self.client.call_matching_api(
-                  request_id=f"req-{uuid.uuid4()}",
-                  correlation_id=correlation_id,
-                  user_profile={"user_id": "user-123"},
-                  policy_version="v0.4"
-              )
-              response_2 = self.client.call_matching_api(
-                  request_id=f"req-{uuid.uuid4()}",
-                  correlation_id=correlation_id,
-                  user_profile={"user_id": "user-123"},
-                  policy_version="v0.4"
-              )
-              self.assertEqual(response_1["decision_id"], response_2["decision_id"])
+    def test_idempotency_uses_idempotency_key(self):
+        first = self.client.recommend(
+            "user-123", "steward-456", "ACTIVE", "corr-003", "idem-shared"
+        )
+        second = self.client.recommend(
+            "user-123", "steward-456", "ACTIVE", "corr-004", "idem-shared"
+        )
+        self.assertEqual(first["decision_id"], second["decision_id"])
+
+    def test_dry_run_rejects_luna_owned_policy_logic(self):
+        with self.assertRaises(RuntimeError):
+            MatchingClient(dry_run=True).recommend(
+                "user-123", "steward-456", "ACTIVE"
+            )
+
+    def test_human_approval_is_mandatory(self):
+        manager = StateManager("corr-state")
+        manager.transition(MatchingState.RECOMMENDED)
+        manager.transition(MatchingState.APPROVAL_PENDING)
+        with self.assertRaises(PermissionError):
+            manager.transition(MatchingState.HUMAN_APPROVED, actor="luna")
+        manager.transition(MatchingState.HUMAN_APPROVED, actor="human:re.eul")
+        manager.transition(MatchingState.DRY_RUN_COMPLETED)
+        self.assertTrue(manager.is_terminal())
+
+    def test_no_executed_state_exists(self):
+        self.assertNotIn("EXECUTED", MatchingState.__members__)
 
 
 if __name__ == "__main__":
-      unittest.main(verbosity=2)
+    unittest.main(verbosity=2)
