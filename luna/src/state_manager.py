@@ -1,5 +1,11 @@
-"""Human-gated state transitions for Luna Matching recommendations."""
+"""Human-gated state transitions for Luna Matching recommendations.
 
+Codex fix applied (2026-07-31 TRANG Manager):
+  - history property now returns deep copies of transition records so
+    external code cannot mutate the manager's internal audit history.
+"""
+
+import copy
 import logging
 from datetime import datetime, timezone
 from enum import Enum
@@ -89,7 +95,13 @@ class StateManager:
 
     @property
     def history(self) -> list:
-        return list(self._history)
+        """Return deep copies of transition records.
+
+        Callers cannot mutate the manager's internal audit history through
+        the returned objects (actor, reason, state fields are immutable
+        from the caller's perspective).
+        """
+        return copy.deepcopy(self._history)
 
     def is_terminal(self) -> bool:
         return self._state in (

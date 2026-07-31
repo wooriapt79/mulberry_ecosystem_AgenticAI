@@ -2,8 +2,15 @@
 
 Luna transports Matching decisions; it does not calculate policy, Spirit
 Score, mandate eligibility, or approval requirements.
+
+Codex fixes applied (2026-07-31 TRANG Manager):
+  - recommend(): idempotency key now bound to request fingerprint;
+    conflicting reuse (different user/steward/mandate) raises ValueError.
+  - _validate_response(): full envelope required; state must be
+    'APPROVAL_PENDING' — partial or unsafe states are rejected.
 """
 
+import hashlib
 import json
 import logging
 import urllib.request
@@ -12,6 +19,22 @@ from datetime import datetime, timezone
 from typing import Callable, Optional
 
 logger = logging.getLogger("luna.matching_client")
+
+
+def _request_fingerprint(
+    user_id: str, steward_id: str, mandate_status: str, context: Optional[dict]
+) -> str:
+    """Canonical SHA-256 fingerprint for an idempotency key binding."""
+    payload = json.dumps(
+        {
+            "user_id": user_id,
+            "steward_id": steward_id,
+            "mandate_status": mandate_status,
+            "context": context or {},
+        },
+        sort_keys=True,
+    )
+    return hashlib.sha256(payload.encode()).hexdigest()
 
 
 class MatchingClient:
@@ -34,7 +57,8 @@ class MatchingClient:
         self.timeout_seconds = timeout_seconds
         self.max_retries = max_retries
         self.mock_provider = mock_provider
-        self._request_cache: dict[str, dict] = {}
+        # Maps idempotency_key -> (fingerprint, response)
+        self._request_cache: dict[str, tuple[str, dict]] = {}
         self._audit_log: list[dict] = []
 
     def recommend(
@@ -48,10 +72,18 @@ class MatchingClient:
     ) -> dict:
         correlation_id = correlation_id or f"corr-{uuid.uuid4()}"
         idempotency_key = idempotency_key or f"idem-{uuid.uuid4()}"
+        fingerprint = _request_fingerprint(user_id, steward_id, mandate_status, context)
 
         if idempotency_key in self._request_cache:
+            cached_fp, cached_response = self._request_cache[idempotency_key]
+            if cached_fp != fingerprint:
+                raise ValueError(
+                    f"Idempotency key '{idempotency_key}' was already used with a "
+                    "different request payload. Reuse is only permitted for identical "
+                    "requests (same user_id, steward_id, mandate_status, and context)."
+                )
             self._audit("idempotent_hit", correlation_id, idempotency_key, user_id)
-            return self._request_cache[idempotency_key]
+            return cached_response
 
         payload = {
             "request_id": f"req-{uuid.uuid4()}",
@@ -77,7 +109,7 @@ class MatchingClient:
             response = self._http_post(payload)
 
         self._validate_response(response, correlation_id)
-        self._request_cache[idempotency_key] = response
+        self._request_cache[idempotency_key] = (fingerprint, response)
         self._audit(
             "matching_response",
             correlation_id,
@@ -122,13 +154,27 @@ class MatchingClient:
     def _validate_response(response: dict, correlation_id: str) -> None:
         if response.get("correlation_id") != correlation_id:
             raise ValueError("Matching response correlation_id mismatch")
-        if "recommendation" in response:
-            recommendation = response["recommendation"]
-            required = {"policy_id", "reason", "requires_approval", "approval_gate"}
-            if not required.issubset(recommendation):
-                raise ValueError("Matching response is missing policy-owned fields")
-            if recommendation["requires_approval"] is not True:
-                raise ValueError("Phase 1 requires Human approval for every recommendation")
+
+        # Full envelope required — partial responses are rejected.
+        recommendation = response.get("recommendation")
+        if recommendation is None:
+            raise ValueError(
+                "Matching response missing 'recommendation' envelope. "
+                "Every response must include the full approval-pending structure."
+            )
+        required = {"policy_id", "reason", "requires_approval", "approval_gate"}
+        if not required.issubset(recommendation):
+            raise ValueError("Matching response is missing policy-owned fields")
+        if recommendation["requires_approval"] is not True:
+            raise ValueError("Phase 1 requires Human approval for every recommendation")
+
+        # Enforce APPROVAL_PENDING — reject unsafe states (e.g. DRY_RUN_COMPLETED).
+        state = response.get("state")
+        if state != "APPROVAL_PENDING":
+            raise ValueError(
+                f"Matching response state must be 'APPROVAL_PENDING', got '{state}'. "
+                "Responses outside the approval-pending envelope are rejected."
+            )
 
     def _audit(
         self,

@@ -5,7 +5,13 @@ GitHub API wrapper for Luna's autonomous workbench operations.
 Usage:
     client = GitHubClient()
     client.create_issue("wooriapt79/mulberry-research-lab", "title", "body")
-    client.upload_file("wooriapt79/mulberry_ecosystem_AgenticAI", "luna/src/foo.py", code, "feat: add foo")
+    client.upload_file("wooriapt79/mulberry_ecosystem_AgenticAI", "luna/src/foo.py", code,
+                       "feat: add foo", branch="luna/my-feature")
+
+Codex fixes applied (2026-07-31 TRANG Manager):
+  - create_pr(): default draft=True (prevents accidental ready-for-review PRs)
+  - upload_file(): 'branch' is now required; passing 'main' raises ValueError
+  - requests declared in luna/requirements.txt
 """
 
 import base64
@@ -82,20 +88,24 @@ class GitHubClient:
     # ──────────────────────────────────────────────
 
     def upload_file(self, repo: str, path: str, content: str,
-                    message: str, branch: str = "main") -> dict:
+                    message: str, branch: str) -> dict:
         """
         Create or update a file in the repo.
         Automatically fetches SHA if file already exists (upsert).
+
+        IMPORTANT: 'branch' is required and must NOT be 'main'.
+        Committing directly to main bypasses the Draft-PR review workflow.
         """
+        if branch == "main":
+            raise ValueError(
+                "Direct commits to 'main' are not allowed. "
+                "Use a feature branch and open a Draft PR instead."
+            )
         encoded = base64.b64encode(content.encode("utf-8")).decode("ascii")
-
-        # Check if file exists → get SHA for update
         sha = self._get_file_sha(repo, path, branch)
-
         body = {"message": message, "content": encoded, "branch": branch}
         if sha:
             body["sha"] = sha
-
         resp = requests.put(
             f"{self.BASE}/repos/{repo}/contents/{path}",
             headers=self._headers,
@@ -133,16 +143,24 @@ class GitHubClient:
     # ──────────────────────────────────────────────
 
     def create_pr(self, repo: str, title: str, body: str,
-                  head: str, base: str = "main") -> dict:
-        """Create a pull request. head = branch name."""
+                  head: str, base: str = "main", draft: bool = True) -> dict:
+        """
+        Create a pull request. head = branch name.
+
+        draft=True by default — all Luna-generated PRs start as Draft
+        to enforce human review before merge.
+        Pass draft=False only for explicitly approved ready-for-review flows.
+        """
         resp = requests.post(
             f"{self.BASE}/repos/{repo}/pulls",
             headers=self._headers,
-            json={"title": title, "body": body, "head": head, "base": base},
+            json={"title": title, "body": body, "head": head, "base": base, "draft": draft},
         )
         self._raise_for_status(resp)
         data = resp.json()
-        logger.info(f"[GITHUB] PR #{data['number']} created: {data['html_url']}")
+        logger.info(
+            f"[GITHUB] PR #{data['number']} created (draft={draft}): {data['html_url']}"
+        )
         return data
 
     def list_open_prs(self, repo: str) -> list:
