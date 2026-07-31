@@ -1,0 +1,516 @@
+openapi: 3.0.0
+info:
+  title: Luna Evidence-Based Steward Matching API v0.4
+  version: 0.4.0
+  description: |
+    Evidence-based steward matching API for Luna Open Reception.
+
+    This API provides recommendation-only matching results based on:
+    - User profile (skills, trust level, location)
+    - Request context (request type, domain, risk level)
+    - Domain-specific policies (Food Desert v1)
+    - Validated capabilities, permissions, and supervision requirements
+
+    **Important:** This API returns RECOMMENDATIONS only. All matches require Human approval before execution.
+
+  contact:
+    name: Mulberry Project
+    url: https://github.com/wooriapt79/mulberry_ecosystem_AgenticAI
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: https://api.mulberry.local
+    description: Production server (TBD - KeBin decision required)
+
+paths:
+  /matching/recommendations:
+    post:
+      summary: Get steward matching recommendations
+      description: |
+        Request evidence-based steward recommendations for a specific request.
+
+        Returns recommendation_only status by default.
+        Returns human_approval_required=true if high-risk factors detected.
+
+        Safety gates applied:
+        - Spirit Score >= 0.4
+        - Required permissions validated
+        - Risk level within policy bounds
+        - Supervision requirements for jr.Agents verified
+
+      operationId: getMatchingRecommendations
+      tags:
+        - Matching
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchingRequest'
+            examples:
+              food_desert_example:
+                summary: Food Desert Request
+                value:
+                  request_type: food_desert
+                  user_id: user_12345
+                  context:
+                    location: "40.7128,-74.0060"
+                    request_risk_level: medium
+                    timestamp: "2026-07-31T09:00:00Z"
+                  policy_version: luna-matching-v0.4
+                  correlation_id: req_12345_user_12345_food_desert
+                  request_fingerprint: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b"
+      responses:
+        '200':
+          description: Matching recommendations retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchingResponse'
+              examples:
+                success_example:
+                  summary: Successful recommendation
+                  value:
+                    recommendation_id: rec_67890
+                    request_id: req_12345_user_12345_food_desert
+                    policy_version: luna-matching-v0.4
+                    status: recommendation_only
+                    human_approval_required: false
+                    matched_stewards:
+                      - steward_id: steward_001
+                        name: Community Steward AI
+                        capability_score: 0.92
+                        spirit_score: 0.87
+                        permissions_validated: true
+                        supervision_level: autonomous
+                        confidence_score: 0.89
+                        reasoning:
+                          - "Validated Food Desert domain expertise (0.92)"
+                          - "Active trust relationship with user (0.87)"
+                          - "Meets all required permissions"
+                          - "No supervision required"
+                      - steward_id: jr_agent_042
+                        name: Junior Community Agent
+                        capability_score: 0.78
+                        spirit_score: 0.82
+                        permissions_validated: true
+                        supervision_level: supervised
+                        confidence_score: 0.75
+                        reasoning:
+                          - "Good capability match (0.78)"
+                          - "Active supervisor assigned"
+                          - "All permissions within scope"
+                    policy_reasoning: "Food Desert policy v1.0 applied"
+                    created_at: "2026-07-31T09:00:01Z"
+        '400':
+          description: Bad Request - Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_request:
+                  summary: Missing required fields
+                  value:
+                    error_code: 400_INVALID_REQUEST
+                    message: "Missing required field: request_type"
+                    details:
+                      field: request_type
+                      expected: string (enum)
+        '403':
+          description: Forbidden - User lacks required permissions or mandate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                mandate_error:
+                  summary: User Mandate validation failed
+                  value:
+                    error_code: 403_MANDATE_REQUIRED
+                    message: "User does not have required Mandate for this request type"
+                    details:
+                      required_mandate: food_desert_access
+                      user_mandates: []
+        '409':
+          description: Conflict - Idempotency key fingerprint mismatch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                fingerprint_mismatch:
+                  summary: Request fingerprint does not match cached recommendation
+                  value:
+                    error_code: 409_FINGERPRINT_MISMATCH
+                    message: "Correlation ID used with different request context"
+                    details:
+                      provided_fingerprint: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b"
+                      cached_fingerprint: "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c"
+                      recommendation_id: "rec_67890"
+                      action: "Reject and retry with new correlation_id"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Service Unavailable - Matching engine or policy service down
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/matching/recommendations/{recommendation_id}/decision:
+    post:
+      summary: Record Human decision on a recommendation
+      description: |
+        Record Human approval/rejection/reassignment for a steward recommendation.
+
+        Actions:
+        - approve: Accept recommendation and prepare for execution
+        - reject: Reject recommendation
+        - reassign: Request different stewards
+        - hold: Pause decision (awaiting more information)
+
+        Permission: matching:decide (Human administrator only)
+
+      operationId: recordMatchingDecision
+      tags:
+        - Admin
+      parameters:
+        - name: recommendation_id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "rec_67890"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionRequest'
+            examples:
+              approve_example:
+                summary: Approve recommendation
+                value:
+                  action: approve
+                  selected_steward_id: steward_001
+                  notes: "User confirmed steward selection"
+                  human_id: admin_user_123
+      responses:
+        '200':
+          description: Decision recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecisionResponse'
+              examples:
+                approve_response:
+                  summary: Approval recorded
+                  value:
+                    recommendation_id: rec_67890
+                    action: approve
+                    status: approved
+                    selected_steward_id: steward_001
+                    execution_ready: true
+                    decision_timestamp: "2026-07-31T09:05:00Z"
+                    audit_id: audit_12345
+        '409':
+          description: Conflict - Duplicate decision on same recommendation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                conflict_example:
+                  summary: Duplicate decision attempt
+                  value:
+                    error_code: 409_DUPLICATE_DECISION
+                    message: "Decision already recorded for this recommendation"
+                    details:
+                      previous_decision: approve
+                      previous_timestamp: "2026-07-31T09:05:00Z"
+
+components:
+  schemas:
+    MatchingRequest:
+      type: object
+      required:
+        - request_type
+        - user_id
+        - context
+        - policy_version
+        - correlation_id
+        - request_fingerprint
+      properties:
+        request_type:
+          type: string
+          enum:
+            - food_desert
+            - community_support
+            - emergency_assistance
+          description: Type of request (Domain Pack specific)
+        user_id:
+          type: string
+          description: Unique user identifier
+        context:
+          type: object
+          required:
+            - location
+            - request_risk_level
+            - timestamp
+          properties:
+            location:
+              type: string
+              description: "Geographic location (lat,lon format)"
+              example: "40.7128,-74.0060"
+            request_risk_level:
+              type: string
+              enum:
+                - low
+                - medium
+                - high
+              description: Risk level of the request
+            timestamp:
+              type: string
+              format: date-time
+              description: Request creation timestamp
+            additional_context:
+              type: object
+              description: Domain-specific context data
+        policy_version:
+          type: string
+          description: Policy version to apply
+          example: "luna-matching-v0.4"
+        correlation_id:
+          type: string
+          description: Correlation ID for audit trail (format: req_{request_id}_{user_id}_{resource})
+          example: "req_12345_user_12345_food_desert"
+        request_fingerprint:
+          type: string
+          description: |
+            SHA256 hash binding idempotency key to this specific request.
+            Computed as: SHA256(concat(user_id, request_type, location, risk_level, timestamp))
+            Prevents cache hits when idempotency key is reused with different context.
+          example: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b"
+
+    MatchingResponse:
+      type: object
+      required:
+        - recommendation_id
+        - request_id
+        - policy_version
+        - status
+        - human_approval_required
+        - matched_stewards
+      properties:
+        recommendation_id:
+          type: string
+          description: Unique recommendation ID
+        request_id:
+          type: string
+          description: Original request ID
+        policy_version:
+          type: string
+          description: Policy version applied
+        status:
+          type: string
+          enum:
+            - recommendation_only
+            - approval_pending
+          description: |
+            Recommendation status.
+            - recommendation_only: Low-risk request with safe steward matches (no human approval required)
+            - approval_pending: High-risk request requiring explicit human approval before execution
+
+            Policy Rule: If human_approval_required=true, status MUST be approval_pending.
+            Response validation MUST enforce this state envelope.
+        human_approval_required:
+          type: boolean
+          description: Whether Human approval is required before execution
+        matched_stewards:
+          type: array
+          items:
+            $ref: '#/components/schemas/StewardRecommendation'
+          description: List of recommended stewards (ranked by confidence)
+        policy_reasoning:
+          type: string
+          description: Explanation of policy applied
+        created_at:
+          type: string
+          format: date-time
+          description: Recommendation creation timestamp
+
+    StewardRecommendation:
+      type: object
+      required:
+        - steward_id
+        - capability_score
+        - spirit_score
+        - permissions_validated
+        - confidence_score
+      properties:
+        steward_id:
+          type: string
+          description: Unique steward identifier
+        name:
+          type: string
+          description: Steward display name
+        capability_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Evidence-based capability score
+        spirit_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Trust/spirit score (minimum 0.4 required)
+        permissions_validated:
+          type: boolean
+          description: Whether required permissions are validated
+        supervision_level:
+          type: string
+          enum:
+            - autonomous
+            - supervised
+            - restricted
+          description: Supervision level for jr.Agents
+        confidence_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Overall confidence in this recommendation
+        reasoning:
+          type: array
+          items:
+            type: string
+          description: Evidence-based reasoning for recommendation
+
+    DecisionRequest:
+      type: object
+      required:
+        - action
+        - human_id
+      properties:
+        action:
+          type: string
+          enum:
+            - approve
+            - reject
+            - reassign
+            - hold
+          description: Decision action
+        selected_steward_id:
+          type: string
+          description: Steward ID selected (required for approve action)
+        notes:
+          type: string
+          description: Human notes on decision
+        human_id:
+          type: string
+          description: Human administrator ID (requires matching:decide permission)
+
+    DecisionResponse:
+      type: object
+      required:
+        - recommendation_id
+        - action
+        - status
+        - decision_timestamp
+      properties:
+        recommendation_id:
+          type: string
+          description: Recommendation ID
+        action:
+          type: string
+          description: Recorded action
+        status:
+          type: string
+          enum:
+            - approved
+            - rejected
+            - pending_reassignment
+            - on_hold
+          description: Decision status
+        selected_steward_id:
+          type: string
+          description: Selected steward (if approved)
+        execution_ready:
+          type: boolean
+          description: Whether recommendation is ready for execution
+        decision_timestamp:
+          type: string
+          format: date-time
+          description: Decision recording timestamp
+        audit_id:
+          type: string
+          description: Audit log reference ID
+
+    ErrorResponse:
+      type: object
+      required:
+        - error_code
+        - message
+      properties:
+        error_code:
+          type: string
+          description: Error classification code
+          examples:
+            - "400_INVALID_REQUEST"
+            - "403_MANDATE_REQUIRED"
+            - "409_DUPLICATE_DECISION"
+            - "500_INTERNAL_ERROR"
+            - "503_SERVICE_UNAVAILABLE"
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error details (varies by error type)
+
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer token for API authentication
+
+security:
+  - bearer: []
+
+tags:
+  - name: Matching
+    description: Steward matching recommendations
+  - name: Admin
+    description: Administrative decision recording
+
+info:
+  x-note: |
+    **ChatGPT-Codex Review Feedback (Resolved - PR #7 v2):**
+    ✅ [RESOLVED] Bind each idempotency key to its original request
+       - Added request_fingerprint field (SHA256 hash)
+       - Added 409_FINGERPRINT_MISMATCH error response
+       - Prevents cache hits across different user contexts
+
+    ✅ [RESOLVED] Reject responses outside the approval-pending envelope
+       - Clarified status enum (recommendation_only vs approval_pending)
+       - Added policy rule: human_approval_required=true MUST have status=approval_pending
+       - Response validation must enforce this constraint
+
+    **TBD (KeBin decision required):**
+    - HTTP endpoint base URL
+    - Timeout SLA
+    - Retry policy details
+    - Rate limiting parameters
+    - Implementation validation: fingerprint computation in matching_client.py
+    - Audit logging: idempotent_hit events must include request_fingerprint comparison
