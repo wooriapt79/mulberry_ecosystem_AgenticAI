@@ -117,7 +117,7 @@ def build_lexicon() -> dict[str, Any]:
         "source_domain_pack": SOURCE_DOMAIN_PACK_VERSION,
         "source_policy_version": SOURCE_POLICY_VERSION,
         "generator": "build_lexicon_seed.py",
-        "notes": "Domain Pack-derived seed. surface_forms remain empty until field verification.",
+        "notes": ("Domain Pack 에서 자동 생성된 시드입니다. "\n                  "surface_forms 는 현장 확인 후에만 채웁니다. "\n                  "verified=false 인 항목은 실제 발화로 확인되지 않았습니다."),
         "statistics": {"total": len(entries), "verified": 0, "unverified": len(entries),
                        "with_surface_forms": 0},
         "entries": [asdict(entry) for entry in entries]}
