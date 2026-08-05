@@ -2,7 +2,7 @@
 
 AI Inje Tokenizer 의 지역 어휘 사전. Luna Open Reception 의 Domain Pack 에서 파생된다.
 
-- 설계 문서: [`docs/luna-tokenizer-integration-v0.1.md`](../docs/luna-tokenizer-integration-v0.1.md)
+- 설계 문서: [`docs/luna-tokenizer-integration-v0.2.md`](../docs/luna-tokenizer-integration-v0.1.md)
 - 원본 정책: [`open-reception/app/matching_policy.py`](../open-reception/app/matching_policy.py)
 
 ---
@@ -11,13 +11,18 @@ AI Inje Tokenizer 의 지역 어휘 사전. Luna Open Reception 의 Domain Pack 
 
 토크나이저의 L4(도메인 어휘) 레이어를 **추측이 아니라 거버넌스 모델에서** 만든다.
 Luna Domain Pack (food-desert-v1)
-│ 거버넌스 승인을 거친 도메인 개념 체계
-▼
+|
+ 거버넌스 승인을 거친 도메인 개념 체계
+v
+
 build_lexicon_seed.py
-│ request_type / competency / permission 추출
-▼
+|
+ request_type / competency / permission 구조 검증 및 추출
+v
+
 domain/food-desert.json
-│ surface_forms 는 비어 있음 (verified: false)
+|
+ surface_forms 는 비어 있음 (verified: false)
 ▼
 현장 검증 후 surface_forms 채움
 
@@ -125,7 +130,7 @@ inje-lexicon/
 
 ## 다음 단계
 
-현재는 연결 설계 문서의 **A-1, A-2** 까지 구현되어 있다.
+현재는 연결 설계 문서의 **A-1, A-2**까지 구현되어 있다. 정책 동기화는 문자열 존재 여부가 아니라 전체 구조와 값을 비교한다.
 
 | 단계 | 내용 | 상태 |
 |---|---|---|
