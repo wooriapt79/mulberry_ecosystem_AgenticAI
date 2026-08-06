@@ -1,0 +1,106 @@
+{
+  "lexicon_version": "inje-food-desert-v0.1",
+  "generated_at": "2026-08-03T04:28:17.899445+00:00",
+  "source_domain_pack": "food-desert-v1",
+  "source_policy_version": "luna-matching-v0.4",
+  "generator": "build_lexicon_seed.py",
+  "notes": "Domain Pack 에서 자동 생성된 시드입니다. surface_forms 는 현장 확인 후에만 채웁니다. verified=false 인 항목은 실제 발화로 확인되지 않았습니다.",
+  "statistics": {
+    "total": 9,
+    "verified": 0,
+    "unverified": 9,
+    "with_surface_forms": 0
+  },
+  "entries": [
+    {
+      "canonical": "draft",
+      "canonical_ko": "초안 작성",
+      "surface_forms": [],
+      "layer": "L4",
+      "domain": "food-desert",
+      "entry_type": "permission",
+      "evidence": "domain_pack",
+      "verified": false
+    },
+    {
+      "canonical": "food-desert",
+      "canonical_ko": "식품사막",
+      "surface_forms": [],
+      "layer": "L4",
+      "domain": "food-desert",
+      "entry_type": "competency",
+      "evidence": "domain_pack",
+      "verified": false
+    },
+    {
+      "canonical": "food_access_research",
+      "canonical_ko": "식품 접근성 조사",
+      "surface_forms": [],
+      "layer": "L4",
+      "domain": "food-desert",
+      "entry_type": "request_type",
+      "evidence": "domain_pack",
+      "verified": false
+    },
+    {
+      "canonical": "joint-purchase",
+      "canonical_ko": "공동구매",
+      "surface_forms": [],
+      "layer": "L4",
+      "domain": "food-desert",
+      "entry_type": "competency",
+      "evidence": "domain_pack",
+      "verified": false
+    },
+    {
+      "canonical": "joint_purchase_draft",
+      "canonical_ko": "공동구매 초안",
+      "surface_forms": [],
+      "layer": "L4",
+      "domain": "food-desert",
+      "entry_type": "request_type",
+      "evidence": "domain_pack",
+      "verified": false
+    },
+    {
+      "canonical": "membership-guidance",
+      "canonical_ko": "가입 안내",
+      "surface_forms": [],
+      "layer": "L4",
+      "domain": "food-desert",
+      "entry_type": "competency",
+      "evidence": "domain_pack",
+      "verified": false
+    },
+    {
+      "canonical": "membership_guidance",
+      "canonical_ko": "가입 안내",
+      "surface_forms": [],
+      "layer": "L4",
+      "domain": "food-desert",
+      "entry_type": "request_type",
+      "evidence": "domain_pack",
+      "verified": false
+    },
+    {
+      "canonical": "recommend",
+      "canonical_ko": "추천",
+      "surface_forms": [],
+      "layer": "L4",
+      "domain": "food-desert",
+      "entry_type": "permission",
+      "evidence": "domain_pack",
+      "verified": false
+    },
+    {
+      "canonical": "research",
+      "canonical_ko": "조사",
+      "surface_forms": [],
+      "layer": "L4",
+      "domain": "food-desert",
+      "entry_type": "competency",
+      "evidence": "domain_pack",
+      "verified": false
+    }
+  ]
+}
