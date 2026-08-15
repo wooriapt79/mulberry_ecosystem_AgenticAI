@@ -32,6 +32,19 @@ uvicorn app.main:app --host 127.0.0.1 --port 8080 --no-access-log
 pytest -q
 ```
 
+## 자동 검증
+
+`Special Reception Phase A` GitHub Actions는 다음을 필수 확인합니다.
+
+- 규칙·API·격리 경계 테스트
+- Python 컴파일과 브라우저 JavaScript 문법
+- Docker 이미지 빌드
+- 읽기 전용·capability 제거 컨테이너의 health/catalog
+- DB·외부 AI·외부 HTTP 클라이언트 비연결
+- 브라우저 영구 저장소 미사용과 최소 세션 토큰
+
+배포 검토는 [사전 체크리스트](../docs/special-reception-predeployment-checklist.md)를 따릅니다.
+
 ## 운영 전 Human 승인 체크
 
 1. KODA: 컨테이너·메모리·health check 검토
