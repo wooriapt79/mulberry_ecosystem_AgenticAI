@@ -39,3 +39,20 @@ For the complete stack, copy `.env.example` to `.env`, replace every placeholder
 docker compose config
 docker compose up --build
 ```
+
+## Reception Core v0.1
+
+Issue [#19](https://github.com/wooriapt79/mulberry_ecosystem_AgenticAI/issues/19) tracks the channel-neutral Reception Core work that follows Matching v0.4.
+
+The first bundle adds deterministic domain contracts for:
+
+- Case states and allowed transitions
+- Human approval before assignment or work starts
+- HMAC-based pseudonymous Visitor identity with `key_version`
+- separation of Passport users from anonymous visitors
+- rejection of raw channel identity, raw conversation, ShopMate context, and inferred sensitive data
+- identity-free correlation IDs for future Case/Matching/approval/audit linkage
+
+See [Reception Core v0.1 first bundle](../docs/reception-core-v0.1-first-bundle.md).
+
+The service remains `dry_run` and `recommendation_only`. Kakao webhooks, Railway deployment, payments, contracts, inventory, delivery, and external messages are not enabled.
