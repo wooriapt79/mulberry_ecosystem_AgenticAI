@@ -1,6 +1,6 @@
 import pytest
 
-from reception_core import (
+from app.reception_core import (
     CaseState,
     ReceptionContractError,
     ReceptionRequest,
