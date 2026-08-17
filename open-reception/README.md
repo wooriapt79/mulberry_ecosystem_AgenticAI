@@ -202,6 +202,7 @@ docker compose up --build
 - [Data & Audit v0.3 결과](../docs/work-result-report-data-audit-v0.3-2026-07-25.md)
 - [Matching v0.4 결과](../docs/pr-4-luna-matching-v0.4-result-report.md)
 - [Reception Core v0.1 첫 작업 묶음](../docs/reception-core-v0.1-first-bundle.md)
+- [Open Reception Agent Interface Strategy v0.1](../docs/open-reception-agent-interface-strategy-v0.1.md)
 
 ## 검토·병합 절차
 
