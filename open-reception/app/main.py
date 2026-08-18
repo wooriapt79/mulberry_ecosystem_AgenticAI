@@ -203,6 +203,11 @@ class KillSwitch(Base):
 
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./open_reception.sqlite3")
+# psycopg3 호환: Railway PostgreSQL URL 변환
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 engine_args = (
     {"connect_args": {"check_same_thread": False, "timeout": 30}}
     if DATABASE_URL.startswith("sqlite")
