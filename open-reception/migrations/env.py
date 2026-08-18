@@ -7,7 +7,15 @@ from sqlalchemy import engine_from_config, pool
 from app.main import Base
 
 config = context.config
-config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
+
+raw_url = os.environ["DATABASE_URL"]
+# psycopg3 호환: Railway PostgreSQL URL을 SQLAlchemy psycopg dialect로 변환
+if raw_url.startswith("postgres://"):
+    raw_url = raw_url.replace("postgres://", "postgresql+psycopg://", 1)
+elif raw_url.startswith("postgresql://"):
+    raw_url = raw_url.replace("postgresql://", "postgresql+psycopg://", 1)
+
+config.set_main_option("sqlalchemy.url", raw_url)
 if config.config_file_name:
     fileConfig(config.config_file_name)
 target_metadata = Base.metadata
