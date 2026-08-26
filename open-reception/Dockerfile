@@ -6,6 +6,7 @@ RUN addgroup --system mulberry && adduser --system --ingroup mulberry mulberry
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app ./app
+COPY luna ./luna
 COPY alembic.ini .
 COPY migrations ./migrations
 USER mulberry
