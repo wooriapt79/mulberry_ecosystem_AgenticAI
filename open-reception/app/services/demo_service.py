@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import re
+from pathlib import Path
 
 # Personal-info patterns — server-side rejection per security spec
 _PII_PATTERNS = [
@@ -9,47 +11,60 @@ _PII_PATTERNS = [
     re.compile(r"\b[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}\b"),  # email
 ]
 
-# Keyword → domain mapping for rule-based routing
-_DOMAIN_KEYWORDS: list[tuple[list[str], str]] = [
-    (["식품", "먹거리", "밥", "급식", "농산물", "장보기"], "food-desert"),
-    (["외로움", "혼자", "고립", "이웃", "친구", "말벗"], "membership-guidance"),
-    (["홍천", "인제", "양양", "지역", "마을", "군청"], "reception"),
-    (["AI", "인공지능", "에이전트", "서비스", "프로그램"], "reception"),
-]
+_SYSTEM_PROMPT_PATH = Path(__file__).parent.parent.parent / "luna" / "Luna_Demo_System_Prompt_Inje_v1.0.md"
+
+_DEMO_FOOTER = "\n\n---\n🌿 Luna Demo · Mulberry AI Inje 2030 · AI 생성 답변 · 데모 환경"
+
+# Fallback rule-based responses when ANTHROPIC_API_KEY is not set
+_FALLBACK_RESPONSES: dict[str, str] = {
+    "food": (
+        "좋은 질문입니다. 인제군 식품사막화 제로 프로젝트는 WiFi CSI 센싱과 "
+        "카카오 기반 ShopMate로 먹거리 접근성 문제를 해결합니다. "
+        "4년(2026~2030), 총 13.5억원 예산으로 진행되는 비영리 사업입니다."
+    ),
+    "default": (
+        "좋은 질문입니다. 저는 Mulberry AI Inje 2030 프로젝트 담당 AI 보좌관 Luna입니다. "
+        "인제군 식품사막화 제로 프로젝트에 대해 궁금하신 점을 편하게 말씀해 주세요."
+    ),
+}
 
 
 def contains_pii(text: str) -> bool:
     return any(p.search(text) for p in _PII_PATTERNS)
 
 
-def _infer_domain(message: str) -> str:
-    for keywords, domain in _DOMAIN_KEYWORDS:
-        if any(kw in message for kw in keywords):
-            return domain
-    return "reception"
+def _load_system_prompt() -> str:
+    try:
+        return _SYSTEM_PROMPT_PATH.read_text(encoding="utf-8")
+    except OSError:
+        return ""
 
 
-# Rule-based response templates (no LLM call in demo — DRY_RUN=true preserved)
-_RESPONSES: dict[str, list[str]] = {
-    "food-desert": [
-        "안녕하세요! 저는 Luna입니다. 지역 먹거리 접근성 문제를 함께 고민하고 있어요. "
-        "홍천·인제·양양 지역의 식품 사막화 현황과 Mulberry의 협력 방안을 말씀드릴 수 있습니다. "
-        "더 구체적으로 어떤 부분이 궁금하신가요?",
-    ],
-    "membership-guidance": [
-        "안녕하세요! Luna입니다. 외로움과 고립 문제는 정말 중요한 과제예요. "
-        "Mulberry는 지역 커뮤니티 연결과 AI 말벗 서비스로 함께 해결책을 찾고 있습니다. "
-        "어떤 도움이 필요하신지 편하게 말씀해 주세요.",
-    ],
-    "reception": [
-        "안녕하세요! 저는 Mulberry AI 에이전트 Luna입니다. "
-        "홍천·인제·양양 지역 주민 여러분의 생활 편의와 복지를 위해 활동하고 있어요. "
-        "궁금하신 점이나 도움 요청 사항을 말씀해 주시면 최선을 다해 안내드리겠습니다.",
-    ],
-}
+def _fallback_reply(message: str) -> str:
+    key = "food" if any(kw in message for kw in ["식품", "먹거리", "장보기", "쇼핑"]) else "default"
+    return _FALLBACK_RESPONSES[key] + _DEMO_FOOTER
 
 
 def generate_demo_reply(message: str) -> str:
-    domain = _infer_domain(message)
-    replies = _RESPONSES.get(domain, _RESPONSES["reception"])
-    return replies[0]
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        return _fallback_reply(message)
+
+    try:
+        import anthropic  # type: ignore[import]
+
+        system_prompt = _load_system_prompt()
+        client = anthropic.Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=512,
+            system=system_prompt,
+            messages=[{"role": "user", "content": message}],
+        )
+        reply = response.content[0].text
+        # Ensure footer is present (model may omit it)
+        if "Luna Demo" not in reply:
+            reply += _DEMO_FOOTER
+        return reply
+    except Exception:
+        return _fallback_reply(message)
