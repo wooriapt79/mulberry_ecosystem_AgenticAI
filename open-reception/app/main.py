@@ -9,7 +9,9 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated, Literal
 from uuid import uuid4
 
-from fastapi import Depends, FastAPI, Header, HTTPException, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint, case, create_engine, select, update
 from sqlalchemy.exc import IntegrityError
@@ -216,7 +218,17 @@ engine_args = (
 engine = create_engine(DATABASE_URL, **engine_args)
 SessionLocal = sessionmaker(engine, expire_on_commit=False)
 
+from pathlib import Path
+
 app = FastAPI(title="Luna Open Reception", version="0.4.0")
+
+_TEMPLATES_DIR = Path(__file__).parent / "templates"
+_templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
+
+# Demo router — active only when DEMO_MODE env var is set
+if os.getenv("DEMO_MODE", "").lower() in {"1", "true", "yes"}:
+    from app.routers.demo import router as _demo_router
+    app.include_router(_demo_router)
 
 ADMIN_PERMISSIONS = {
     "security_admin": {"session:revoke", "account:disable", "passport:manage"},
@@ -500,6 +512,13 @@ def startup():
 @app.get("/health")
 def health():
     return {"status": "ok", "dry_run": True, "version": "0.4.0"}
+
+
+@app.get("/meeting", response_class=HTMLResponse)
+def meeting_page(request: Request):
+    if os.getenv("DEMO_MODE", "").lower() not in {"1", "true", "yes"}:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
+    return _templates.TemplateResponse("meeting.html", {"request": request})
 
 
 @app.post("/auth/bootstrap", status_code=201)
