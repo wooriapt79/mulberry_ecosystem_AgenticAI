@@ -151,6 +151,15 @@
     font-size: 16px;
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+.bubble.luna table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 18px; }
+.bubble.luna th, .bubble.luna td { border: 1px solid #b7e4c7; padding: 8px 12px; text-align: left; }
+.bubble.luna th { background: #d8f3dc; font-weight: 600; }
+.bubble.luna strong { font-weight: 700; }
+.bubble.luna p { margin: 4px 0; }
+.bubble.luna li { margin-left: 20px; }
+</style>
 </head>
 <body>
 
@@ -187,7 +196,13 @@
       sender.textContent = 'Luna';
       div.appendChild(sender);
     }
-    div.appendChild(document.createTextNode(text));
+    if (role === 'luna') {
+  const content = document.createElement('div');
+  content.innerHTML = marked.parse(text);
+  div.appendChild(content);
+} else {
+  div.appendChild(document.createTextNode(text));
+}
     chatArea.appendChild(div);
     chatArea.scrollTop = chatArea.scrollHeight;
     return div;
