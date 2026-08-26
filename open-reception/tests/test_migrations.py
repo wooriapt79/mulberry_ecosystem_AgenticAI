@@ -88,3 +88,32 @@ def test_existing_v02_database_upgrade_and_downgrade(tmp_path, monkeypatch):
     assert "status_reason" not in {
         column["name"] for column in inspect(engine).get_columns("human_passports")
     }
+
+
+def test_v04_matching_migration_round_trip(tmp_path, monkeypatch):
+    database = tmp_path / "matching-v04.sqlite3"
+    url = f"sqlite:///{database}"
+    engine = create_engine(url)
+    monkeypatch.setenv("DATABASE_URL", url)
+    config = Config(str(Path(__file__).parents[1] / "alembic.ini"))
+
+    command.upgrade(config, "head")
+    assert {
+        "matching_recommendations",
+        "matching_candidates",
+        "matching_decisions",
+    } <= set(inspect(engine).get_table_names())
+
+    command.downgrade(config, "0001_v03")
+    assert not {
+        "matching_recommendations",
+        "matching_candidates",
+        "matching_decisions",
+    } & set(inspect(engine).get_table_names())
+
+    command.upgrade(config, "head")
+    assert {
+        "matching_recommendations",
+        "matching_candidates",
+        "matching_decisions",
+    } <= set(inspect(engine).get_table_names())

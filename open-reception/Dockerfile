@@ -10,4 +10,4 @@ COPY alembic.ini .
 COPY migrations ./migrations
 USER mulberry
 EXPOSE 8088
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8088"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8088} --no-access-log"]

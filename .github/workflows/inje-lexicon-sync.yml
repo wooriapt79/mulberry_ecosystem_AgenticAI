@@ -1,0 +1,104 @@
+name: Inje Lexicon Sync
+
+# 렉시콘과 Luna Domain Pack 의 동기화를 검증한다.
+#
+# 두 방향 모두에서 트리거된다:
+#   - inje-lexicon/** 변경 시  → 렉시콘 쪽이 바뀐 경우
+#   - open-reception/app/matching_policy.py 변경 시 → 정책 쪽이 바뀐 경우
+#
+# 정책이 바뀌었는데 렉시콘을 갱신하지 않으면 이 워크플로가 실패한다.
+# 그것이 이 검사의 목적이다.
+
+on:
+  pull_request:
+    paths:
+      - "inje-lexicon/**"
+      - "open-reception/app/matching_policy.py"
+      - ".github/workflows/inje-lexicon-sync.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lexicon-sync:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: inje-lexicon
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependencies
+        run: python -m pip install pytest
+
+      - name: Verify Domain Pack mirror is in sync
+        # 미러가 원본과 어긋나면 여기서 종료코드 1 로 실패한다
+        run: python scripts/build_lexicon_seed.py --check-only
+
+      - name: Run lexicon tests
+        run: python -m pytest tests/ -v
+
+      - name: Confirm committed lexicon is regenerable
+        # 커밋된 JSON 이 생성기 출력과 다르면 실패한다.
+        # 손으로 고쳤거나, 생성기를 바꾸고 재생성하지 않은 경우를 잡는다.
+        run: |
+          python - <<'PY'
+          import json, subprocess, sys
+          from pathlib import Path
+
+          sys.path.insert(0, "scripts")
+          from build_lexicon_seed import build_lexicon, default_output_path
+
+          committed = json.loads(default_output_path().read_text(encoding="utf-8"))
+          regenerated = build_lexicon()
+
+          for d in (committed, regenerated):
+              d.pop("generated_at", None)
+
+          if committed != regenerated:
+              print("커밋된 렉시콘이 생성기 출력과 다릅니다.")
+              print("scripts/build_lexicon_seed.py 를 실행해 재생성한 뒤 커밋하세요.")
+              sys.exit(1)
+
+          print("커밋된 렉시콘이 생성기 출력과 일치합니다.")
+          PY
+
+      - name: Confirm no personal data in lexicon
+        # 렉시콘은 어휘 사전이며 발화·신원 데이터를 담지 않는다.
+        # 발화 기여는 별도 채널(utterance_contributions)로 관리한다.
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+
+          forbidden = {
+              "requester_id", "contributor_id", "user_id",
+              "original_text", "utterance", "speaker",
+              "phone", "address", "name",
+          }
+
+          failures = []
+          for path in Path("domain").glob("*.json"):
+              data = json.loads(path.read_text(encoding="utf-8"))
+              for entry in data.get("entries", []):
+                  leaked = forbidden & set(entry)
+                  if leaked:
+                      failures.append(f"{path}: {sorted(leaked)}")
+
+          if failures:
+              print("렉시콘에 개인정보성 필드가 발견되었습니다:")
+              for f in failures:
+                  print(" -", f)
+              sys.exit(1)
+
+          print("개인정보성 필드 없음.")
+          PY

@@ -18,6 +18,7 @@ from app.main import (
     AuditEvent,
     BootstrapConsumption,
     LoginSession,
+    MatchingDecision,
     SessionLocal,
     User,
     app,
@@ -49,6 +50,11 @@ def reset_bootstrap_state():
         ).all()
         if admin_ids:
             db.execute(delete(LoginSession).where(LoginSession.user_id.in_(admin_ids)))
+            db.execute(
+                delete(MatchingDecision).where(
+                    MatchingDecision.decided_by.in_(admin_ids)
+                )
+            )
             db.execute(delete(User).where(User.id.in_(admin_ids)))
         db.execute(delete(BootstrapConsumption).where(BootstrapConsumption.id == "admin"))
         db.commit()

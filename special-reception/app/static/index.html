@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>Special Reception Luna</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <span class="eyebrow">SPECIAL RECEPTION</span>
+        <h1>Luna의 타로 AI 친구</h1>
+        <p>카드는 미래를 정하지 않아요. 오늘 나누고 싶은 대화의 분위기를 고르는 가벼운 체험입니다.</p>
+      </header>
+
+      <section id="setup" class="panel">
+        <label for="card">선택한 카드 코드</label>
+        <select id="card" aria-describedby="card-help"></select>
+        <small id="card-help">카카오 링크에서는 카드가 자동으로 선택됩니다.</small>
+
+        <label for="persona">이야기할 친구</label>
+        <select id="persona"></select>
+        <button id="start" type="button">AI 친구 만나기</button>
+      </section>
+
+      <section id="chat" class="panel hidden" aria-live="polite">
+        <div class="friend">
+          <div aria-hidden="true" class="moon">☾</div>
+          <div><strong id="friend-name"></strong><small id="friend-tagline"></small></div>
+        </div>
+        <div id="messages" class="messages"></div>
+        <form id="chat-form">
+          <label class="sr-only" for="message">대화 입력</label>
+          <input id="message" maxlength="500" autocomplete="off" placeholder="개인정보 없이 편하게 입력하세요">
+          <button type="submit">보내기</button>
+        </form>
+        <div class="meta"><span id="turns"></span><button id="end" class="link" type="button">대화 종료</button></div>
+      </section>
+
+      <p class="notice">로그인·저장 없이 최대 5턴 또는 10분 동안 작동합니다. 의료·심리·법률·투자 상담이나 운세 보장 서비스가 아닙니다.</p>
+    </main>
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>

@@ -13,9 +13,16 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, EmailStr, Field
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, case, create_engine, select, update
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint, case, create_engine, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
+
+from app.matching_policy import (
+    DOMAIN_PACK_VERSION,
+    MATCHING_POLICY_VERSION,
+    evaluate_candidate,
+    get_domain_pack,
+)
 
 
 def now() -> datetime:
@@ -116,6 +123,57 @@ class MatchRequest(Base):
     approved_by: Mapped[str | None] = mapped_column(String, nullable=True)
 
 
+class MatchingRecommendation(Base):
+    __tablename__ = "matching_recommendations"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
+    request_id: Mapped[str] = mapped_column(
+        ForeignKey("matching_requests.id"), unique=True, index=True
+    )
+    domain_pack_version: Mapped[str] = mapped_column(String)
+    policy_version: Mapped[str] = mapped_column(String)
+    status: Mapped[str] = mapped_column(String, default="recommended")
+    rationale: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class MatchingCandidate(Base):
+    __tablename__ = "matching_candidates"
+    __table_args__ = (
+        UniqueConstraint(
+            "recommendation_id",
+            "agent_passport_id",
+            name="uq_matching_candidate_recommendation_agent",
+        ),
+    )
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
+    recommendation_id: Mapped[str] = mapped_column(
+        ForeignKey("matching_recommendations.id"), index=True
+    )
+    agent_passport_id: Mapped[str] = mapped_column(ForeignKey("ai_passports.id"))
+    agent_kind: Mapped[str] = mapped_column(String)
+    rank: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    eligible: Mapped[bool] = mapped_column(Boolean)
+    evidence: Mapped[dict] = mapped_column(JSON, default=dict)
+    exclusion_reasons: Mapped[list] = mapped_column(JSON, default=list)
+    supervisor_agent_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class MatchingDecision(Base):
+    __tablename__ = "matching_decisions"
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
+    recommendation_id: Mapped[str] = mapped_column(
+        ForeignKey("matching_recommendations.id"), index=True
+    )
+    action: Mapped[str] = mapped_column(String)
+    from_status: Mapped[str] = mapped_column(String)
+    to_status: Mapped[str] = mapped_column(String)
+    decided_by: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    reason: Mapped[str] = mapped_column(String)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
 class AuditEvent(Base):
     __tablename__ = "audit_events"
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid4()))
@@ -147,6 +205,11 @@ class KillSwitch(Base):
 
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./open_reception.sqlite3")
+# psycopg3 호환: Railway PostgreSQL URL 변환
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+elif DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 engine_args = (
     {"connect_args": {"check_same_thread": False, "timeout": 30}}
     if DATABASE_URL.startswith("sqlite")
@@ -169,9 +232,9 @@ if os.getenv("DEMO_MODE", "").lower() in {"1", "true", "yes"}:
 
 ADMIN_PERMISSIONS = {
     "security_admin": {"session:revoke", "account:disable", "passport:manage"},
-    "steward_reviewer": {"steward:review"},
+    "steward_reviewer": {"steward:review", "matching:decide"},
     "safety_operator": {"kill_switch:change"},
-    "admin": {"session:revoke", "account:disable", "passport:manage", "steward:review", "kill_switch:change"},
+    "admin": {"session:revoke", "account:disable", "passport:manage", "steward:review", "matching:decide", "kill_switch:change"},
 }
 
 
@@ -240,6 +303,21 @@ def locked_human_passport(db: Session, passport_id: str) -> HumanPassport | None
     return db.scalar(
         select(HumanPassport)
         .where(HumanPassport.id == passport_id)
+        .with_for_update()
+    )
+
+
+def locked_recommendation(db: Session, recommendation_id: str) -> MatchingRecommendation | None:
+    if db.bind.dialect.name == "sqlite":
+        db.execute(
+            update(MatchingRecommendation)
+            .where(MatchingRecommendation.id == recommendation_id)
+            .values(status=MatchingRecommendation.status)
+        )
+        return db.get(MatchingRecommendation, recommendation_id)
+    return db.scalar(
+        select(MatchingRecommendation)
+        .where(MatchingRecommendation.id == recommendation_id)
         .with_for_update()
     )
 
@@ -378,8 +456,15 @@ class ReviewInput(BaseModel):
 
 class MatchInput(BaseModel):
     domain: str
+    request_type: str = "food_access_research"
     risk: Literal["low", "medium", "high"] = "low"
     required_permissions: list[str] = Field(default_factory=list)
+
+
+class MatchingDecisionInput(BaseModel):
+    action: Literal["approve", "reject", "reassign", "hold"]
+    reason: str = Field(min_length=3, max_length=500)
+    candidate_id: str | None = None
 
 
 class KillInput(BaseModel):
@@ -411,7 +496,7 @@ def startup():
         if not db.get(AiPassport, "luna"):
             db.add(AiPassport(
                 id="luna", name="Luna", level="professional",
-                domains=["reception", "food-desert", "membership-guidance"],
+                domains=["reception", "food-desert", "research", "membership-guidance", "joint-purchase"],
                 permissions=["research", "recommend", "draft"],
                 spirit_score=0.90, origin_agent="jr-trang", mentor_agent="nguyen-trang",
             ))
@@ -675,29 +760,139 @@ def review_steward(application_id: str, payload: ReviewInput, admin: User = Depe
 @app.post("/matching/recommendations")
 def recommend(payload: MatchInput, user: User = Depends(current_user), db: Session = Depends(db_session)):
     enforce_kill_switch(db)
+    try:
+        domain_pack = get_domain_pack(payload.domain)
+        policy = domain_pack.policy_for(payload.request_type)
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc)) from exc
     request = MatchRequest(
         requester_id=user.id, domain=payload.domain, risk=payload.risk,
         required_permissions=payload.required_permissions,
     )
     db.add(request)
-    candidates = []
-    for agent in db.scalars(select(AiPassport).where(AiPassport.status == "active")).all():
-        if agent.spirit_score < 0.4 or payload.domain not in agent.domains:
-            continue
-        permission_fit = len(set(payload.required_permissions) & set(agent.permissions)) / max(len(payload.required_permissions), 1)
-        domain_fit = 1.0
-        safety = 1.0 if payload.risk == "low" else (0.7 if agent.level != "junior" else 0.3)
-        score = round(0.30 * domain_fit + 0.20 * (0.8 if agent.level != "junior" else 0.4) + 0.20 * safety + 0.15 * permission_fit + 0.10 * agent.spirit_score + 0.05, 3)
-        candidates.append({
-            "agent_id": agent.id, "name": agent.name, "level": agent.level, "score": score,
-            "requires_supervision": agent.level == "junior",
-            "allowed_actions": agent.permissions,
-            "explanation": f"domain={payload.domain}; spirit={agent.spirit_score}; risk={payload.risk}",
-        })
-    candidates.sort(key=lambda item: item["score"], reverse=True)
-    audit(db, user.id, "matching.recommended", "matching_request", request.id, {"candidate_ids": [c["agent_id"] for c in candidates[:3]]})
+    db.flush()
+    recommendation = MatchingRecommendation(
+        request_id=request.id,
+        domain_pack_version=DOMAIN_PACK_VERSION,
+        policy_version=MATCHING_POLICY_VERSION,
+        rationale={"request_type": payload.request_type, "supervision": policy.supervision_level},
+    )
+    db.add(recommendation)
+    db.flush()
+    evaluated = []
+    agents = db.scalars(select(AiPassport).order_by(AiPassport.id)).all()
+    active_ids = {agent.id for agent in agents if agent.status == "active"}
+    for agent in agents:
+        evaluation = evaluate_candidate(
+            policy=policy,
+            request_risk=payload.risk,
+            mandate_permissions=payload.required_permissions,
+            agent_id=agent.id,
+            agent_level=agent.level,
+            agent_domains=agent.domains,
+            passport_permissions=agent.permissions,
+            spirit_score=agent.spirit_score,
+            agent_status=agent.status,
+            supervisor_active=bool(agent.mentor_agent and agent.mentor_agent in active_ids),
+        )
+        evaluated.append((agent, evaluation))
+    eligible = sorted(
+        ((agent, result) for agent, result in evaluated if result.eligible),
+        key=lambda pair: (-pair[1].score, pair[0].id),
+    )
+    ranks = {agent.id: rank for rank, (agent, _) in enumerate(eligible, 1)}
+    for agent, result in evaluated:
+        db.add(MatchingCandidate(
+            recommendation_id=recommendation.id,
+            agent_passport_id=agent.id,
+            agent_kind="jr_agent" if agent.level == "junior" else "steward_ai",
+            rank=ranks.get(agent.id),
+            score=result.score,
+            eligible=result.eligible,
+            evidence=dict(result.evidence),
+            exclusion_reasons=list(result.exclusion_reasons),
+            supervisor_agent_id=agent.mentor_agent if agent.level == "junior" else None,
+        ))
+    candidates = [{
+        "candidate_id": next_candidate.id,
+        "agent_id": agent.id,
+        "name": agent.name,
+        "level": agent.level,
+        "rank": ranks[agent.id],
+        "score": result.score,
+        "requires_supervision": agent.level == "junior",
+        "supervisor_agent_id": agent.mentor_agent if agent.level == "junior" else None,
+        "allowed_actions": agent.permissions,
+        "evidence": dict(result.evidence),
+    } for agent, result in eligible for next_candidate in [
+        db.scalar(select(MatchingCandidate).where(
+            MatchingCandidate.recommendation_id == recommendation.id,
+            MatchingCandidate.agent_passport_id == agent.id,
+        ))
+    ]]
+    audit(db, user.id, "matching.recommended", "matching_recommendation", recommendation.id, {
+        "request_id": request.id,
+        "policy_version": MATCHING_POLICY_VERSION,
+        "candidate_ids": [c["agent_id"] for c in candidates[:3]],
+    })
     db.commit()
-    return {"request_id": request.id, "status": "recommendation_only", "human_approval_required": True, "candidates": candidates[:3]}
+    return {
+        "request_id": request.id,
+        "recommendation_id": recommendation.id,
+        "status": "recommendation_only",
+        "policy_version": MATCHING_POLICY_VERSION,
+        "human_approval_required": True,
+        "candidates": candidates[:3],
+    }
+
+
+@app.post("/admin/matching/recommendations/{recommendation_id}/decision")
+def decide_matching(
+    recommendation_id: str,
+    payload: MatchingDecisionInput,
+    admin: User = Depends(require_permission("matching:decide")),
+    db: Session = Depends(db_session),
+):
+    enforce_kill_switch(db)
+    recommendation = locked_recommendation(db, recommendation_id)
+    if not recommendation:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Recommendation not found")
+    if recommendation.status != "recommended":
+        raise HTTPException(status.HTTP_409_CONFLICT, "Recommendation already decided")
+    target_status = {
+        "approve": "approved",
+        "reject": "rejected",
+        "reassign": "reassignment_requested",
+        "hold": "needs_evidence",
+    }[payload.action]
+    if payload.action == "approve":
+        if not payload.candidate_id:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "candidate_id required")
+        candidate = db.get(MatchingCandidate, payload.candidate_id)
+        if not candidate or candidate.recommendation_id != recommendation.id or not candidate.eligible:
+            raise HTTPException(status.HTTP_409_CONFLICT, "Eligible candidate required")
+        agent = db.get(AiPassport, candidate.agent_passport_id)
+        if not agent or agent.status != "active" or agent.spirit_score < 0.4:
+            raise HTTPException(status.HTTP_409_CONFLICT, "Candidate is no longer eligible")
+        if agent.level == "junior":
+            supervisor = db.get(AiPassport, candidate.supervisor_agent_id)
+            if not supervisor or supervisor.status != "active":
+                raise HTTPException(status.HTTP_409_CONFLICT, "Active supervisor required")
+    previous = recommendation.status
+    recommendation.status = target_status
+    db.add(MatchingDecision(
+        recommendation_id=recommendation.id,
+        action=payload.action,
+        from_status=previous,
+        to_status=target_status,
+        decided_by=admin.id,
+        reason=payload.reason,
+    ))
+    audit(db, admin.id, f"matching.{payload.action}", "matching_recommendation", recommendation.id, {
+        "from": previous, "to": target_status, "candidate_id": payload.candidate_id,
+    })
+    db.commit()
+    return {"recommendation_id": recommendation.id, "status": target_status}
 
 
 @app.post("/admin/kill-switch")
