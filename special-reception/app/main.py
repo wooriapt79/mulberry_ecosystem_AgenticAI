@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .catalog import public_catalog
 from .engine import SessionError, continue_session, start_session
+from .kakao import router as kakao_router
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -17,6 +18,7 @@ app = FastAPI(
     redoc_url=None,
 )
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+app.include_router(kakao_router)
 
 
 class StrictModel(BaseModel):
