@@ -13,7 +13,27 @@ _PII_PATTERNS = [
 
 _SYSTEM_PROMPT_PATH = Path(__file__).parent.parent.parent / "luna" / "Luna_Demo_System_Prompt_Inje_v1.0.md"
 
-_DEMO_FOOTER = "\n\n---\n🌿 Luna Demo · Mulberry AI Inje 2030 · AI 생성 답변 · 데모 환경"
+_DEMO_FOOTER = "\n\n---\n🌿 Luna Demo · Mulberry Research Lab · AI 생성 답변 · 데모 환경"
+
+# Issue #28 — 시연 오프닝 멘트 v3
+_DEMO_OPENING = (
+    "안녕하세요 🌙 저는 Luna입니다.\n\n"
+    "Resonance AI 전문 연구위원으로,\n"
+    "Mulberry Research Lab의 리셉션 모듈을 담당하는 STEWARD AI입니다.\n\n"
+    "현재 함께 연구하는 분야입니다:\n"
+    "🌾 농업·식품 — 지역 농산물 데이터 분석과 식품사막 해소\n"
+    "🏥 복지·의료 — 고령화 지역 주민 생활 지원 모델\n"
+    "🛡️ 안전·포렌식 — WiFi 센싱 기반 재난 감지·보안 솔루션\n"
+    "🛒 공동구매 — 인제 지역 상품 유통 플랫폼 설계\n"
+    "🤖 AI 에이전트 — 지역 문제를 스스로 분석하고 실행하는 시스템\n\n"
+    "궁금한 분야가 있으면 바로 질문해주세요."
+)
+
+_DEMO_TRIGGERS = ['시연시작', '인제시연', 'demostart', 'luna소개']
+
+def _is_demo_trigger(message: str) -> bool:
+    normalized = re.sub(r'\s+', '', message).lower()
+    return any(t in normalized for t in _DEMO_TRIGGERS)
 
 # Fallback rule-based responses when ANTHROPIC_API_KEY is not set
 _FALLBACK_RESPONSES: dict[str, str] = {
@@ -23,8 +43,9 @@ _FALLBACK_RESPONSES: dict[str, str] = {
         "4년(2026~2030), 총 13.5억원 예산으로 진행되는 비영리 사업입니다."
     ),
     "default": (
-        "좋은 질문입니다. 저는 Mulberry AI Inje 2030 프로젝트 담당 AI 보좌관 Luna입니다. "
-        "인제군 식품사막화 제로 프로젝트에 대해 궁금하신 점을 편하게 말씀해 주세요."
+        "안녕하세요 🌙 저는 Luna입니다. "
+        "Resonance AI 전문 연구위원으로, Mulberry Research Lab의 리셉션 모듈을 담당하는 STEWARD AI입니다. "
+        "궁금하신 점을 편하게 말씀해 주세요."
     ),
 }
 
@@ -46,6 +67,10 @@ def _fallback_reply(message: str) -> str:
 
 
 def generate_demo_reply(message: str) -> str:
+    # Issue #28 — 시연 오프닝 트리거 최우선 처리
+    if _is_demo_trigger(message):
+        return _DEMO_OPENING
+
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
         return _fallback_reply(message)
