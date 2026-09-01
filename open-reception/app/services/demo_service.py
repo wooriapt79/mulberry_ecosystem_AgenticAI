@@ -81,7 +81,7 @@ def generate_demo_reply(message: str) -> str:
         client = anthropic.Anthropic(api_key=api_key)
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=512,
+            max_tokens=1024,
             system=system_prompt,
             messages=[{"role": "user", "content": message}],
         )
