@@ -2027,6 +2027,7 @@ function analyzeFile() {
     result.style.display = 'flex';
     document.getElementById('analysisResultText').textContent = '분석 결과가 여기에 표시됩니다.\n(백엔드 API 연동 후 구현)';
     btn.disabled = false;
+    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 1500);
 }
 
