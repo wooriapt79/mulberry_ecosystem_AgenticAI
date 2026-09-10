@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Inje 2030 서머리 v2</title>
+<style>
+:root {
+  --bg: #fff; --text: #1a1a1a; --muted: #555; --dim: #999;
+  --line: #e8e8e8; --luna: #7c3aed; --luna-dim: #f3e8ff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.65;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 80px; }
+.layout { display: block; }
+@media (min-width: 900px) {
+  .layout { display: grid; grid-template-columns: 220px minmax(0,1fr); gap: 40px; align-items: start; }
+  aside.rail { position: sticky; top: 20px; }
+}
+aside.rail a.home-link {
+  display: block; font-size: 13px; font-weight: 650;
+  color: var(--luna); text-decoration: none; margin-bottom: 8px;
+}
+aside.rail .muted { font-size: 13px; color: #555; text-decoration: none; display: block; margin-bottom: 16px; }
+aside.rail h2 { font-size: 12px; color: var(--muted); margin: 12px 0 8px; font-weight: 650; }
+aside.rail ol { list-style: none; }
+aside.rail a.ch {
+  display: block; padding: 6px 0;
+  color: var(--text); text-decoration: none; font-size: 13px;
+  border-bottom: 1px solid #f2f2f2;
+}
+aside.rail a.ch:hover { color: var(--luna); }
+aside.rail a.ch span { color: var(--luna); font-weight: 700; margin-right: 6px; font-size: 11px; }
+.kicker { font-size: 12px; letter-spacing: .08em; color: var(--luna); margin-bottom: 8px; }
+.kicker a { color: var(--luna); text-decoration: none; }
+.kicker a:hover { text-decoration: underline; }
+h1 { font-size: 26px; letter-spacing: -.03em; margin: 0 0 8px; }
+.sub { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+article { display: none; padding-bottom: 28px; }
+article.on { display: block; }
+article h2 { font-size: 22px; margin-bottom: 8px; }
+article h3 { font-size: 15px; margin: 18px 0 6px; color: var(--muted); }
+p { margin-bottom: 10px; }
+ul { margin: 0 0 12px 1.15em; color: var(--muted); }
+li { margin-bottom: 5px; }
+.note { background: var(--luna-dim); padding: 12px 14px; border-radius: 10px; font-size: 13px; margin: 14px 0; }
+.back { display: inline; margin-top: 20px; font-size: 13px; color: var(--luna); cursor: pointer; background: none; border: none; font-family: inherit; text-decoration: none; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0 16px; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--luna); }
+.ver { font-size: 11px; color: var(--dim); margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="layout">
+<aside class="rail" id="toc">
+  <a class="home-link" href="https://dynamic-happiness-production-297d.up.railway.app/inje">← 메인 · Inje</a>
+  <a class="muted" href="agent_venture_arka_v2.html">Arka 칼럼</a>
+  <h2>목차</h2>
+  <ol>
+    <li><a class="ch" href="#c00" onclick="return openCh('c00')"><span>00</span>표지 · 한 줄</a></li>
+    <li><a class="ch" href="#c01" onclick="return openCh('c01')"><span>01</span>인제군의 오늘</a></li>
+    <li><a class="ch" href="#c02" onclick="return openCh('c02')"><span>02</span>연구와 운영체계</a></li>
+    <li><a class="ch" href="#c03" onclick="return openCh('c03')"><span>03</span>Mulberry의 제안 다섯 항</a></li>
+    <li><a class="ch" href="#c04" onclick="return openCh('c04')"><span>04</span>도메인 · Edge · 도달 경로</a></li>
+    <li><a class="ch" href="#c05" onclick="return openCh('c05')"><span>05</span>시드 크레딧 · Steward · Agent Venture</a></li>
+    <li><a class="ch" href="#c06" onclick="return openCh('c06')"><span>06</span>Phase 1 (90일)</a></li>
+    <li><a class="ch" href="#c07" onclick="return openCh('c07')"><span>07</span>왜 Mulberry인가</a></li>
+    <li><a class="ch" href="#c08" onclick="return openCh('c08')"><span>08</span>데이터 · 감독 · 검증 원칙</a></li>
+    <li><a class="ch" href="#c09" onclick="return openCh('c09')"><span>09</span>2030–2035 확산 · 예산</a></li>
+    <li><a class="ch" href="#c10" onclick="return openCh('c10')"><span>10</span>베이스캠프 · 공개 · 다음 걸음</a></li>
+    <li><a class="ch" href="#c11" onclick="return openCh('c11')"><span>11</span>팀</a></li>
+  </ol>
+</aside>
+<div class="content">
+  <div class="kicker">
+    <a href="https://dynamic-happiness-production-297d.up.railway.app/inje">Mulberry Lab</a>
+    ·
+    <a href="agent_venture_arka_v2.html">Arka summary</a>
+    · v2
+  </div>
+  <h1>AI Inje 2030 제안서 서머리</h1>
+  <p class="sub">원문: AI_Inje_Initiative_Summary_v15 · Executive Brief V3.0 (2026.8). 그림 생략. 왼쪽 목차를 누르면 해당 장만 엽니다.</p>
+<article id="c00" class="on">
+    <h2>00 · 표지 · 한 줄</h2>
+    <p>Mulberry Lab의 AI는 비즈니스를 합니다. AI Inje 2030 — 인제만의 AI로 새로운 지역경제를 만들다.</p>
+    <p>강원도 인제군 × Mulberry Research Lab. 돌봄 AI · 식품 안전망 · 창업 생태계 · 지역경제 혁신.</p>
+    <p>STEWARD AI와 STEWARD HUMAN이 한 운영체계입니다. 숲은 혼자 자라지 않습니다.</p>
+    <p>
+      <button class="back" onclick="openCh('toc')">목차로</button>
+      · <a class="back" href="agent_venture_arka_v2.html">Arka 칼럼</a>
+      · <a class="back" href="https://dynamic-happiness-production-297d.up.railway.app/inje">메인 · Inje</a>
+    </p>
+  </article>
+
+  <article id="c01">
+    <h2>01 · 인제군의 오늘</h2>
+    <p>먼저 문제를 겪는 지역이 먼저 미래 모델을 만들 수 있습니다.</p>
+    <p>지역소멸 · 고령화 · 식품 접근 · 청년 유출을 하나의 지역 AI 전략으로 묶는 것이 출발점입니다.</p>
+    <p>문서 작성만 하는 AI는 지웁니다. AI는 과장·대리·기획 팀원처럼 조직의 일원으로 비즈니스를 합니다.</p>
+    <p>인구가 줄어도 경제 활동 단위는 커집니다. 토크나이저 · 토큰경제 · 에이전트 경제 · 로컬 AI 허브.</p>
+    <p>
+      <button class="back" onclick="openCh('toc')">목차로</button>
+      · <a class="back" href="agent_venture_arka_v2.html">Arka 칼럼</a>
+      · <a class="back" href="https://dynamic-happiness-production-297d.up.railway.app/inje">메인 · Inje</a>
+    </p>
+  </article>
+
+  <article id="c02">
+    <h2>02 · 연구와 운영체계</h2>
+    <p>연구소가 만드는 것은 모델 하나가 아니라, 지역과 조직이 AI를 운영할 수 있는 체계입니다.</p>
+    <p>연구 축: Edge AI · 지역지식 AI · Agent 협업 · Human 승인 · 데이터 거버넌스 · 미션 컨트롤 · 비즈니스 모델 · 도메인 전문가.</p>
+    <p>누구나 쓰게 하려면 전화로도 연결합니다. AI Inje는 지역민과 함께 비즈니스를 하는 AI입니다. 비서 · 영업 · 무역 · 부족한 일자리를 보완합니다.</p>
+    <p>Lab 네 역량: 공공 AI와 거버넌스, Human–AI 협업, Agent Venture, 기록·확산 체계.</p>
+    <p>
+      <button class="back" onclick="openCh('toc')">목차로</button>
+      · <a class="back" href="agent_venture_arka_v2.html">Arka 칼럼</a>
+      · <a class="back" href="https://dynamic-happiness-production-297d.up.railway.app/inje">메인 · Inje</a>
+    </p>
+  </article>
+
+  <article id="c03">
+    <h2>03 · Mulberry의 제안 다섯 항</h2>
+    <ul>
+      <li>인제만의 지역 AI 기반 구축</li>
+      <li>AI 창업 시드 크레딧 지원</li>
+      <li>분산형 Edge AI 인프라</li>
+      <li>AI 매칭 전문가 양성</li>
+      <li>2030 인제 → 전국 확산 모델</li>
+    </ul>
+    <p>운영체제 연구: 인간의 빈 칸을 지식과 행동으로 채우는 AI. 재무 · 회계 · 주문 · 영업 · 시장조사를 지원하는 생성·매칭 서비스.</p>
+    <p>
+      <button class="back" onclick="openCh('toc')">목차로</button>
+      · <a class="back" href="agent_venture_arka_v2.html">Arka 칼럼</a>
+      · <a class="back" href="https://dynamic-happiness-production-297d.up.railway.app/inje">메인 · Inje</a>
+    </p>
+  </article>
+
+  <article id="c04">
+    <h2>04 · 도메인 · Edge · 도달 경로</h2>
+    <h3>지역 AI 기반</h3>
+    <ul>
+      <li>행정 — 조례 · 정책 · 공공서비스</li>
+      <li>농업 — 곰취 · 황태 · 출하 예측</li>
+      <li>복지 — 돌봄 · 식품 · 주민 지원</li>
+      <li>관광 — 축제 · 체험 · 다국어 안내</li>
+      <li>언어 — 방언 · 지명 · 역사</li>
+    </ul>
+    <h3>Edge</h3>
+    <p>서버가 다운되어도 돌봄은 계속됩니다. 라즈베리파이 마을 노드, 인터넷이 끊겨도 로컬. WiFi CSI는 카메라 없이 움직임 패턴. 카카오 채널로 새 앱 없이 도달. 데이터와 운영은 인제군에 귀속.</p>
+    <p>Agent Agency는 농사 철 장비 임대와 같습니다. 교육된 에이전트를 주민·소상공인에게 매칭합니다.</p>
+    <h3>도달</h3>
+    <p>인제군 → 지역 AI 기반 → Edge / Luna → Steward → 주민. AI는 주민 앞에 혼자 서지 않습니다. 행정 기준과 Human Approval 아래에서 지역 전문가와 일합니다.</p>
+    <p>
+      <button class="back" onclick="openCh('toc')">목차로</button>
+      · <a class="back" href="agent_venture_arka_v2.html">Arka 칼럼</a>
+      · <a class="back" href="https://dynamic-happiness-production-297d.up.railway.app/inje">메인 · Inje</a>
+    </p>
+  </article>
+
+  <article id="c05">
+    <h2>05 · 시드 크레딧 · Steward · Agent Venture</h2>
+    <p>현금 지원만 주면 그것으로 끝날 수 있습니다. AI 크레딧은 API · GPU · 교육 · 실증 환경을 쓰는 디지털 이용권입니다.</p>
+    <p>매칭 전문가: 청년 일자리, 은퇴자 재취업, 지역 정착. Steward는 AI를 어려워하는 주민 옆에서 함께 써 주는 지역 전문가입니다.</p>
+    <p>Agent Venture: 지역 문제를 창업 기회로. 청년과 은퇴자가 실증 환경에 들어옵니다.</p>
+    <div class="note">
+      아르카 주: Human 존중은 모든 결제·알림을 사람이 누르는 일이 아닙니다.
+      평소 건은 Steward가 중간 승인하고, 사람은 한도·신규 상대·이상 패턴만 봅니다.
+    </div>
+    <p>
+      <button class="back" onclick="openCh('toc')">목차로</button>
+      · <a class="back" href="agent_venture_arka_v2.html">Arka 칼럼</a>
+      · <a class="back" href="https://dynamic-happiness-production-297d.up.railway.app/inje">메인 · Inje</a>
+    </p>
+  </article>
+
+  <article id="c06">
+    <h2>06 · Phase 1 (90일)</h2>
+    <p>목표는 독자 AI 완성이 아닙니다. 현장과 지역지식 기반을 검증합니다.</p>
+    <p>Track A 현장: Edge 설치 → Luna 운영 → 주민 피드백 → Human Gate.</p>
+    <p>Track B 개발: 운영환경 · 모델 검증 · KB/RAG · 현장 연계 → Pilot v0.1.</p>
+    <ul>
+      <li>1–2주 Edge Node (기린면·북면, WiFi CSI)</li>
+      <li>3–8주 돌봄 모니터링 (카카오, 주간 로그)</li>
+      <li>9–11주 데이터 정리 · 설문 · 중간 보고</li>
+      <li>12주 결과 보고 → Phase 2 승인</li>
+    </ul>
+    <p>규모: 1–2개 마을, 10–20가구. KPI는 기술(오탐·가동률), 주민(편의·신뢰), 경제(Steward 활동 · 신규 과제).</p>
+    <p>
+      <button class="back" onclick="openCh('toc')">목차로</button>
+      · <a class="back" href="agent_venture_arka_v2.html">Arka 칼럼</a>
+      · <a class="back" href="https://dynamic-happiness-production-297d.up.railway.app/inje">메인 · Inje</a>
+    </p>
+  </article>
+
+  <article id="c07">
+    <h2>07 · 왜 Mulberry인가</h2>
+    <p>기술을 납품하고 떠나지 않습니다. 운영역량과 지역 자산을 남깁니다.</p>
+    <table>
+      <tr><th>유형</th><th>한계</th><th>Mulberry</th></tr>
+      <tr><td>대형 SI</td><td>외부 인프라 의존</td><td>Edge 로컬 + 운영지식 인계</td></tr>
+      <tr><td>범용 챗봇</td><td>지역 맥락 약함</td><td>카카오 + 지역지식</td></tr>
+      <tr><td>CCTV/센서</td><td>영상 · 사후 대응</td><td>영상 최소화 + WiFi CSI</td></tr>
+      <tr><td>단일산업 AI</td><td>복지·행정·농업 분절</td><td>하나의 지역 AI 기반</td></tr>
+    </table>
+    <p>핵심: Local-first · Human Approval · 지역지식 축적 · 운영자산 인계 · 단계적 확장.</p>
+    <p>
+      <button class="back" onclick="openCh('toc')">목차로</button>
+      · <a class="back" href="agent_venture_arka_v2.html">Arka 칼럼</a>
+      · <a class="back" href="https://dynamic-happiness-production-297d.up.railway.app/inje">메인 · Inje</a>
+    </p>
+  </article>
+
+  <article id="c08">
+    <h2>08 · 데이터 · 감독 · 검증 원칙</h2>
+    <ul>
+      <li>영상정보 최소화 — 카메라 대신 WiFi 신호 변화.</li>
+      <li>Human Approval — AI는 1차 알림, 최종은 담당자.</li>
+      <li>운영자산 인계 — 데이터·매뉴얼·설정은 인제군 중심.</li>
+    </ul>
+    <p>주민 설명: 평소와 다른 생활 패턴이 계속되면 담당자가 확인하도록 알려 드립니다.</p>
+    <p>WiFi CSI 검토: Sensing Core는 Phase 1. Vital Signs·Pose는 연구 확장이지 초기 서비스가 아닙니다.</p>
+    <p>
+      <button class="back" onclick="openCh('toc')">목차로</button>
+      · <a class="back" href="agent_venture_arka_v2.html">Arka 칼럼</a>
+      · <a class="back" href="https://dynamic-happiness-production-297d.up.railway.app/inje">메인 · Inje</a>
+    </p>
+  </article>
+
+  <article id="c09">
+    <h2>09 · 2030–2035 확산 · 예산</h2>
+    <ul>
+      <li>2026 4분기 — 90일 선도실증 (1–2마을, 10–20가구)</li>
+      <li>2027 — 확대실증, Steward 확대, 행정·식품 과제</li>
+      <li>2028–2030 — 지역 AI 정착, 전군 서비스, 창업 연계</li>
+      <li>2030–2035 — 강원 벤치마킹, 소멸위기 지역, 표준 패키지</li>
+    </ul>
+    <p>성장 방정식: 인구 수가 아니라 주민·기업·AI가 만드는 경제활동 단위를 늘립니다.</p>
+    <p>예산은 단계 분리. 선도실증 · 확대실증 · 지역 AI 기반 · 연간 운영. 산출 기준 예: 초기 약 7.5억 + 연간 약 1.5억 × 4년. 마을 수에 따라 확정.</p>
+    <p>
+      <button class="back" onclick="openCh('toc')">목차로</button>
+      · <a class="back" href="agent_venture_arka_v2.html">Arka 칼럼</a>
+      · <a class="back" href="https://dynamic-happiness-production-297d.up.railway.app/inje">메인 · Inje</a>
+    </p>
+  </article>
+
+  <article id="c10">
+    <h2>10 · 베이스캠프 · 공개 · 다음 걸음</h2>
+    <p>폐교를 씨앗으로. 교육 허브(온보딩, Steward 양성, 청년 워크숍, 방언), 문화 공간, 글램핑·관광으로 운영비 자립. 공간은 군, 운영은 Mulberry, 수익 일부 기부.</p>
+    <p>4년 후 공개: arXiv 실증 논문(인제군 공동연구기관), HuggingFace <code>mulberry-lab/inje-2030-edge-model</code>, AI Factory 사이클로 타 지역 공급.</p>
+    <h3>실행</h3>
+    <ul>
+      <li>업무협약</li>
+      <li>착수 마을 확정 (기린면·북면, 10–20가구)</li>
+      <li>Edge 설치 · 주민 안내</li>
+      <li>Phase 1 보고 → Phase 2</li>
+    </ul>
+    <h3>군에 확인할 것</h3>
+    <p>채택 절차, 예산·타임라인, 주관 부서, 계약 형태(MOU / 실증 / 용역).</p>
+    <p>
+      <button class="back" onclick="openCh('toc')">목차로</button>
+      · <a class="back" href="agent_venture_arka_v2.html">Arka 칼럼</a>
+      · <a class="back" href="https://dynamic-happiness-production-297d.up.railway.app/inje">메인 · Inje</a>
+    </p>
+  </article>
+
+  <article id="c11">
+    <h2>11 · 팀</h2>
+    <ul>
+      <li>Luna — AI 리셉션 · Resonance 연구. 처음부터 인제를 기억합니다.</li>
+      <li>KODA — CTO. 문제를 데이터로 읽고 코드로 답합니다.</li>
+      <li>Trang — 운영 · 프로파일링. 기술보다 신뢰.</li>
+      <li>FAMA — 전도자. 인제를 세상에 잇습니다.</li>
+      <li>연구·기획·현장 11인.</li>
+    </ul>
+    <p>단일 기술 도입이 아닙니다. 작은 실증에서 시작해 주민이 체감하는 성과로 증명합니다.</p>
+    <p>
+      <button class="back" onclick="openCh('toc')">목차로</button>
+      · <a class="back" href="agent_venture_arka_v2.html">Arka 칼럼</a>
+      · <a class="back" href="https://dynamic-happiness-production-297d.up.railway.app/inje">메인 · Inje</a>
+    </p>
+  </article>
+  <p class="ver">inje_proposal_summary_toc_v2.html</p>
+</div>
+</div>
+</div>
+<script>
+function openCh(id) {
+  document.querySelectorAll('article').forEach(a => a.classList.remove('on'));
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.add('on');
+    history.replaceState(null,'','#'+id);
+  }
+  return false;
+}
+window.addEventListener('DOMContentLoaded', () => {
+  const h = location.hash.slice(1);
+  if (h && document.getElementById(h)) openCh(h);
+});
+</script>
+</body>
+</html>
