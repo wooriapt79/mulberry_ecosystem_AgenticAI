@@ -10,7 +10,7 @@ from typing import Annotated, Literal
 from uuid import uuid4
 
 from fastapi.staticfiles import StaticFiles
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, EmailStr, Field
@@ -961,3 +961,66 @@ async def luna_chat(payload: ChatInput):
         return {"reply": "잌시 후 다시 시도해 주세요.", "status": "api_error"}
     except Exception:
         return {"reply": "연결에 문제가 발생했습니다. 잌시 후 다시 시도해 주세요.", "status": "error"}
+
+ANALYZE_SYSTEM_PROMPT = """당신은 Luna입니다. Mulberry Research Lab의 AI 전문 연구위원입니다.
+업로드된 파일의 내용을 분석하여 다음 형식으로 한국어 요약을 제공하세요:
+
+## 📄 파일 요약
+(2~3문장 핵심 요약)
+
+## 🔑 주요 항목
+(핵심 항목 3~5개를 bullet로)
+
+## 💡 인사이트
+(Mulberry Lab AI 이니셔티브 관점에서 활용 가능한 인사이트 2~3개)
+
+답변은 명확하고 간결하게 작성하세요."""
+
+@app.post("/api/analyze-file")
+async def analyze_file(file: UploadFile = File(...), page: str = Form(default="inje")):
+    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return {"result": "API 키가 설정되지 않았습니다. 관리자에게 문의해 주세요.", "status": "no_key"}
+
+    # 파일 크기 제한 (2MB)
+    content = await file.read()
+    if len(content) > 2 * 1024 * 1024:
+        return {"result": "파일 크기가 2MB를 초과합니다. 더 작은 파일을 업로드해 주세요.", "status": "too_large"}
+
+    # 텍스트 디코딩
+    text_content = None
+    for enc in ("utf-8", "cp949", "euc-kr"):
+        try:
+            text_content = content.decode(enc)
+            break
+        except Exception:
+            continue
+    if text_content is None:
+        return {"result": "파일을 읽을 수 없습니다. 텍스트 파일(.txt .md .csv .html)을 업로드해 주세요.", "status": "decode_error"}
+
+    # 50,000자 제한
+    if len(text_content) > 50000:
+        text_content = text_content[:50000] + "\n\n... (이후 내용 생략)"
+
+    try:
+        async with _httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                },
+                json={
+                    "model": "claude-haiku-4-5-20251001",
+                    "max_tokens": 1024,
+                    "system": ANALYZE_SYSTEM_PROMPT,
+                    "messages": [{"role": "user", "content": f"파일명: {file.filename}\n\n---\n{text_content}"}],
+                },
+            )
+        if resp.status_code == 200:
+            data = resp.json()
+            return {"result": data["content"][0]["text"], "status": "ok"}
+        return {"result": "분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.", "status": "api_error"}
+    except Exception:
+        return {"result": "연결에 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.", "status": "error"}
