@@ -155,6 +155,14 @@ body {
   border-color: #e9d5ff;
 }
 .nav-item .ni-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+.nav-item.has-sub { flex-wrap: wrap; }
+.nav-item.has-sub .ni-arrow { margin-left: auto; font-size: 11px; transition: transform 0.2s; }
+.nav-item.has-sub.open .ni-arrow { transform: rotate(90deg); }
+.sub-nav { display: none; flex-direction: column; gap: 1px; width: 100%; margin-top: 4px; padding-left: 28px; }
+.nav-item.has-sub.open .sub-nav { display: flex; }
+.sub-nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; color: var(--text-secondary); transition: all 0.2s; }
+.sub-nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.sub-nav-item .sni-icon { font-size: 12px; width: 18px; text-align: center; flex-shrink: 0; font-weight: 700; color: var(--purple); }
 .nav-item .ni-badge {
   margin-left: auto; background: var(--purple); color: #fff;
   font-size: 9px; padding: 2px 6px; border-radius: 8px;
@@ -1111,6 +1119,28 @@ body {
     <div class="nav-item" onclick="showSection('team', this)">
       <span class="ni-icon">T</span> <span class="lang-ko">팀</span><span class="lang-en" style="display:none;">Team</span>
     </div>
+    <div class="nav-item has-sub" onclick="toggleSubNav(this)">
+      <span class="ni-icon">M</span>
+      <span class="lang-ko">Mulberry Lab Column</span><span class="lang-en" style="display:none;">Mulberry Lab Column</span>
+      <span class="ni-arrow">▶</span>
+      <div class="sub-nav">
+        <div class="sub-nav-item" onclick="event.stopPropagation(); window.open('/static/agent_venture_arka_v2.html','_blank')">
+          <span class="sni-icon">A</span>
+          <span class="lang-ko">AI 경제 <small style="color:#9ca3af">지역 비즈니스 모델</small></span><span class="lang-en" style="display:none;">AI Economy</span>
+        </div>
+        <div class="sub-nav-item" onclick="event.stopPropagation(); window.open('/static/agent_venture_arka_v2.html','_blank')">
+          <span class="sni-icon">E</span>
+          <span class="lang-ko">AI 생태계 <small style="color:#9ca3af">인제→강원→전국</small></span><span class="lang-en" style="display:none;">AI Ecosystem</span>
+        </div>
+        <div class="sub-nav-item" onclick="event.stopPropagation(); window.open('/static/agent_venture_arka_v2.html','_blank')">
+          <span class="sni-icon">S</span>
+          <span class="lang-ko">AI 창업 성지 <small style="color:#9ca3af">청년 에이전트 모델</small></span><span class="lang-en" style="display:none;">AI Startup Hub</span>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item" onclick="window.open('/static/inje_proposal_summary_toc_v2.html','_blank')">
+      <span class="ni-icon">P</span> <span class="lang-ko">제안서 Summary</span><span class="lang-en" style="display:none;">Proposal Summary</span>
+    </div>
   </div>
 
   <div class="sb-footer">
@@ -1751,6 +1781,10 @@ const titles = {
   team: { ko: '팀', en: 'Team' }
 };
 let currentLang = 'ko'; // 전역 언어 상태 ('ko' 또는 'en')
+
+function toggleSubNav(el) {
+  el.classList.toggle('open');
+}
 
 function showSection(id, navEl) {
   // 모든 섹션 숨기기 → 선택된 섹션만 보이기
