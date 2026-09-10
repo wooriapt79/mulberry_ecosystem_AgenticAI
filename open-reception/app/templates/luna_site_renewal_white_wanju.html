@@ -1313,12 +1313,12 @@ body {
     <div class="qa-file-panel">
       <!-- 드롭존 -->
       <div style="border: 2px dashed var(--border); border-radius: 12px; padding: 28px 16px; text-align: center; cursor: pointer; transition: all 0.2s;" id="fileDropZone" onclick="document.getElementById('fileInput').click()" ondrop="handleFileDrop(event)" ondragover="handleFileDragOver(event)" ondragleave="handleFileDragLeave()">
-        <input type="file" id="fileInput" style="display:none" accept=".txt,.md,.html,.csv,.pdf" onchange="handleFileSelect(event)">
+        <input type="file" id="fileInput" style="display:none" accept=".txt,.md,.html,.csv" onchange="handleFileSelect(event)">
         <div style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">
           <span class="lang-ko">📎 파일 업로드</span><span class="lang-en" style="display:none;">📎 Upload File</span>
         </div>
         <div style="font-size:11px; color:var(--text-tertiary);">
-          <span class="lang-ko">클릭 또는 드래그 — .txt .md .html .csv .pdf</span><span class="lang-en" style="display:none;">Click or drag — .txt .md .html .csv .pdf</span>
+          <span class="lang-ko">클릭 또는 드래그 — .txt .md .html .csv</span><span class="lang-en" style="display:none;">Click or drag — .txt .md .html .csv</span>
         </div>
       </div>
 
