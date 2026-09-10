@@ -1961,18 +1961,25 @@ function analyzeFile() {
   btn.disabled = true;
   status.textContent = '분석 중...';
 
-  // 백엔드 API 호출 (추후 구현)
-  // POST /api/analyze-file
-  // - file: FormData
-  // - headers: Authorization (backend에서 처리)
+  const formData = new FormData();
+  formData.append('file', analysisFile);
+  formData.append('page', 'wanju');
 
-  setTimeout(() => {
-    status.textContent = '';
-    const result = document.getElementById('analysisResultWrap');
-    result.style.display = 'flex';
-    document.getElementById('analysisResultText').textContent = '분석 결과가 여기에 표시됩니다.\n(백엔드 API 연동 후 구현)';
-    btn.disabled = false;
-  }, 1500);
+  fetch('/api/analyze-file', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+      status.textContent = '';
+      const result = document.getElementById('analysisResultWrap');
+      result.style.display = 'flex';
+      document.getElementById('analysisResultText').textContent = data.result || '분석 결과를 가져올 수 없습니다.';
+      btn.disabled = false;
+    })
+    .catch(() => {
+      status.textContent = '';
+      document.getElementById('analysisResultWrap').style.display = 'flex';
+      document.getElementById('analysisResultText').textContent = '연결 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+      btn.disabled = false;
+    });
 }
 
 function downloadSummary() {
