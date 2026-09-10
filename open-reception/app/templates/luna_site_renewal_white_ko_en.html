@@ -2380,8 +2380,10 @@ function genReport() {
   setTimeout(() => {
     btn.textContent = currentLang === 'ko' ? '📄 보고서 생성' : '📄 Generate Report';
     btn.disabled = false;
-    document.getElementById('rPreview').innerHTML = buildReport(selectedType, recipient, today);
+    const rPreview = document.getElementById('rPreview');
+    rPreview.innerHTML = buildReport(selectedType, recipient, today);
     document.getElementById('rActions').style.display = 'flex';
+    rPreview.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 1200);
 }
 
