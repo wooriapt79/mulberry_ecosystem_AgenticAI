@@ -369,20 +369,16 @@ body {
   border-radius: 14px; padding: 24px;
 }
 .proposal-card {
-  display: flex; gap: 20px; align-items: center;
+  text-align: center;
 }
-.prop-icon { font-size: 48px; flex-shrink: 0; }
+.prop-icon { display: none; }
 .prop-content { flex: 1; }
 .prop-title { font-size: 16px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px; }
 .prop-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
 .prop-meta { font-size: 11px; color: var(--text-tertiary); }
-.prop-btn { flex-shrink: 0; }
-.download-btn {
-  padding: 10px 20px; background: var(--text-primary); color: white;
-  border: none; border-radius: 8px; cursor: pointer; font-size: 13px;
-  font-weight: 700; transition: all 0.2s;
-}
-.download-btn:hover { transform: scale(1.05); opacity: 0.9; }
+.prop-btn { display: none; }
+.download-btn { display: none; }
+.download-btn:hover {}
 
 /* ══ FILE UPLOAD SECTION ══════════════════════════════ */
 .upload-section {
@@ -1070,14 +1066,14 @@ body {
 <div class="sidebar">
   <div class="sb-brand">
     <div class="sb-logo">
-      <div class="sb-logo-icon"><img src="/static/mulberry_logo.png" alt="Mulberry Lab Logo"></div>
+      <div class="sb-logo-icon"><img src="mulberry_logo.png" alt="Mulberry Lab Logo"></div>
       <div class="sb-logo-text">Mulberry Lab</div>
     </div>
     <div class="sb-sub">AI Inje Initiative · V3.2</div>
   </div>
 
   <div class="luna-card">
-    <img src="/static/Co_Luna.png" style="width: 240px; height: 240px; border-radius: 50%; object-fit: cover;" />
+    <img src="Co_Luna.png" style="width: 240px; height: 240px; border-radius: 50%; object-fit: cover;" />
     <div class="luna-name">Luna</div>
     <div class="luna-role"><span class="lang-ko">AI 리셉션 · 연구 리드</span><span class="lang-en" style="display:none;">AI Reception · Research Lead</span></div>
     <div class="luna-status"><span class="lang-ko">ON Mode</span><span class="lang-en" style="display:none;">ON Mode</span></div>
@@ -1159,7 +1155,7 @@ body {
   <div class="section active" id="sec-home">
     <div class="home-hero">
       <div class="hero-avatar">
-        <img src="/static/mulberry_logo.png" style="width: 200px; height: 200px; object-fit: contain;" alt="Mulberry Lab Logo" />
+        <img src="mulberry_logo.png" style="width: 200px; height: 200px; object-fit: contain;" alt="Mulberry Lab Logo" />
       </div>
       
       <div class="hero-left">
@@ -1261,7 +1257,7 @@ body {
       <!-- 🔧 FIX: id="qaMessages" 추가 — addMsg() / addTyping()이 getElementById('qaMessages')로 찾음 -->
       <div class="qa-chat-messages" id="qaMessages">
         <div class="chat-message">
-          <div class="chat-avatar"><img src="/static/Co_Luna.png" alt="Luna"></div>
+          <div class="chat-avatar"><img src="Co_Luna.png" alt="Luna"></div>
           <div class="chat-bubble"><span class="lang-ko">안녕하세요! 질문을 남겨주세요.</span><span class="lang-en" style="display:none;">Hi! Leave your question.</span></div>
         </div>
       </div>
