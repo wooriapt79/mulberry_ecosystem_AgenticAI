@@ -313,6 +313,21 @@ body {
 }
 
 .hero-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.8; max-width: 480px; }
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 6px 14px;
+  background: #f5f3ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--purple);
+  letter-spacing: 0.02em;
+}
+.hero-badge::before { content: "🌙"; font-size: 14px; }
 .hero-right {
   display: flex; flex-direction: column; gap: 10px; width: 220px; flex-shrink: 0;
 }
@@ -1164,6 +1179,9 @@ body {
         </div>
         <div class="hero-desc">
           <span class="lang-ko">지역 경제 발전을 위한 AI 솔루션입니다.<br>인제 이니셔티브에 대해 질문하고, 보고서를 생성하고,<br>우리 팀을 만나보세요.</span><span class="lang-en" style="display:none;">AI-driven solution for regional economic development.<br>Ask questions about Inje Initiative, generate reports,<br>and meet our team.</span>
+        </div>
+        <div class="hero-badge">
+          <span class="lang-ko">리셉션 담당 — AI Luna</span><span class="lang-en" style="display:none;">Reception Lead — AI Luna</span>
         </div>
       </div>
       <div class="hero-right">
