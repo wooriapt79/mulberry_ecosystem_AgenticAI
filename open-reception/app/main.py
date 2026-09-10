@@ -206,7 +206,7 @@ class KillSwitch(Base):
 
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./open_reception.sqlite3")
-# psycopg3 ÃÂ­ÃÂÃÂ¸ÃÂ­ÃÂÃÂ: Railway PostgreSQL URL ÃÂ«ÃÂ³ÃÂÃÂ­ÃÂÃÂ
+# psycopg3 ÃÂÃÂ­ÃÂÃÂÃÂÃÂ¸ÃÂÃÂ­ÃÂÃÂÃÂÃÂ: Railway PostgreSQL URL ÃÂÃÂ«ÃÂÃÂ³ÃÂÃÂÃÂÃÂ­ÃÂÃÂÃÂÃÂ
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
 elif DATABASE_URL.startswith("postgresql://"):
@@ -227,7 +227,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 _TEMPLATES_DIR = Path(__file__).parent / "templates"
 _templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
 
-# Demo router ÃÂ¢ÃÂÃÂ active only when DEMO_MODE env var is set
+# Demo router ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ active only when DEMO_MODE env var is set
 if os.getenv("DEMO_MODE", "").lower() in {"1", "true", "yes"}:
     from app.routers.demo import router as _demo_router
     app.include_router(_demo_router)
@@ -914,3 +914,50 @@ def set_kill_switch(payload: KillInput, admin: User = Depends(require_permission
     audit(db, admin.id, "kill_switch.changed", "kill_switch", "global", {"active": payload.active, "reason": payload.reason})
     db.commit()
     return {"active": switch.active, "reason": switch.reason}
+
+
+# ── Luna Chat API ─────────────────────────────────────────
+# API Key는 Railway 환경변수 ANTHROPIC_API_KEY 에만 저장됩니다.
+# 프론트엔드(HTML/JS)에는 키가 절대 노출되지 않습니다.
+
+LUNA_SYSTEM_PROMPT = """당신은 Luna입니다. Mulberry Research Lab의 AI 리셈 담당자이며 인제군·완주군 AI 이니셔티브를 안내합니다.
+핵심 주제: AI 경제 생태계, WiFi CSI 센싱 기반 재난·복지 솔루션, FDI 산출 모델, 지역 창업 성지, 90일 파일럿.
+답변은 2~4 문장으로 간결하게. 한국어 질문에는 한국어로, 영어 질문에는 영어로 답변하세요."""
+
+import httpx as _httpx
+
+class ChatInput(BaseModel):
+    message: str = Field(min_length=1, max_length=2000)
+    page: str = Field(default="inje", max_length=20)
+
+@app.get("/api/chat/status")
+def chat_status():
+    return {"available": bool(os.getenv("ANTHROPIC_API_KEY", ""))}
+
+@app.post("/api/chat")
+async def luna_chat(payload: ChatInput):
+    api_key = os.getenv("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return {"reply": "주 AI 연결이 준비 중입니다. 잠시 후 다시 시도해 주세요.", "status": "no_key"}
+    try:
+        async with _httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                },
+                json={
+                    "model": "claude-haiku-4-5-20251001",
+                    "max_tokens": 512,
+                    "system": LUNA_SYSTEM_PROMPT,
+                    "messages": [{"role": "user", "content": payload.message}],
+                },
+            )
+        if resp.status_code == 200:
+            data = resp.json()
+            return {"reply": data["content"][0]["text"], "status": "ok"}
+        return {"reply": "잌시 후 다시 시도해 주세요.", "status": "api_error"}
+    except Exception:
+        return {"reply": "연결에 문제가 발생했습니다. 잌시 후 다시 시도해 주세요.", "status": "error"}
