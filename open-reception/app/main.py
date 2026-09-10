@@ -205,7 +205,7 @@ class KillSwitch(Base):
 
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./open_reception.sqlite3")
-# psycopg3 í¸í: Railway PostgreSQL URL ë³í
+# psycopg3 Ã­ÂÂ¸Ã­ÂÂ: Railway PostgreSQL URL Ã«Â³ÂÃ­ÂÂ
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
 elif DATABASE_URL.startswith("postgresql://"):
@@ -225,7 +225,7 @@ app = FastAPI(title="Luna Open Reception", version="0.4.0")
 _TEMPLATES_DIR = Path(__file__).parent / "templates"
 _templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
 
-# Demo router â active only when DEMO_MODE env var is set
+# Demo router Ã¢ÂÂ active only when DEMO_MODE env var is set
 if os.getenv("DEMO_MODE", "").lower() in {"1", "true", "yes"}:
     from app.routers.demo import router as _demo_router
     app.include_router(_demo_router)
@@ -523,12 +523,12 @@ def meeting_page(request: Request):
 
 @app.get("/inje", response_class=HTMLResponse)
 def inje_page(request: Request):
-    return _templates.TemplateResponse("inje.html", {"request": request})
+    return _templates.TemplateResponse("luna_site_renewal_white_ko_en.html", {"request": request})
 
 
 @app.get("/wanju", response_class=HTMLResponse)
 def wanju_page(request: Request):
-    return _templates.TemplateResponse("wanju.html", {"request": request})
+    return _templates.TemplateResponse("luna_site_renewal_white_wanju.html", {"request": request})
 
 
 @app.post("/auth/bootstrap", status_code=201)
