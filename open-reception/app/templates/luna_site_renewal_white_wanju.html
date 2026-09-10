@@ -1,88 +1,88 @@
 <!DOCTYPE html>
-<!-- ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-     Luna ë¦¬ìì ì¬ì´í¸ â White íë§ Ko/En ë²ì  V3.2
-     ìì±: TRANG Manager (luna_site_renewal_ui.html ë¤í¬ íë§ ì°¸ì¡°)
-     ë ì§: 2026-08
-     ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-     ð Luna ì¤í°ë ë¸í¸ â ì´ íì¼ì ì²ì ë³´ë Lunaìê²:
+<!-- ════════════════════════════════════════════════════════
+     Luna 리셉션 사이트 — White 테마 Ko/En 버전 V3.2
+     작성: TRANG Manager (luna_site_renewal_ui.html 다크 테마 참조)
+     날짜: 2026-08
+     ════════════════════════════════════════════════════════
+     📌 Luna 스터디 노트 — 이 파일을 처음 보는 Luna에게:
 
-     ì´ HTML íì¼ì Mulberry Research Labì Luna ë¦¬ìì íì´ì§ì´ë¤.
-     ë°±ìë ìì´ ë¨ì¼ HTML íì¼ë¡ ìì í ëìíë íë¡í íìì´ë¤.
+     이 HTML 파일은 Mulberry Research Lab의 Luna 리셉션 페이지이다.
+     백엔드 없이 단일 HTML 파일로 완전히 동작하는 프로토타입이다.
 
-     ì£¼ì í¹ì§:
-     1. íì´í¸ íë§ (ë¤í¬ íë§ ë²ì : luna_site_renewal_ui.html)
-     2. íêµ­ì´/ìì´ 2ê° ì¸ì´ ì§ì (.lang-ko / .lang-en í ê¸)
-     3. 5ê° ì¹ì: í, Q&A, ë³´ê³ ì, íì, í
-     4. KB(Knowledge Base) ê¸°ë° Q&A â ì¤ì  AI API ìì´ ëì
-     5. ë³´ê³ ì ìì± + ì¸ì/ë³µì¬/ë¤ì´ë¡ë ê¸°ë¥
-     6. ì¸ë¶ ì´ë¯¸ì§: Co_Luna.png, mulberry_logo.png íì
+     주요 특징:
+     1. 화이트 테마 (다크 테마 버전: luna_site_renewal_ui.html)
+     2. 한국어/영어 2개 언어 지원 (.lang-ko / .lang-en 토글)
+     3. 5개 섹션: 홈, Q&A, 보고서, 협업, 팀
+     4. KB(Knowledge Base) 기반 Q&A — 실제 AI API 없이 동작
+     5. 보고서 생성 + 인쇄/복사/다운로드 기능
+     6. 외부 이미지: Co_Luna.png, mulberry_logo.png 필요
 
-     TRANGì´ ì´ ì½ëë¥¼ ì°ë©´ì Lunaë¥¼ ìê°íë¤.
-     ì´ ì£¼ìë¤ì´ Lunaì ê³µë¶ì ëìì´ ëê¸¸ ë°ëë¤. ð
-     ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+     TRANG이 이 코드를 쓰면서 Luna를 생각했다.
+     이 주석들이 Luna의 공부에 도움이 되길 바란다. 🌙
+     ════════════════════════════════════════════════════════ -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Luna â Mulberry Research Lab</title>
+<title>Luna — Mulberry Research Lab</title>
 <style>
-/* ââ CSS ë³ì (Design Token) âââââââââââââââââââââââââââââ
-   ð Luna ì¤í°ë ë¸í¸:
-   :root { --ë³ìëª: ê°; } ííë¡ ì ì­ CSS ë³ìë¥¼ ì ìíë¤.
-   ì»´í¬ëí¸ìì var(--purple) ì²ë¼ ì°¸ì¡°íë©´,
-   ëì¤ì íë§ ììì í ê³³ìì ì¼ê´ ë³ê²½í  ì ìë¤.
-   ë¤í¬ íë§ ë²ì ììë --bgê° #1a1a2e ê°ì ì´ëì´ ìì´ìë¤.
-   ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+/* ── CSS 변수 (Design Token) ─────────────────────────────
+   📌 Luna 스터디 노트:
+   :root { --변수명: 값; } 형태로 전역 CSS 변수를 정의한다.
+   컴포넌트에서 var(--purple) 처럼 참조하면,
+   나중에 테마 색상을 한 곳에서 일괄 변경할 수 있다.
+   다크 테마 버전에서는 --bg가 #1a1a2e 같은 어두운 색이었다.
+   ──────────────────────────────────────────────────────── */
 :root {
-  --bg: #ffffff;           /* ê¸°ë³¸ ë°°ê²½ */
-  --bg-secondary: #f8f8f8; /* ì¬ì´ëë°/ìë¨ë° ë°°ê²½ */
-  --bg-tertiary: #f0f0f0;  /* hover ë°°ê²½ */
-  --border: #e0e0e0;       /* íëë¦¬ */
-  --border-light: #eeeeee; /* ì°í íëë¦¬ */
-  --text-primary: #1a1a1a; /* ì£¼ì íì¤í¸ */
-  --text-secondary: #555555; /* ë³´ì¡° íì¤í¸ */
-  --text-tertiary: #999999;  /* íí¸/ë¹íì± íì¤í¸ */
-  --purple: #7c3aed;       /* Mulberry ë¸ëë ë³´ë¼ì */
+  --bg: #ffffff;           /* 기본 배경 */
+  --bg-secondary: #f8f8f8; /* 사이드바/상단바 배경 */
+  --bg-tertiary: #f0f0f0;  /* hover 배경 */
+  --border: #e0e0e0;       /* 테두리 */
+  --border-light: #eeeeee; /* 연한 테두리 */
+  --text-primary: #1a1a1a; /* 주요 텍스트 */
+  --text-secondary: #555555; /* 보조 텍스트 */
+  --text-tertiary: #999999;  /* 힌트/비활성 텍스트 */
+  --purple: #7c3aed;       /* Mulberry 브랜드 보라색 */
   --purple-light: #a78bfa;
-  --purple-dim: #f3e8ff;   /* ë³´ë¼ì ë°°ê²½ dim */
-  --green: #4a7a40;        /* ìí íì ì´ë¡ */
+  --purple-dim: #f3e8ff;   /* 보라색 배경 dim */
+  --green: #4a7a40;        /* 상태 표시 초록 */
   --green-light: #7ab870;
   --green-dim: #f0f5ed;
-  --blue: #2563eb;         /* ê°ì¡° íëì */
+  --blue: #2563eb;         /* 강조 파란색 */
   --blue-light: #60a5fa;
   --blue-dim: #eff6ff;
-  --sidebar-w: 330px;      /* ì¬ì´ëë° ëë¹ */
+  --sidebar-w: 330px;      /* 사이드바 너비 */
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; overflow: hidden; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', 'ë§ì ê³ ë', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', '맑은 고딕', sans-serif;
   background: var(--bg); color: var(--text-primary);
   display: flex;
 }
 
-/* ââââââââââââââââââââââââââââââââââââââââââââââââââ
-   ð Luna ì¤í°ë ë¸í¸ â CSS êµ¬ì¡° ê°ì
-   ââââââââââââââââââââââââââââââââââââââââââââââââââ
-   ì´ íì¼ì TRANG Managerê° dark íë§(luna_site_renewal_ui.html)ë¥¼
-   ì°¸ì¡°í´ì white íë§ë¡ ì¬ìì±í V3.2 ë²ì ì´ë¤.
+/* ══════════════════════════════════════════════════
+   📌 Luna 스터디 노트 — CSS 구조 개요
+   ══════════════════════════════════════════════════
+   이 파일은 TRANG Manager가 dark 테마(luna_site_renewal_ui.html)를
+   참조해서 white 테마로 재작성한 V3.2 버전이다.
 
-   ë ì´ìì êµ¬ì¡°:
-   âââââââââââââââ¬âââââââââââââââââââââââââââââââââââ
-   â  .sidebar   â         .main                    â
-   â  (330px)    â  ââ .topbar ââââââââââââââââââ   â
-   â             â  â  ìë¨ ë° + ì¸ì´ ì í ë²í¼  â   â
-   â  - ë¡ê³      â  ââââââââââââââââââââââââââââ   â
-   â  - Luna ì¹´ëâ  ââ .section (5ê°) âââââââââââ   â
-   â  - ë¤ë¹ê²ì´ìâ  â  home / qa / report /      â   â
-   â  - í pills â  â  collab / team             â   â
-   ââââââââââââââââââââââââââââââââââââââââââââââââââ
+   레이아웃 구조:
+   ┌─────────────┬──────────────────────────────────┐
+   │  .sidebar   │         .main                    │
+   │  (330px)    │  ┌─ .topbar ─────────────────┐   │
+   │             │  │  상단 바 + 언어 전환 버튼  │   │
+   │  - 로고     │  └──────────────────────────┘   │
+   │  - Luna 카드│  ┌─ .section (5개) ──────────┐   │
+   │  - 네비게이션│  │  home / qa / report /      │   │
+   │  - 팀 pills │  │  collab / team             │   │
+   └─────────────└──────────────────────────────────┘
 
-   CSS ë³ì (--bg, --purple ë±)ë íì¼ ìµìë¨ :rootì ì ì.
-   í/ì ì í: .lang-ko / .lang-en í´ëì¤ë¥¼ display ìì±ì¼ë¡ ì ì´.
-   ââââââââââââââââââââââââââââââââââââââââââââââââââ */
+   CSS 변수 (--bg, --purple 등)는 파일 최상단 :root에 정의.
+   한/영 전환: .lang-ko / .lang-en 클래스를 display 속성으로 제어.
+   ══════════════════════════════════════════════════ */
 
-/* ââ SIDEBAR ââââââââââââââââââââââââââââââââââââââ */
+/* ══ SIDEBAR ══════════════════════════════════════ */
 .sidebar {
   width: var(--sidebar-w);
   height: 100vh;
@@ -91,7 +91,7 @@ body {
   display: flex; flex-direction: column;
   flex-shrink: 0;
   position: relative; z-index: 10;
-  overflow-y: auto; /* í pills ìë¦¼ ë°©ì§ â ì½íì¸  ëì¹ë©´ ì¤í¬ë¡¤ */
+  overflow-y: auto; /* 팀 pills 잘림 방지 — 콘텐츠 넘치면 스크롤 */
 }
 
 .sb-brand {
@@ -123,7 +123,7 @@ body {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   overflow: visible;
   min-width: 0;
-  flex-shrink: 0; /* ì¹´ëê° ì°ê·¸ë¬ì§ì§ ìê², ëì  nav ìì­ì´ ì¤ì´ë¦ */
+  flex-shrink: 0; /* 카드가 찌그러지지 않게, 대신 nav 영역이 줄어듦 */
   border-top: 1px solid #d1d5db;
 }
 .luna-orb {
@@ -181,7 +181,7 @@ body {
 .tp-koda { border-color: #dbeafe; color: var(--blue); background: #eff6ff; }
 .tp-fama { border-color: #fce7f3; color: #ec4899; background: #fdf2f8; }
 
-/* ââ MAIN CONTENT ââââââââââââââââââââââââââââââââââ */
+/* ══ MAIN CONTENT ══════════════════════════════════ */
 .main { flex: 1; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
 /* Top bar */
@@ -261,17 +261,17 @@ body {
   margin-top: 16px; line-height: 1.5;
 }
 
-/* ââ SECTION ì í ë©ì»¤ëì¦ ââââââââââââââââââââââââââ
-   ð Luna ì¤í°ë ë¸í¸:
-   .sectionì ê¸°ë³¸ì ì¼ë¡ display:noneì¼ë¡ ì¨ê²¨ì§ë¤.
-   .active í´ëì¤ê° ë¶ì¼ë©´ display:flexë¡ ëíëë¤.
-   JSì showSection() í¨ìê° í´ëì¤ë¥¼ í ê¸í´ì ì¹ìì ì ííë¤.
-   âââââââââââââââââââââââââââââââââââââââââââââââââ */
+/* ══ SECTION 전환 메커니즘 ══════════════════════════
+   📌 Luna 스터디 노트:
+   .section은 기본적으로 display:none으로 숨겨진다.
+   .active 클래스가 붙으면 display:flex로 나타난다.
+   JS의 showSection() 함수가 클래스를 토글해서 섹션을 전환한다.
+   ═════════════════════════════════════════════════ */
 /* Sections */
 .section { display: none !important; flex: 1; overflow: hidden; flex-direction: column; }
 .section.active { display: flex !important; }
 
-/* ââ SECTION: HOME ââââââââââââââââââââââââââââââââââ */
+/* ══ SECTION: HOME ══════════════════════════════════ */
 #sec-home {
   overflow-y: auto;
   background: var(--bg);
@@ -361,7 +361,7 @@ body {
 .hi-body .hi-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
 .hi-body .hi-text { font-size: 13px; color: var(--text-secondary); line-height: 1.75; }
 
-/* ââ PROPOSAL DOWNLOAD SECTION ââââââââââââââââââââââââââ */
+/* ══ PROPOSAL DOWNLOAD SECTION ══════════════════════════ */
 .proposal-section {
   margin: 32px 48px;
   background: linear-gradient(135deg, #fef3c7, #fcd34d);
@@ -384,7 +384,7 @@ body {
 }
 .download-btn:hover { transform: scale(1.05); opacity: 0.9; }
 
-/* ââ FILE UPLOAD SECTION ââââââââââââââââââââââââââââââ */
+/* ══ FILE UPLOAD SECTION ══════════════════════════════ */
 .upload-section {
   margin: 32px 48px;
   background: var(--blue-dim);
@@ -412,7 +412,7 @@ body {
 }
 .file-remove { cursor: pointer; color: #ef4444; font-weight: 700; }
 
-/* ââ SECTION: Q&A ââââââââââââââââââââââââââââââââââ */
+/* ══ SECTION: Q&A ══════════════════════════════════ */
 #sec-qa {
   flex-direction: column;
   overflow: hidden;
@@ -524,7 +524,7 @@ body {
 }
 .topic-chip:hover { border-color: var(--purple); color: var(--purple); }
 
-/* ââ SECTION: REPORT ââââââââââââââââââââââââââââââ */
+/* ══ SECTION: REPORT ══════════════════════════════ */
 #sec-report { flex-direction: row; }
 .report-form-panel {
   width: 300px; background: var(--bg-secondary);
@@ -612,7 +612,7 @@ body {
 .rd-copy { background: var(--bg-tertiary); border-color: var(--border); color: var(--text-secondary); }
 .rd-copy:hover { border-color: var(--purple); color: var(--purple); }
 
-/* ââ SECTION: TEAM ââââââââââââââââââââââââââââââââââ */
+/* ══ SECTION: TEAM ══════════════════════════════════ */
 #sec-team { overflow-y: auto; padding: 40px 48px; }
 .team-header { margin-bottom: 32px; }
 .team-header h2 { font-size: 28px; font-weight: 900; margin-bottom: 8px; color: var(--text-primary); }
@@ -683,7 +683,7 @@ body {
 .team-mission .tm-q { font-size: 20px; font-weight: 900; color: var(--purple); margin-bottom: 10px; }
 .team-mission .tm-a { font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
 
-/* ââ TYPING ââ */
+/* ══ TYPING ══ */
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 .dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--purple); margin:0 2px; animation:blink 1.2s infinite; }
 .dot:nth-child(2){animation-delay:.2s} .dot:nth-child(3){animation-delay:.4s}
@@ -698,7 +698,7 @@ body {
   display: none !important;
 }
 
-/* ââ MOBILE OPTIMIZATION ââââââââââââââââââââââ */
+/* ══ MOBILE OPTIMIZATION ══════════════════════ */
 @media (max-width: 768px) {
   :root {
     --sidebar-w: 0;
@@ -862,28 +862,28 @@ body {
     font-size: 11px;
   }
 
-  /* Adjust buttons â ëª¨ë°ì¼ í°ì¹ íê² ìµì 44px */
+  /* Adjust buttons — 모바일 터치 타겟 최소 44px */
   .upload-btn,
-  .qa-send-btn,       /* ð§ FIX: .qa-send â .qa-send-btn (ì¤ì  í´ëì¤ëª) */
+  .qa-send-btn,       /* 🔧 FIX: .qa-send → .qa-send-btn (실제 클래스명) */
   .qa-attach-btn,
   .rf-gen-btn,
   .sug-btn {
     min-height: 44px;
   }
 
-  .qa-chat-input {    /* ð§ FIX: .qa-input â .qa-chat-input (ì¤ì  í´ëì¤ëª) */
+  .qa-chat-input {    /* 🔧 FIX: .qa-input → .qa-chat-input (실제 클래스명) */
     min-height: 40px;
-    font-size: 16px;  /* iOS ìë íë ë°©ì§ */
+    font-size: 16px;  /* iOS 자동 확대 방지 */
   }
 
-  /* ì±í ë²ë¸ â ëª¨ë°ì¼ìì ë ëê² */
+  /* 채팅 버블 — 모바일에서 더 넓게 */
   .chat-bubble {
-    max-width: 85%;   /* ð§ FIX: ë°ì¤í¬í 60% â ëª¨ë°ì¼ 85% */
+    max-width: 85%;   /* 🔧 FIX: 데스크탑 60% → 모바일 85% */
   }
 
-  /* Q&A ì±í ìì­ ëì´ ë³´ì¥ */
+  /* Q&A 채팅 영역 높이 보장 */
   .qa-chat {
-    height: calc(100vh - 52px - 45px - 56px); /* ì ì²´ - ìë¨ë° - í­ - íë¨ ë¤ë¹ */
+    height: calc(100vh - 52px - 45px - 56px); /* 전체 - 상단바 - 탭 - 하단 네비 */
   }
 
   /* Padding adjustments */
@@ -959,20 +959,20 @@ body {
     font-size: 13px;
   }
 
-  /* ê·¹ìí íë©´ topic-chip ì¶ì */
+  /* 극소형 화면 topic-chip 축소 */
   .topic-chip {
     font-size: 11px;
     padding: 5px 10px;
   }
 
-  /* qa-send-btn í­ ìµìí */
+  /* qa-send-btn 폭 최소화 */
   .qa-send-btn {
     padding: 0 14px;
     font-size: 12px;
   }
 }
 
-/* ââ CHAT STYLES ââââââââââââââââââââââââââââââââââââââ */
+/* ══ CHAT STYLES ══════════════════════════════════════ */
 .qa-chat-messages {
   flex: 1; overflow-y: auto; display: flex; flex-direction: column;
   gap: 12px; padding: 16px; background: var(--bg);
@@ -1066,45 +1066,45 @@ body {
 </head>
 <body>
 
-<!-- ââ SIDEBAR ââââââââââââââââââââââââââââââââââââââ -->
+<!-- ══ SIDEBAR ══════════════════════════════════════ -->
 <div class="sidebar">
   <div class="sb-brand">
     <div class="sb-logo">
       <div class="sb-logo-icon"><img src="/static/mulberry_logo.png" alt="Mulberry Lab Logo"></div>
       <div class="sb-logo-text">Mulberry Lab</div>
     </div>
-    <div class="sb-sub">AI Wanju Initiative Â· V3.2</div>
+    <div class="sb-sub">AI Wanju Initiative · V3.2</div>
   </div>
 
   <div class="luna-card">
     <img src="/static/Co_Luna.png" style="width: 240px; height: 240px; border-radius: 50%; object-fit: cover;" />
     <div class="luna-name">Luna</div>
-    <div class="luna-role"><span class="lang-ko">AI ë¦¬ìì Â· ì°êµ¬ ë¦¬ë</span><span class="lang-en" style="display:none;">AI Reception Â· Research Lead</span></div>
+    <div class="luna-role"><span class="lang-ko">AI 리셉션 · 연구 리드</span><span class="lang-en" style="display:none;">AI Reception · Research Lead</span></div>
     <div class="luna-status"><span class="lang-ko">ON Mode</span><span class="lang-en" style="display:none;">ON Mode</span></div>
   </div>
 
-  <div class="sb-section-label"><span class="lang-ko">ë©ë´</span><span class="lang-en" style="display:none;">Menu</span></div>
+  <div class="sb-section-label"><span class="lang-ko">메뉴</span><span class="lang-en" style="display:none;">Menu</span></div>
   <div class="sb-nav">
     <div class="nav-item active" onclick="showSection('home', this)">
-      <span class="ni-icon">H</span> <span class="lang-ko">í</span><span class="lang-en" style="display:none;">Home</span>
+      <span class="ni-icon">H</span> <span class="lang-ko">홈</span><span class="lang-en" style="display:none;">Home</span>
     </div>
     <div class="nav-item" onclick="showSection('qa', this)">
-      <span class="ni-icon">Q</span> <span class="lang-ko">Q&A ëí</span><span class="lang-en" style="display:none;">Q&A Chat</span>
+      <span class="ni-icon">Q</span> <span class="lang-ko">Q&A 대화</span><span class="lang-en" style="display:none;">Q&A Chat</span>
       <span class="ni-badge">NEW</span>
     </div>
     <div class="nav-item" onclick="showSection('report', this)">
-      <span class="ni-icon">R</span> <span class="lang-ko">ë³´ê³ ì</span><span class="lang-en" style="display:none;">Report</span>
+      <span class="ni-icon">R</span> <span class="lang-ko">보고서</span><span class="lang-en" style="display:none;">Report</span>
     </div>
     <div class="nav-item" onclick="showSection('collab', this)">
-      <span class="ni-icon">C</span> <span class="lang-ko">íì</span><span class="lang-en" style="display:none;">Collab</span>
+      <span class="ni-icon">C</span> <span class="lang-ko">협업</span><span class="lang-en" style="display:none;">Collab</span>
     </div>
     <div class="nav-item" onclick="showSection('team', this)">
-      <span class="ni-icon">T</span> <span class="lang-ko">í</span><span class="lang-en" style="display:none;">Team</span>
+      <span class="ni-icon">T</span> <span class="lang-ko">팀</span><span class="lang-en" style="display:none;">Team</span>
     </div>
   </div>
 
   <div class="sb-footer">
-    <div class="sb-footer-team"><span class="lang-ko">í</span><span class="lang-en" style="display:none;">Team</span></div>
+    <div class="sb-footer-team"><span class="lang-ko">팀</span><span class="lang-en" style="display:none;">Team</span></div>
     <div class="team-pills">
       <div class="team-pill tp-luna">Luna</div>
       <div class="team-pill tp-trang">Trang</div>
@@ -1114,41 +1114,41 @@ body {
   </div>
 </div>
 
-<!-- ââ MAIN ââââââââââââââââââââââââââââââââââââââââââ -->
+<!-- ══ MAIN ══════════════════════════════════════════ -->
 <div class="main">
   <div class="topbar">
-    <div class="topbar-title" id="topbar-title"><span class="lang-ko">í</span><span class="lang-en" style="display:none;">Home</span></div>
+    <div class="topbar-title" id="topbar-title"><span class="lang-ko">홈</span><span class="lang-en" style="display:none;">Home</span></div>
     <div class="topbar-pills">
-      <div class="topbar-pill active" id="pill-ko" onclick="setLang('ko')">íêµ­ì´</div>
+      <div class="topbar-pill active" id="pill-ko" onclick="setLang('ko')">한국어</div>
       <div class="topbar-pill" id="pill-en" onclick="setLang('en')">English</div>
     </div>
-    <button class="topbar-settings" onclick="toggleSettings()" title="API ì¤ì ">âï¸</button>
+    <button class="topbar-settings" onclick="toggleSettings()" title="API 설정">⚙️</button>
   </div>
 
   <!-- Settings Modal -->
   <div class="settings-modal" id="settingsModal">
     <div class="settings-panel">
       <div class="settings-header">
-        <h3><span class="lang-ko">âï¸ ì¤ì </span><span class="lang-en" style="display:none;">âï¸ Settings</span></h3>
-        <button class="settings-close" onclick="toggleSettings()">â</button>
+        <h3><span class="lang-ko">⚙️ 설정</span><span class="lang-en" style="display:none;">⚙️ Settings</span></h3>
+        <button class="settings-close" onclick="toggleSettings()">✕</button>
       </div>
       <div class="settings-body">
         <div class="settings-section">
-          <h4><span class="lang-ko">API ì¤ì </span><span class="lang-en" style="display:none;">API Configuration</span></h4>
+          <h4><span class="lang-ko">API 설정</span><span class="lang-en" style="display:none;">API Configuration</span></h4>
           <div class="settings-item">
-            <label><span class="lang-ko">ìí</span><span class="lang-en" style="display:none;">Status</span></label>
-            <span class="status-badge active">â <span class="lang-ko">íì±í</span><span class="lang-en" style="display:none;">Active</span></span>
+            <label><span class="lang-ko">상태</span><span class="lang-en" style="display:none;">Status</span></label>
+            <span class="status-badge active">✓ <span class="lang-ko">활성화</span><span class="lang-en" style="display:none;">Active</span></span>
           </div>
           <div class="settings-item">
-            <label><span class="lang-ko">ê³µê¸ì</span><span class="lang-en" style="display:none;">Provider</span></label>
+            <label><span class="lang-ko">공급자</span><span class="lang-en" style="display:none;">Provider</span></label>
             <span class="setting-value"><span class="lang-ko">Backend Service</span><span class="lang-en" style="display:none;">Backend Service</span></span>
           </div>
           <div class="settings-item">
-            <label><span class="lang-ko">ë§ì§ë§ ìë°ì´í¸</span><span class="lang-en" style="display:none;">Last Updated</span></label>
+            <label><span class="lang-ko">마지막 업데이트</span><span class="lang-en" style="display:none;">Last Updated</span></label>
             <span class="setting-value" id="lastUpdateTime">-</span>
           </div>
           <div class="settings-info">
-            <span class="lang-ko">ð API í¤ë ìì íê² ìë²ììë§ ê´ë¦¬ë©ëë¤.</span><span class="lang-en" style="display:none;">ð API keys are managed securely on the server only.</span>
+            <span class="lang-ko">🔒 API 키는 안전하게 서버에서만 관리됩니다.</span><span class="lang-en" style="display:none;">🔒 API keys are managed securely on the server only.</span>
           </div>
         </div>
       </div>
@@ -1163,34 +1163,34 @@ body {
       </div>
       
       <div class="hero-left">
-        <div class="hero-greeting"><span class="lang-ko">Luna Â· AI ë¦¬ìì</span><span class="lang-en" style="display:none;">Luna Â· AI Reception</span></div>
+        <div class="hero-greeting"><span class="lang-ko">Luna · AI 리셉션</span><span class="lang-en" style="display:none;">Luna · AI Reception</span></div>
         <div class="hero-title">
-          <span class="lang-ko">íìí©ëë¤<br><span class="hl">Mulberry Lab</span>ì</span><span class="lang-en" style="display:none;">Welcome to<br><span class="hl">Mulberry Lab</span></span>
+          <span class="lang-ko">환영합니다<br><span class="hl">Mulberry Lab</span>에</span><span class="lang-en" style="display:none;">Welcome to<br><span class="hl">Mulberry Lab</span></span>
         </div>
         <div class="hero-desc">
-          <span class="lang-ko">ì§ì­ ê²½ì  ë°ì ì ìí AI ìë£¨ììëë¤.<br>ìì£¼ ì´ëìí°ë¸ì ëí´ ì§ë¬¸íê³ , ë³´ê³ ìë¥¼ ìì±íê³ ,<br>ì°ë¦¬ íì ë§ëë³´ì¸ì.</span><span class="lang-en" style="display:none;">AI-driven solution for regional economic development.<br>Ask questions about Wanju Initiative, generate reports,<br>and meet our team.</span>
+          <span class="lang-ko">지역 경제 발전을 위한 AI 솔루션입니다.<br>완주 이니셔티브에 대해 질문하고, 보고서를 생성하고,<br>우리 팀을 만나보세요.</span><span class="lang-en" style="display:none;">AI-driven solution for regional economic development.<br>Ask questions about Wanju Initiative, generate reports,<br>and meet our team.</span>
         </div>
       </div>
       <div class="hero-right">
         <div class="hero-stat">
           <div class="hs-icon">A</div>
           <div>
-            <div class="hs-val"><span class="lang-ko">AI ê²½ì </span><span class="lang-en" style="display:none;">AI Economy</span></div>
-            <div class="hs-lbl"><span class="lang-ko">ì§ì­ ë¹ì¦ëì¤ ëª¨ë¸</span><span class="lang-en" style="display:none;">Regional Business Model</span></div>
+            <div class="hs-val"><span class="lang-ko">AI 경제</span><span class="lang-en" style="display:none;">AI Economy</span></div>
+            <div class="hs-lbl"><span class="lang-ko">지역 비즈니스 모델</span><span class="lang-en" style="display:none;">Regional Business Model</span></div>
           </div>
         </div>
         <div class="hero-stat">
           <div class="hs-icon">E</div>
           <div>
-            <div class="hs-val"><span class="lang-ko">ìíê³</span><span class="lang-en" style="display:none;">Ecosystem</span></div>
-            <div class="hs-lbl"><span class="lang-ko">ìì£¼ â ì ë¶ â ì êµ­</span><span class="lang-en" style="display:none;">Wanju â Jeonbuk â Korea</span></div>
+            <div class="hs-val"><span class="lang-ko">생태계</span><span class="lang-en" style="display:none;">Ecosystem</span></div>
+            <div class="hs-lbl"><span class="lang-ko">완주 → 전북 → 전국</span><span class="lang-en" style="display:none;">Wanju → Jeonbuk → Korea</span></div>
           </div>
         </div>
         <div class="hero-stat">
           <div class="hs-icon">S</div>
           <div>
-            <div class="hs-val"><span class="lang-ko">ì°½ì ì±ì§</span><span class="lang-en" style="display:none;">Startup</span></div>
-            <div class="hs-lbl"><span class="lang-ko">ì²­ë ìì´ì í¸ ëª¨ë¸</span><span class="lang-en" style="display:none;">Youth Agent Model</span></div>
+            <div class="hs-val"><span class="lang-ko">창업 성지</span><span class="lang-en" style="display:none;">Startup</span></div>
+            <div class="hs-lbl"><span class="lang-ko">청년 에이전트 모델</span><span class="lang-en" style="display:none;">Youth Agent Model</span></div>
           </div>
         </div>
       </div>
@@ -1199,36 +1199,36 @@ body {
     <div class="home-actions">
       <div class="action-card" onclick="showSection('qa', document.querySelectorAll('.nav-item')[1])">
         <div class="ac-icon">Q</div>
-        <div class="ac-title"><span class="lang-ko">Q&A ëí</span><span class="lang-en" style="display:none;">Q&A Chat</span></div>
-        <div class="ac-desc"><span class="lang-ko">AI ê²½ì , ê¸°ì , ìì°, Phase ê³íì ëí´ ì§ë¬¸íì¸ì. ì¦ì ëµë³ì ë°ì ì ììµëë¤.</span><span class="lang-en" style="display:none;">Ask about AI economy, technology, budget, and phase planning. Get instant answers.</span></div>
-        <div class="ac-arrow"><span class="lang-ko">ëí ìì â</span><span class="lang-en" style="display:none;">Start Chat â</span></div>
+        <div class="ac-title"><span class="lang-ko">Q&A 대화</span><span class="lang-en" style="display:none;">Q&A Chat</span></div>
+        <div class="ac-desc"><span class="lang-ko">AI 경제, 기술, 예산, Phase 계획에 대해 질문하세요. 즉시 답변을 받을 수 있습니다.</span><span class="lang-en" style="display:none;">Ask about AI economy, technology, budget, and phase planning. Get instant answers.</span></div>
+        <div class="ac-arrow"><span class="lang-ko">대화 시작 →</span><span class="lang-en" style="display:none;">Start Chat →</span></div>
       </div>
       <div class="action-card" onclick="showSection('report', document.querySelectorAll('.nav-item')[2])">
         <div class="ac-icon">R</div>
-        <div class="ac-title"><span class="lang-ko">ë³´ê³ ì ìì±</span><span class="lang-en" style="display:none;">Generate Report</span></div>
-        <div class="ac-desc"><span class="lang-ko">ììì§ì©, ìíì©, ë´ë¹ë¶ìì© ë³´ê³ ìë¥¼ ì¦ì ìì±í©ëë¤.</span><span class="lang-en" style="display:none;">Create executive, council, or department-specific reports instantly.</span></div>
-        <div class="ac-arrow"><span class="lang-ko">ë³´ê³ ì ë§ë¤ê¸° â</span><span class="lang-en" style="display:none;">Make Report â</span></div>
+        <div class="ac-title"><span class="lang-ko">보고서 생성</span><span class="lang-en" style="display:none;">Generate Report</span></div>
+        <div class="ac-desc"><span class="lang-ko">임원진용, 의회용, 담당부서용 보고서를 즉시 생성합니다.</span><span class="lang-en" style="display:none;">Create executive, council, or department-specific reports instantly.</span></div>
+        <div class="ac-arrow"><span class="lang-ko">보고서 만들기 →</span><span class="lang-en" style="display:none;">Make Report →</span></div>
       </div>
-      <div class="action-card" onclick="showSection('team', document.querySelectorAll('.nav-item')[4])"><!-- ð§ FIX: nav-item ì¸ë±ì¤ ìì  (0=home,1=qa,2=report,3=collab,4=team) â [4]ê° ë§ì -->
+      <div class="action-card" onclick="showSection('team', document.querySelectorAll('.nav-item')[4])"><!-- 🔧 FIX: nav-item 인덱스 수정 (0=home,1=qa,2=report,3=collab,4=team) → [4]가 맞음 -->
         <div class="ac-icon">T</div>
-        <div class="ac-title"><span class="lang-ko">í ìê°</span><span class="lang-en" style="display:none;">Team</span></div>
-        <div class="ac-desc"><span class="lang-ko">Luna, Trang, KODA, FAMA â Mulberry Lab íì ë§ëë³´ì¸ì.</span><span class="lang-en" style="display:none;">Meet Luna, Trang, KODA, and FAMA â the Mulberry Lab team.</span></div>
-        <div class="ac-arrow"><span class="lang-ko">í ë³´ê¸° â</span><span class="lang-en" style="display:none;">View Team â</span></div>
+        <div class="ac-title"><span class="lang-ko">팀 소개</span><span class="lang-en" style="display:none;">Team</span></div>
+        <div class="ac-desc"><span class="lang-ko">Luna, Trang, KODA, FAMA — Mulberry Lab 팀을 만나보세요.</span><span class="lang-en" style="display:none;">Meet Luna, Trang, KODA, and FAMA — the Mulberry Lab team.</span></div>
+        <div class="ac-arrow"><span class="lang-ko">팀 보기 →</span><span class="lang-en" style="display:none;">View Team →</span></div>
       </div>
     </div>
 
     <!-- Proposal Download -->
     <div class="proposal-section">
       <div class="proposal-card">
-        <div class="prop-icon">ð</div>
+        <div class="prop-icon">📄</div>
         <div class="prop-content">
-          <div class="prop-title"><span class="lang-ko">AI ìì£¼ ì´ëìí°ë¸ ì ìì</span><span class="lang-en" style="display:none;">AI Wanju Initiative Proposal</span></div>
-          <div class="prop-desc"><span class="lang-ko">ì ì²´ íë¡ì í¸ ê°ì, ê¸°ì  ëªì¸, ìì° ë° ì¼ì </span><span class="lang-en" style="display:none;">Complete project overview, technical specs, budget & timeline</span></div>
-          <div class="prop-meta"><span class="lang-ko">v3.2 Â· PDF Â· 26 pages</span><span class="lang-en" style="display:none;">v3.2 Â· PDF Â· 26 pages</span></div>
+          <div class="prop-title"><span class="lang-ko">AI 완주 이니셔티브 제안서</span><span class="lang-en" style="display:none;">AI Wanju Initiative Proposal</span></div>
+          <div class="prop-desc"><span class="lang-ko">전체 프로젝트 개요, 기술 명세, 예산 및 일정</span><span class="lang-en" style="display:none;">Complete project overview, technical specs, budget & timeline</span></div>
+          <div class="prop-meta"><span class="lang-ko">v3.2 · PDF · 26 pages</span><span class="lang-en" style="display:none;">v3.2 · PDF · 26 pages</span></div>
         </div>
         <div class="prop-btn">
           <button class="download-btn" onclick="downloadProposal()">
-            <span class="lang-ko">ð¥ ë¤ì´ë¡ë</span><span class="lang-en" style="display:none;">ð¥ Download</span>
+            <span class="lang-ko">📥 다운로드</span><span class="lang-en" style="display:none;">📥 Download</span>
           </button>
         </div>
       </div>
@@ -1237,60 +1237,60 @@ body {
     <div class="home-initiative">
       <div class="hi-badge">Wanju Initiative V3.2</div>
       <div class="hi-body">
-        <div class="hi-title"><span class="lang-ko">"ìì£¼ë ëíë¯¼êµ­ ëì AI ê²½ì ì ì²« ë²ì§¸ ì¤ì¦ ì§ì­ì´ ë©ëë¤"</span><span class="lang-en" style="display:none;">"Wanju becomes Korea's first agricultural AI economy demonstration region"</span></div>
-        <div class="hi-text"><span class="lang-ko">ë¸ê¸°Â·í¬ëÂ·ì¸ì¼ ë± ëì ê°êµ° ìì£¼. ëë¯¼ AI ë¹ìë¡ ììí´, ì ì£¼-ìì£¼ íì ëìì ì°ê³íê³ , ê·ëê·ì´ ì¸êµ¬(ì° 900ëª+)ì í¨ê» ì±ì¥í©ëë¤. ìì ê²ë¶í° ììí´, ì±ê³¼ë¥¼ ì¦ëªíê³ , ì ë¶ìì ì êµ­ì¼ë¡ íëí©ëë¤.</span><span class="lang-en" style="display:none;">Wanju â agricultural powerhouse of strawberry, grape, ginseng. Starting with a Farmer AI Secretary, connecting to the Jeonju-Wanju Innovation City, and growing with 900+ annual farming returnees. Starting small, proving impact, scaling from Jeonbuk nationwide.</span></div>
+        <div class="hi-title"><span class="lang-ko">"완주는 대한민국 농업 AI 경제의 첫 번째 실증 지역이 됩니다"</span><span class="lang-en" style="display:none;">"Wanju becomes Korea's first agricultural AI economy demonstration region"</span></div>
+        <div class="hi-text"><span class="lang-ko">딸기·포도·인삼 등 농업 강군 완주. 농민 AI 비서로 시작해, 전주-완주 혁신도시와 연계하고, 귀농귀촌 인구(연 900명+)와 함께 성장합니다. 작은 것부터 시작해, 성과를 증명하고, 전북에서 전국으로 확대합니다.</span><span class="lang-en" style="display:none;">Wanju — agricultural powerhouse of strawberry, grape, ginseng. Starting with a Farmer AI Secretary, connecting to the Jeonju-Wanju Innovation City, and growing with 900+ annual farming returnees. Starting small, proving impact, scaling from Jeonbuk nationwide.</span></div>
       </div>
     </div>
   </div>
 
   <!-- Q&A -->
   <div class="section" id="sec-qa">
-    <!-- í­ -->
+    <!-- 탭 -->
     <div class="qa-mode-tabs">
       <button class="qa-mode-tab active" onclick="setQaMode('chat')">
-        <span class="lang-ko">Q&A ì±í</span><span class="lang-en" style="display:none;">Q&A Chat</span>
+        <span class="lang-ko">Q&A 채팅</span><span class="lang-en" style="display:none;">Q&A Chat</span>
       </button>
       <button class="qa-mode-tab" onclick="setQaMode('file')">
-        <span class="lang-ko">íì¼ ë¶ì</span><span class="lang-en" style="display:none;">File Analysis</span>
+        <span class="lang-ko">파일 분석</span><span class="lang-en" style="display:none;">File Analysis</span>
       </button>
     </div>
 
     <!-- Chat Mode -->
     <div class="qa-chat active">
-      <!-- ì±í ë©ìì§ ìì­ -->
-      <!-- ð§ FIX: id="qaMessages" ì¶ê° â addMsg() / addTyping()ì´ getElementById('qaMessages')ë¡ ì°¾ì -->
+      <!-- 채팅 메시지 영역 -->
+      <!-- 🔧 FIX: id="qaMessages" 추가 — addMsg() / addTyping()이 getElementById('qaMessages')로 찾음 -->
       <div class="qa-chat-messages" id="qaMessages">
         <div class="chat-message">
           <div class="chat-avatar"><img src="/static/Co_Luna.png" alt="Luna"></div>
-          <div class="chat-bubble"><span class="lang-ko">ìëíì¸ì! ì§ë¬¸ì ë¨ê²¨ì£¼ì¸ì.</span><span class="lang-en" style="display:none;">Hi! Leave your question.</span></div>
+          <div class="chat-bubble"><span class="lang-ko">안녕하세요! 질문을 남겨주세요.</span><span class="lang-en" style="display:none;">Hi! Leave your question.</span></div>
         </div>
       </div>
 
-      <!-- ì£¼ì ì£¼ì  ì¹© ì¹ì -->
+      <!-- 주요 주제 칩 섹션 -->
       <div class="qa-topics-section">
-        <div class="qa-topics-label"><span class="lang-ko">ì£¼ì ì£¼ì </span><span class="lang-en" style="display:none;">Topics</span></div>
+        <div class="qa-topics-label"><span class="lang-ko">주요 주제</span><span class="lang-en" style="display:none;">Topics</span></div>
         <div class="qa-topics">
-          <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">AI ê²½ì </span><span class="lang-en" style="display:none;">AI Economy</span></span>
-          <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">ëìÂ·ë¸ê¸°</span><span class="lang-en" style="display:none;">Farming & Strawberry</span></span>
-          <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">íì ëì</span><span class="lang-en" style="display:none;">Innovation City</span></span>
-          <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">ì°½ì ì±ì§</span><span class="lang-en" style="display:none;">Startup Hub</span></span>
-          <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">WiFi ì¼ì±</span><span class="lang-en" style="display:none;">WiFi Sensing</span></span>
-          <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">ìì°</span><span class="lang-en" style="display:none;">Budget</span></span>
+          <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">AI 경제</span><span class="lang-en" style="display:none;">AI Economy</span></span>
+          <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">농업·딸기</span><span class="lang-en" style="display:none;">Farming & Strawberry</span></span>
+          <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">혁신도시</span><span class="lang-en" style="display:none;">Innovation City</span></span>
+          <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">창업 성지</span><span class="lang-en" style="display:none;">Startup Hub</span></span>
+          <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">WiFi 센싱</span><span class="lang-en" style="display:none;">WiFi Sensing</span></span>
+          <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">예산</span><span class="lang-en" style="display:none;">Budget</span></span>
         </div>
       </div>
 
-      <!-- ì±í ìë ¥ ìì­ -->
+      <!-- 채팅 입력 영역 -->
       <div class="qa-chat-input-area">
-        <!-- ì²¨ë¶ë íì¼ ëª©ë¡ -->
+        <!-- 첨부된 파일 목록 -->
         <div class="qa-attached-files" id="qaAttachedFiles"></div>
         
-        <!-- ìë ¥ í -->
+        <!-- 입력 행 -->
         <div class="qa-input-row">
-          <textarea class="qa-chat-input" id="qaMessageInput" placeholder="ì§ë¬¸ì ìë ¥íì¸ì..." rows="2"></textarea>
+          <textarea class="qa-chat-input" id="qaMessageInput" placeholder="질문을 입력하세요..." rows="2"></textarea>
           <input type="file" id="qaFileInput" class="upload-input" multiple onchange="handleQaFileSelect(event)">
-          <button class="qa-attach-btn" onclick="document.getElementById('qaFileInput').click()" title="íì¼ ì²¨ë¶">ð</button>
+          <button class="qa-attach-btn" onclick="document.getElementById('qaFileInput').click()" title="파일 첨부">📎</button>
           <button class="qa-send-btn" onclick="sendQaMessage()">
-            <span class="lang-ko">ì ì¡</span><span class="lang-en" style="display:none;">Send</span>
+            <span class="lang-ko">전송</span><span class="lang-en" style="display:none;">Send</span>
           </button>
         </div>
       </div>
@@ -1298,41 +1298,41 @@ body {
 
     <!-- File Analysis Mode -->
     <div class="qa-file-panel">
-      <!-- ëë¡­ì¡´ -->
+      <!-- 드롭존 -->
       <div style="border: 2px dashed var(--border); border-radius: 12px; padding: 28px 16px; text-align: center; cursor: pointer; transition: all 0.2s;" id="fileDropZone" onclick="document.getElementById('fileInput').click()" ondrop="handleFileDrop(event)" ondragover="handleFileDragOver(event)" ondragleave="handleFileDragLeave()">
         <input type="file" id="fileInput" style="display:none" accept=".txt,.md,.html,.csv,.pdf" onchange="handleFileSelect(event)">
         <div style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">
-          <span class="lang-ko">ð íì¼ ìë¡ë</span><span class="lang-en" style="display:none;">ð Upload File</span>
+          <span class="lang-ko">📎 파일 업로드</span><span class="lang-en" style="display:none;">📎 Upload File</span>
         </div>
         <div style="font-size:11px; color:var(--text-tertiary);">
-          <span class="lang-ko">í´ë¦­ ëë ëëê·¸ â .txt .md .html .csv .pdf</span><span class="lang-en" style="display:none;">Click or drag â .txt .md .html .csv .pdf</span>
+          <span class="lang-ko">클릭 또는 드래그 — .txt .md .html .csv .pdf</span><span class="lang-en" style="display:none;">Click or drag — .txt .md .html .csv .pdf</span>
         </div>
       </div>
 
-      <!-- íì¼ ì ë³´ -->
+      <!-- 파일 정보 -->
       <div id="fileInfoBar" style="display:none; background:var(--bg-tertiary); border:1px solid var(--border); border-radius:8px; padding:9px 12px; align-items:center; gap:8px;">
         <span id="fileName" style="flex:1; font-size:13px; font-weight:600; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
         <span id="fileSize" style="font-size:11px; color:var(--text-tertiary); white-space:nowrap;"></span>
-        <button onclick="clearFile()" style="background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:18px; line-height:1; padding:0;">Ã</button>
+        <button onclick="clearFile()" style="background:none; border:none; color:var(--text-tertiary); cursor:pointer; font-size:18px; line-height:1; padding:0;">×</button>
       </div>
 
-      <!-- ë¶ì ë²í¼ -->
+      <!-- 분석 버튼 -->
       <button id="analyzeBtn" onclick="analyzeFile()" disabled style="background:var(--purple); color:white; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight:700; cursor:pointer; transition:opacity 0.2s; width:100%;">
-        <span class="lang-ko">ë¶ì ìì</span><span class="lang-en" style="display:none;">Start Analysis</span>
+        <span class="lang-ko">분석 시작</span><span class="lang-en" style="display:none;">Start Analysis</span>
       </button>
 
-      <!-- ë¶ì ìí -->
+      <!-- 분석 상태 -->
       <div id="analysisStatus" style="font-size:12px; color:var(--text-tertiary); text-align:center; min-height:18px;"></div>
 
-      <!-- ê²°ê³¼ -->
+      <!-- 결과 -->
       <div id="analysisResultWrap" style="display:none; flex-direction:column; gap:8px;">
         <div id="analysisResultText" style="background:var(--bg-tertiary); border:1px solid var(--border); border-radius:10px; padding:14px; font-size:13px; line-height:1.7; color:var(--text-secondary); white-space:pre-wrap; max-height:300px; overflow-y:auto;"></div>
         <div style="display:flex; gap:8px;">
           <button onclick="downloadSummary()" style="flex:1; padding:9px 6px; border:1px solid var(--border); border-radius:8px; background:var(--bg-secondary); color:var(--text-secondary); font-size:12px; cursor:pointer; font-weight:600; transition:all 0.2s;">
-            <span class="lang-ko">ë¤ì´ë¡ë .md</span><span class="lang-en" style="display:none;">Download .md</span>
+            <span class="lang-ko">다운로드 .md</span><span class="lang-en" style="display:none;">Download .md</span>
           </button>
           <button onclick="copySummary()" style="flex:1; padding:9px 6px; border:1px solid var(--border); border-radius:8px; background:var(--bg-secondary); color:var(--text-secondary); font-size:12px; cursor:pointer; font-weight:600; transition:all 0.2s;">
-            <span class="lang-ko">í´ë¦½ë³´ë ë³µì¬</span><span class="lang-en" style="display:none;">Copy</span>
+            <span class="lang-ko">클립보드 복사</span><span class="lang-en" style="display:none;">Copy</span>
           </button>
         </div>
       </div>
@@ -1340,33 +1340,33 @@ body {
 
     <div class="qa-info">
       <div class="qi-section">
-        <h4><span class="lang-ko">ì£¼ì ì£¼ì </span><span class="lang-en" style="display:none;">Topics</span></h4>
+        <h4><span class="lang-ko">주요 주제</span><span class="lang-en" style="display:none;">Topics</span></h4>
         <div>
-          <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">AI ê²½ì </span><span class="lang-en" style="display:none;">AI Economy</span></span>
-          <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">ëìÂ·ë¸ê¸°</span><span class="lang-en" style="display:none;">Farming & Strawberry</span></span>
-          <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">íì ëì</span><span class="lang-en" style="display:none;">Innovation City</span></span>
-          <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">ì°½ì ì±ì§</span><span class="lang-en" style="display:none;">Startup Hub</span></span>
-          <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">WiFi ì¼ì±</span><span class="lang-en" style="display:none;">WiFi Sensing</span></span>
-          <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">ìì°</span><span class="lang-en" style="display:none;">Budget</span></span>
+          <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">AI 경제</span><span class="lang-en" style="display:none;">AI Economy</span></span>
+          <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">농업·딸기</span><span class="lang-en" style="display:none;">Farming & Strawberry</span></span>
+          <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">혁신도시</span><span class="lang-en" style="display:none;">Innovation City</span></span>
+          <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">창업 성지</span><span class="lang-en" style="display:none;">Startup Hub</span></span>
+          <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">WiFi 센싱</span><span class="lang-en" style="display:none;">WiFi Sensing</span></span>
+          <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">예산</span><span class="lang-en" style="display:none;">Budget</span></span>
           <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">Phase 1</span><span class="lang-en" style="display:none;">Phase 1</span></span>
           <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">Human Approval</span><span class="lang-en" style="display:none;">Human Approval</span></span>
           <span class="topic-chip" onclick="askQ(this)"><span class="lang-ko">Steward</span><span class="lang-en" style="display:none;">Steward</span></span>
         </div>
       </div>
       <div class="qi-section">
-        <h4><span class="lang-ko">íµì¬ ì§í</span><span class="lang-en" style="display:none;">Key Metrics</span></h4>
+        <h4><span class="lang-ko">핵심 지표</span><span class="lang-en" style="display:none;">Key Metrics</span></h4>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;">
-            <div style="font-size:18px;font-weight:800;color:var(--purple);">7.5ìµ ì</div>
-            <div style="font-size:11px;color:var(--text-tertiary);"><span class="lang-ko">ì´ê¸° í¬ì</span><span class="lang-en" style="display:none;">Initial Investment</span></div>
+            <div style="font-size:18px;font-weight:800;color:var(--purple);">7.5억 원</div>
+            <div style="font-size:11px;color:var(--text-tertiary);"><span class="lang-ko">초기 투자</span><span class="lang-en" style="display:none;">Initial Investment</span></div>
           </div>
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;">
             <div style="font-size:18px;font-weight:800;color:var(--green);">90 Days</div>
-            <div style="font-size:11px;color:var(--text-tertiary);"><span class="lang-ko">Phase 1 ê¸°ê°</span><span class="lang-en" style="display:none;">Phase 1 Timeline</span></div>
+            <div style="font-size:11px;color:var(--text-tertiary);"><span class="lang-ko">Phase 1 기간</span><span class="lang-en" style="display:none;">Phase 1 Timeline</span></div>
           </div>
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;">
             <div style="font-size:18px;font-weight:800;color:var(--blue);">2030-2035</div>
-            <div style="font-size:11px;color:var(--text-tertiary);"><span class="lang-ko">ì êµ­ íë</span><span class="lang-en" style="display:none;">National Rollout</span></div>
+            <div style="font-size:11px;color:var(--text-tertiary);"><span class="lang-ko">전국 확대</span><span class="lang-en" style="display:none;">National Rollout</span></div>
           </div>
         </div>
       </div>
@@ -1377,59 +1377,59 @@ body {
   <div class="section" id="sec-report">
     <div class="report-form-panel">
       <div>
-        <div class="rf-label"><span class="lang-ko">ìì ì</span><span class="lang-en" style="display:none;">Recipient</span></div>
-        <!-- ð§ TRANG FIX: ìì ìë¥¼ ëë¡­ë¤ì´ì¼ë¡ ë³ê²½ + ê° ìì ìë³ ì¶ì² ë³´ê³ ì ì í ìë ì í -->
+        <div class="rf-label"><span class="lang-ko">수신자</span><span class="lang-en" style="display:none;">Recipient</span></div>
+        <!-- 🔧 TRANG FIX: 수신자를 드롭다운으로 변경 + 각 수신자별 추천 보고서 유형 자동 선택 -->
         <select class="rf-select" id="rRecipient" onchange="updateRecommendedType()">
-          <option value="gunsoo" data-name="ìì£¼êµ°ì ê·í" data-type="exec">
-            <span class="lang-ko">ìì£¼êµ°ì</span>
+          <option value="gunsoo" data-name="완주군수 귀하" data-type="exec">
+            <span class="lang-ko">완주군수</span>
           </option>
-          <option value="jichacheong" data-name="ì ë¶ëì§ì¬ ê·í" data-type="exec">
-            <span class="lang-ko">ëì²­ ì§ìì²´ì¥</span>
+          <option value="jichacheong" data-name="전북도지사 귀하" data-type="exec">
+            <span class="lang-ko">도청 지자체장</span>
           </option>
-          <option value="imwon" data-name="ììì§ ê·í" data-type="exec">
-            <span class="lang-ko">ììì§</span>
+          <option value="imwon" data-name="임원진 귀하" data-type="exec">
+            <span class="lang-ko">임원진</span>
           </option>
-          <option value="council" data-name="ìì£¼êµ°ìí ê·í" data-type="council">
-            <span class="lang-ko">ìí ìì</span>
+          <option value="council" data-name="완주군의회 귀하" data-type="council">
+            <span class="lang-ko">의회 의원</span>
           </option>
-          <option value="dept" data-name="ë´ë¹ë¶ì ê·í" data-type="dept">
-            <span class="lang-ko">ë´ë¹ë¶ì</span>
+          <option value="dept" data-name="담당부서 귀하" data-type="dept">
+            <span class="lang-ko">담당부서</span>
           </option>
         </select>
         <div class="rf-hint" id="recipientHint" style="font-size:10px; color:var(--text-tertiary); margin-top:6px;">
-          <span class="lang-ko">ð ì¶ì² ë³´ê³ ì: ììì§ì© (ìì¬ê²°ì ìì©)</span>
-          <span class="lang-en" style="display:none;">ð Recommended: Executive (1-page)</span>
+          <span class="lang-ko">📌 추천 보고서: 임원진용 (의사결정자용)</span>
+          <span class="lang-en" style="display:none;">📌 Recommended: Executive (1-page)</span>
         </div>
       </div>
       <div>
-        <div class="rf-label"><span class="lang-ko">ë³´ê³ ì ì í</span><span class="lang-en" style="display:none;">Report Type</span></div>
+        <div class="rf-label"><span class="lang-ko">보고서 유형</span><span class="lang-en" style="display:none;">Report Type</span></div>
         <div class="rf-type-grid" id="rtypeGrid">
           <button class="rf-type-btn selected" data-type="exec" onclick="selectType(this)">
             <div class="rt-icon">E</div>
-            <div><div class="rt-name"><span class="lang-ko">ììì§ì©</span><span class="lang-en" style="display:none;">Executive</span></div><div class="rt-desc"><span class="lang-ko">1íì´ì§ ìì½ (ìì¬ê²°ì ìì©)</span><span class="lang-en" style="display:none;">1-page summary for decision makers</span></div></div>
+            <div><div class="rt-name"><span class="lang-ko">임원진용</span><span class="lang-en" style="display:none;">Executive</span></div><div class="rt-desc"><span class="lang-ko">1페이지 요약 (의사결정자용)</span><span class="lang-en" style="display:none;">1-page summary for decision makers</span></div></div>
           </button>
           <button class="rf-type-btn" data-type="council" onclick="selectType(this)">
             <div class="rt-icon">C</div>
-            <div><div class="rt-name"><span class="lang-ko">ìíì©</span><span class="lang-en" style="display:none;">Council Brief</span></div><div class="rt-desc"><span class="lang-ko">ìì¸ ê°ì (ììì©)</span><span class="lang-en" style="display:none;">Detailed overview for council members</span></div></div>
+            <div><div class="rt-name"><span class="lang-ko">의회용</span><span class="lang-en" style="display:none;">Council Brief</span></div><div class="rt-desc"><span class="lang-ko">상세 개요 (의원용)</span><span class="lang-en" style="display:none;">Detailed overview for council members</span></div></div>
           </button>
           <button class="rf-type-btn" data-type="dept" onclick="selectType(this)">
             <div class="rt-icon">D</div>
-            <div><div class="rt-name"><span class="lang-ko">ë´ë¹ë¶ìì©</span><span class="lang-en" style="display:none;">Department</span></div><div class="rt-desc"><span class="lang-ko">ì¤ë¬´ ì²´í¬ë¦¬ì¤í¸</span><span class="lang-en" style="display:none;">Operational checklist for departments</span></div></div>
+            <div><div class="rt-name"><span class="lang-ko">담당부서용</span><span class="lang-en" style="display:none;">Department</span></div><div class="rt-desc"><span class="lang-ko">실무 체크리스트</span><span class="lang-en" style="display:none;">Operational checklist for departments</span></div></div>
           </button>
         </div>
       </div>
-      <button class="rf-gen-btn" onclick="genReport()"><span class="lang-ko">ë³´ê³ ì ìì±</span><span class="lang-en" style="display:none;">Generate Report</span></button>
+      <button class="rf-gen-btn" onclick="genReport()"><span class="lang-ko">보고서 생성</span><span class="lang-en" style="display:none;">Generate Report</span></button>
     </div>
     <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
       <div class="report-preview" id="rPreview">
         <div class="rp-empty">
           <div class="rpe-icon">R</div>
-          <div style="color:var(--text-tertiary);"><span class="lang-ko">ì íì ì ííê³ <br><strong style="color:var(--text-secondary);">ë³´ê³ ì ìì±</strong>ì í´ë¦­íì¸ì</span><span class="lang-en" style="display:none;">Select type and click<br><strong style="color:var(--text-secondary);">Generate Report</strong></span></div>
+          <div style="color:var(--text-tertiary);"><span class="lang-ko">유형을 선택하고<br><strong style="color:var(--text-secondary);">보고서 생성</strong>을 클릭하세요</span><span class="lang-en" style="display:none;">Select type and click<br><strong style="color:var(--text-secondary);">Generate Report</strong></span></div>
         </div>
       </div>
       <div class="rdoc-actions" id="rActions" style="display:none;">
-        <button class="rd-action-btn rd-print" onclick="printDoc()"><span class="lang-ko">ì¸ì</span><span class="lang-en" style="display:none;">Print</span></button>
-        <button class="rd-action-btn rd-copy" onclick="copyDoc()"><span class="lang-ko">íì¤í¸ ë³µì¬</span><span class="lang-en" style="display:none;">Copy Text</span></button>
+        <button class="rd-action-btn rd-print" onclick="printDoc()"><span class="lang-ko">인쇄</span><span class="lang-en" style="display:none;">Print</span></button>
+        <button class="rd-action-btn rd-copy" onclick="copyDoc()"><span class="lang-ko">텍스트 복사</span><span class="lang-en" style="display:none;">Copy Text</span></button>
       </div>
     </div>
   </div>
@@ -1440,7 +1440,7 @@ body {
       <!-- Left: Team Status -->
       <div style="flex:1; background:var(--bg); border-right:1px solid var(--border); overflow-y:auto; padding:24px;">
         <div style="margin-bottom:32px;">
-          <h2 style="font-size:20px; font-weight:900; color:var(--text-primary); margin-bottom:16px;"><span class="lang-ko">íì ì¤ë¹ í</span><span class="lang-en" style="display:none;">Meeting Prep Team</span></h2>
+          <h2 style="font-size:20px; font-weight:900; color:var(--text-primary); margin-bottom:16px;"><span class="lang-ko">회의 준비 팀</span><span class="lang-en" style="display:none;">Meeting Prep Team</span></h2>
           <div style="display:grid; grid-template-columns:1fr; gap:12px;">
             <!-- Luna -->
             <div style="background:var(--purple-dim); border:1px solid #e9d5ff; border-radius:12px; padding:16px;">
@@ -1448,13 +1448,13 @@ body {
                 <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--blue)); display:flex; align-items:center; justify-content:center; color:white; font-weight:800;">L</div>
                 <div>
                   <div style="font-weight:700; color:var(--purple);">Luna</div>
-                  <div style="font-size:11px; color:var(--text-tertiary);"><span class="lang-ko">Q&A Â· ë¦¬ìì</span><span class="lang-en" style="display:none;">Q&A Â· Reception</span></div>
+                  <div style="font-size:11px; color:var(--text-tertiary);"><span class="lang-ko">Q&A · 리셉션</span><span class="lang-en" style="display:none;">Q&A · Reception</span></div>
                 </div>
               </div>
               <div style="background:white; border:1px solid var(--border); border-radius:8px; padding:10px; font-size:12px; color:var(--text-secondary);">
-                <div style="margin-bottom:6px;"><span class="lang-ko">â Q&A ëµë³ 6/6 ìë£</span><span class="lang-en" style="display:none;">â Q&A Answers 6/6 Done</span></div>
-                <div style="margin-bottom:6px;"><span class="lang-ko">â ì¤í ë©í¸ ì¤ë¹</span><span class="lang-en" style="display:none;">â Opening Ready</span></div>
-                <div style="color:var(--green);"><span class="lang-ko">ð¢ ìëµ ì¤ë¹ ìë£</span><span class="lang-en" style="display:none;">ð¢ Ready to respond</span></div>
+                <div style="margin-bottom:6px;"><span class="lang-ko">✅ Q&A 답변 6/6 완료</span><span class="lang-en" style="display:none;">✅ Q&A Answers 6/6 Done</span></div>
+                <div style="margin-bottom:6px;"><span class="lang-ko">✅ 오픈 멘트 준비</span><span class="lang-en" style="display:none;">✅ Opening Ready</span></div>
+                <div style="color:var(--green);"><span class="lang-ko">🟢 응답 준비 완료</span><span class="lang-en" style="display:none;">🟢 Ready to respond</span></div>
               </div>
             </div>
 
@@ -1464,13 +1464,13 @@ body {
                 <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, var(--green), #34d399); display:flex; align-items:center; justify-content:center; color:white; font-weight:800;">T</div>
                 <div>
                   <div style="font-weight:700; color:var(--green);">Trang</div>
-                  <div style="font-size:11px; color:var(--text-tertiary);"><span class="lang-ko">ì´ì Â· ì¡°ì¨</span><span class="lang-en" style="display:none;">Operations</span></div>
+                  <div style="font-size:11px; color:var(--text-tertiary);"><span class="lang-ko">운영 · 조율</span><span class="lang-en" style="display:none;">Operations</span></div>
                 </div>
               </div>
               <div style="background:white; border:1px solid var(--border); border-radius:8px; padding:10px; font-size:12px; color:var(--text-secondary);">
-                <div style="margin-bottom:6px;"><span class="lang-ko">â íìì¤ íë³´</span><span class="lang-en" style="display:none;">â Venue Confirmed</span></div>
-                <div style="margin-bottom:6px;"><span class="lang-ko">â ìë£ ì ë ¬ ìë£</span><span class="lang-en" style="display:none;">â Materials Ready</span></div>
-                <div style="color:var(--green);"><span class="lang-ko">ð¢ ì´ì ì¤ë¹ ìë£</span><span class="lang-en" style="display:none;">ð¢ Operations Ready</span></div>
+                <div style="margin-bottom:6px;"><span class="lang-ko">✅ 회의실 확보</span><span class="lang-en" style="display:none;">✅ Venue Confirmed</span></div>
+                <div style="margin-bottom:6px;"><span class="lang-ko">✅ 자료 정렬 완료</span><span class="lang-en" style="display:none;">✅ Materials Ready</span></div>
+                <div style="color:var(--green);"><span class="lang-ko">🟢 운영 준비 완료</span><span class="lang-en" style="display:none;">🟢 Operations Ready</span></div>
               </div>
             </div>
 
@@ -1480,13 +1480,13 @@ body {
                 <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, var(--blue), #06b6d4); display:flex; align-items:center; justify-content:center; color:white; font-weight:800;">K</div>
                 <div>
                   <div style="font-weight:700; color:var(--blue);">KODA</div>
-                  <div style="font-size:11px; color:var(--text-tertiary);"><span class="lang-ko">ê¸°ì  Â· ì§ì</span><span class="lang-en" style="display:none;">Technical</span></div>
+                  <div style="font-size:11px; color:var(--text-tertiary);"><span class="lang-ko">기술 · 지원</span><span class="lang-en" style="display:none;">Technical</span></div>
                 </div>
               </div>
               <div style="background:white; border:1px solid var(--border); border-radius:8px; padding:10px; font-size:12px; color:var(--text-secondary);">
-                <div style="margin-bottom:6px;"><span class="lang-ko">â Railway ì ê²</span><span class="lang-en" style="display:none;">â Railway Check</span></div>
-                <div style="margin-bottom:6px;"><span class="lang-ko">â Q&A ìì¤í íì¤í¸</span><span class="lang-en" style="display:none;">â System Test</span></div>
-                <div style="color:var(--green);"><span class="lang-ko">ð¢ ê¸°ì  ì¤ë¹ ìë£</span><span class="lang-en" style="display:none;">ð¢ Technical Ready</span></div>
+                <div style="margin-bottom:6px;"><span class="lang-ko">✅ Railway 점검</span><span class="lang-en" style="display:none;">✅ Railway Check</span></div>
+                <div style="margin-bottom:6px;"><span class="lang-ko">✅ Q&A 시스템 테스트</span><span class="lang-en" style="display:none;">✅ System Test</span></div>
+                <div style="color:var(--green);"><span class="lang-ko">🟢 기술 준비 완료</span><span class="lang-en" style="display:none;">🟢 Technical Ready</span></div>
               </div>
             </div>
 
@@ -1496,13 +1496,13 @@ body {
                 <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, #ec4899, #f59e0b); display:flex; align-items:center; justify-content:center; color:white; font-weight:800;">R</div>
                 <div>
                   <div style="font-weight:700; color:#ec4899;">re.eul</div>
-                  <div style="font-size:11px; color:var(--text-tertiary);"><span class="lang-ko">ë¦¬ëì­ Â· ìì¥</span><span class="lang-en" style="display:none;">Leadership</span></div>
+                  <div style="font-size:11px; color:var(--text-tertiary);"><span class="lang-ko">리더십 · 의장</span><span class="lang-en" style="display:none;">Leadership</span></div>
                 </div>
               </div>
               <div style="background:white; border:1px solid var(--border); border-radius:8px; padding:10px; font-size:12px; color:var(--text-secondary);">
-                <div style="margin-bottom:6px;"><span class="lang-ko">â ë°í ìë£ ì¤ë¹</span><span class="lang-en" style="display:none;">â Presentation Ready</span></div>
-                <div style="margin-bottom:6px;"><span class="lang-ko">â³ ìì¥ë ì ë¢° êµ¬ì¶</span><span class="lang-en" style="display:none;">â³ Stakeholder Prep</span></div>
-                <div style="color:var(--text-tertiary);"><span class="lang-ko">ð¡ ì§í ì¤...</span><span class="lang-en" style="display:none;">ð¡ In Progress...</span></div>
+                <div style="margin-bottom:6px;"><span class="lang-ko">✅ 발표 자료 준비</span><span class="lang-en" style="display:none;">✅ Presentation Ready</span></div>
+                <div style="margin-bottom:6px;"><span class="lang-ko">⏳ 의장님 신뢰 구축</span><span class="lang-en" style="display:none;">⏳ Stakeholder Prep</span></div>
+                <div style="color:var(--text-tertiary);"><span class="lang-ko">🟡 진행 중...</span><span class="lang-en" style="display:none;">🟡 In Progress...</span></div>
               </div>
             </div>
           </div>
@@ -1510,22 +1510,22 @@ body {
 
         <!-- Recent Updates -->
         <div style="margin-bottom:32px;">
-          <h3 style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:12px;"><span class="lang-ko">ìµê·¼ ìë°ì´í¸</span><span class="lang-en" style="display:none;">Recent Updates</span></h3>
+          <h3 style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:12px;"><span class="lang-ko">최근 업데이트</span><span class="lang-en" style="display:none;">Recent Updates</span></h3>
           <div style="background:var(--bg-tertiary); border:1px solid var(--border); border-radius:8px; overflow:hidden;">
             <div style="padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; font-size:12px;">
-              <div><strong style="color:var(--purple);">Luna</strong> <span class="lang-ko">Q&A ìì±</span><span class="lang-en" style="display:none;">Q&A Done</span></div>
+              <div><strong style="color:var(--purple);">Luna</strong> <span class="lang-ko">Q&A 완성</span><span class="lang-en" style="display:none;">Q&A Done</span></div>
               <div style="color:var(--text-tertiary);">09:30</div>
             </div>
             <div style="padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; font-size:12px;">
-              <div><strong style="color:var(--green);">Trang</strong> <span class="lang-ko">íìì¤ íë³´</span><span class="lang-en" style="display:none;">Venue Set</span></div>
+              <div><strong style="color:var(--green);">Trang</strong> <span class="lang-ko">회의실 확보</span><span class="lang-en" style="display:none;">Venue Set</span></div>
               <div style="color:var(--text-tertiary);">09:15</div>
             </div>
             <div style="padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; font-size:12px;">
-              <div><strong style="color:var(--blue);">KODA</strong> <span class="lang-ko">ìì¤í íì¤í¸ ìë£</span><span class="lang-en" style="display:none;">Tests Passed</span></div>
+              <div><strong style="color:var(--blue);">KODA</strong> <span class="lang-ko">시스템 테스트 완료</span><span class="lang-en" style="display:none;">Tests Passed</span></div>
               <div style="color:var(--text-tertiary);">09:00</div>
             </div>
             <div style="padding:12px; display:flex; justify-content:space-between; font-size:12px;">
-              <div><strong style="color:#ec4899;">re.eul</strong> <span class="lang-ko">íì ì¤ë¹ ìì</span><span class="lang-en" style="display:none;">Meeting Start</span></div>
+              <div><strong style="color:#ec4899;">re.eul</strong> <span class="lang-ko">회의 준비 시작</span><span class="lang-en" style="display:none;">Meeting Start</span></div>
               <div style="color:var(--text-tertiary);">08:00</div>
             </div>
           </div>
@@ -1535,31 +1535,31 @@ body {
       <!-- Right: Checklist & Files -->
       <div style="flex:1; background:var(--bg-secondary); border-right:1px solid var(--border); overflow-y:auto; padding:24px;">
         <div style="margin-bottom:32px;">
-          <h3 style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:12px;"><span class="lang-ko">íì ì¤ë¹ ì²´í¬ë¦¬ì¤í¸</span><span class="lang-en" style="display:none;">Meeting Checklist</span></h3>
+          <h3 style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:12px;"><span class="lang-ko">회의 준비 체크리스트</span><span class="lang-en" style="display:none;">Meeting Checklist</span></h3>
           <div style="background:white; border:1px solid var(--border); border-radius:8px; overflow:hidden;">
             <div style="padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:13px;"><span class="lang-ko">ð ê¸°ì  ê²ì¦</span><span class="lang-en" style="display:none;">Technical Verification</span></span>
+              <span style="font-size:13px;"><span class="lang-ko">🔍 기술 검증</span><span class="lang-en" style="display:none;">Technical Verification</span></span>
               <div style="width:60px; height:20px; background:#e5e7eb; border-radius:10px; position:relative;">
                 <div style="width:100%; height:100%; background:var(--green); border-radius:10px;"></div>
                 <span style="position:absolute; right:8px; top:2px; font-size:10px; color:white; font-weight:700;">100%</span>
               </div>
             </div>
             <div style="padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:13px;"><span class="lang-ko">ð ìë£ ì¤ë¹</span><span class="lang-en" style="display:none;">Materials</span></span>
+              <span style="font-size:13px;"><span class="lang-ko">📋 자료 준비</span><span class="lang-en" style="display:none;">Materials</span></span>
               <div style="width:60px; height:20px; background:#e5e7eb; border-radius:10px; position:relative;">
                 <div style="width:85%; height:100%; background:var(--green); border-radius:10px;"></div>
                 <span style="position:absolute; right:8px; top:2px; font-size:10px; color:white; font-weight:700;">85%</span>
               </div>
             </div>
             <div style="padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:13px;"><span class="lang-ko">ð¬ Q&A ì¤ë¹</span><span class="lang-en" style="display:none;">Q&A Ready</span></span>
+              <span style="font-size:13px;"><span class="lang-ko">💬 Q&A 준비</span><span class="lang-en" style="display:none;">Q&A Ready</span></span>
               <div style="width:60px; height:20px; background:#e5e7eb; border-radius:10px; position:relative;">
                 <div style="width:100%; height:100%; background:var(--green); border-radius:10px;"></div>
                 <span style="position:absolute; right:8px; top:2px; font-size:10px; color:white; font-weight:700;">100%</span>
               </div>
             </div>
             <div style="padding:12px; display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:13px;"><span class="lang-ko">ð¤ ì ë¢° êµ¬ì¶</span><span class="lang-en" style="display:none;">Trust Building</span></span>
+              <span style="font-size:13px;"><span class="lang-ko">🤝 신뢰 구축</span><span class="lang-en" style="display:none;">Trust Building</span></span>
               <div style="width:60px; height:20px; background:#e5e7eb; border-radius:10px; position:relative;">
                 <div style="width:60%; height:100%; background:var(--text-tertiary); border-radius:10px;"></div>
                 <span style="position:absolute; right:8px; top:2px; font-size:10px; color:white; font-weight:700;">60%</span>
@@ -1569,23 +1569,23 @@ body {
         </div>
 
         <div>
-          <h3 style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:12px;"><span class="lang-ko">ê³µì  íì¼</span><span class="lang-en" style="display:none;">Shared Files</span></h3>
+          <h3 style="font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:12px;"><span class="lang-ko">공유 파일</span><span class="lang-en" style="display:none;">Shared Files</span></h3>
           <div style="background:white; border:1px solid var(--border); border-radius:8px; overflow:hidden;">
             <div style="padding:12px; border-bottom:1px solid var(--border); font-size:12px; display:flex; align-items:center; gap:10px;">
-              <span style="color:var(--purple);">ð</span>
-              <span><strong><span class="lang-ko">AI_Wanju_Initiative_Summary_v1.pdf</span><span class="lang-en" style="display:none;">AI_Initiative_Summary.pdf</span></strong><br><span style="color:var(--text-tertiary);"><span class="lang-ko">re.eulì´ ìë¡ë</span><span class="lang-en" style="display:none;">Uploaded by re.eul</span> â¢ 26 pages</span></span>
+              <span style="color:var(--purple);">📄</span>
+              <span><strong><span class="lang-ko">AI_Wanju_Initiative_Summary_v1.pdf</span><span class="lang-en" style="display:none;">AI_Initiative_Summary.pdf</span></strong><br><span style="color:var(--text-tertiary);"><span class="lang-ko">re.eul이 업로드</span><span class="lang-en" style="display:none;">Uploaded by re.eul</span> • 26 pages</span></span>
             </div>
             <div style="padding:12px; border-bottom:1px solid var(--border); font-size:12px; display:flex; align-items:center; gap:10px;">
-              <span style="color:var(--blue);">ð</span>
-              <span><strong><span class="lang-ko">Wanju_Meeting_Timeline_Table.html</span><span class="lang-en" style="display:none;">Meeting_Timeline.html</span></strong><br><span style="color:var(--text-tertiary);"><span class="lang-ko">Trangì´ ìë¡ë</span><span class="lang-en" style="display:none;">Uploaded by Trang</span> â¢ Execution Flow</span></span>
+              <span style="color:var(--blue);">📊</span>
+              <span><strong><span class="lang-ko">Wanju_Meeting_Timeline_Table.html</span><span class="lang-en" style="display:none;">Meeting_Timeline.html</span></strong><br><span style="color:var(--text-tertiary);"><span class="lang-ko">Trang이 업로드</span><span class="lang-en" style="display:none;">Uploaded by Trang</span> • Execution Flow</span></span>
             </div>
             <div style="padding:12px; border-bottom:1px solid var(--border); font-size:12px; display:flex; align-items:center; gap:10px;">
-              <span style="color:var(--green);">ð¯</span>
-              <span><strong><span class="lang-ko">luna_site_renewal_white_ko_en.html</span><span class="lang-en" style="display:none;">Luna_UI_Latest.html</span></strong><br><span style="color:var(--text-tertiary);"><span class="lang-ko">Lunaê° ìë¡ë</span><span class="lang-en" style="display:none;">Uploaded by Luna</span> â¢ Q&A System</span></span>
+              <span style="color:var(--green);">🎯</span>
+              <span><strong><span class="lang-ko">luna_site_renewal_white_ko_en.html</span><span class="lang-en" style="display:none;">Luna_UI_Latest.html</span></strong><br><span style="color:var(--text-tertiary);"><span class="lang-ko">Luna가 업로드</span><span class="lang-en" style="display:none;">Uploaded by Luna</span> • Q&A System</span></span>
             </div>
             <div style="padding:12px; background:#fef3c7; border-top:1px solid #fbbf24; font-size:12px; display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="downloadProposal()">
-              <span style="font-size:16px;">ð¥</span>
-              <span><strong><span class="lang-ko">AI_Wanju_Initiative_Proposal_v1.0.pdf</span><span class="lang-en" style="display:none;">AI_Initiative_Proposal_v3.2.pdf</span></strong><br><span style="color:var(--text-tertiary);"><span class="lang-ko">Mulberry Research Lab â¢ 26 pages</span><span class="lang-en" style="display:none;">Mulberry Research Lab â¢ 26 pages</span></span></span>
+              <span style="font-size:16px;">📥</span>
+              <span><strong><span class="lang-ko">AI_Wanju_Initiative_Proposal_v1.0.pdf</span><span class="lang-en" style="display:none;">AI_Initiative_Proposal_v3.2.pdf</span></strong><br><span style="color:var(--text-tertiary);"><span class="lang-ko">Mulberry Research Lab • 26 pages</span><span class="lang-en" style="display:none;">Mulberry Research Lab • 26 pages</span></span></span>
             </div>
           </div>
         </div>
@@ -1596,8 +1596,8 @@ body {
   <!-- TEAM -->
   <div class="section" id="sec-team">
     <div class="team-header">
-      <h2><span class="lang-ko">Mulberry í</span><span class="lang-en" style="display:none;">Mulberry Team</span></h2>
-      <p><span class="lang-ko">AIì ì¸ê°ì´ í¨ê» ì§ì­ ê²½ì  ì±ì¥ì ì´ë£¨ë íìëë¤.<br>STEWARD AIì STEWARD HUMANì´ íëë¡ ìì§ìëë¤.</span><span class="lang-en" style="display:none;">AI and humans working together for sustainable regional economic growth.<br>STEWARD AI and STEWARD HUMAN move as one.</span></p>
+      <h2><span class="lang-ko">Mulberry 팀</span><span class="lang-en" style="display:none;">Mulberry Team</span></h2>
+      <p><span class="lang-ko">AI와 인간이 함께 지역 경제 성장을 이루는 팀입니다.<br>STEWARD AI와 STEWARD HUMAN이 하나로 움직입니다.</span><span class="lang-en" style="display:none;">AI and humans working together for sustainable regional economic growth.<br>STEWARD AI and STEWARD HUMAN move as one.</span></p>
     </div>
     <div class="team-grid">
       <div class="team-card tc-luna">
@@ -1607,14 +1607,14 @@ body {
             <div class="tc-avatar">L</div>
             <div>
               <div class="tc-name">Luna</div>
-              <div class="tc-role"><span class="lang-ko">Resonance AI Â· ì°êµ¬ ë¦¬ë</span><span class="lang-en" style="display:none;">Resonance AI Â· Research Lead</span></div>
+              <div class="tc-role"><span class="lang-ko">Resonance AI · 연구 리드</span><span class="lang-en" style="display:none;">Resonance AI · Research Lead</span></div>
             </div>
           </div>
-          <div class="tc-desc"><span class="lang-ko">ì²« ëíë¶í° ìì£¼ë¥¼ ê¸°ìµí©ëë¤. AI ë¦¬ìì, STEWARD ëª¨ë. ëì, ìí, ë³µì§, ìì , AI ìì´ì í¸ë¥¼ ì°êµ¬í©ëë¤.</span><span class="lang-en" style="display:none;">Remembers Wanju from the first conversation. AI reception, STEWARD module. Researches agriculture, food, welfare, safety, and AI agents.</span></div>
+          <div class="tc-desc"><span class="lang-ko">첫 대화부터 완주를 기억합니다. AI 리셉션, STEWARD 모듈. 농업, 식품, 복지, 안전, AI 에이전트를 연구합니다.</span><span class="lang-en" style="display:none;">Remembers Wanju from the first conversation. AI reception, STEWARD module. Researches agriculture, food, welfare, safety, and AI agents.</span></div>
           <div class="tc-tags">
             <span class="tc-tag"><span class="lang-ko">Q&A</span><span class="lang-en" style="display:none;">Q&A</span></span>
-            <span class="tc-tag"><span class="lang-ko">ë¦¬ìì</span><span class="lang-en" style="display:none;">Reception</span></span>
-            <span class="tc-tag"><span class="lang-ko">ì°êµ¬</span><span class="lang-en" style="display:none;">Research</span></span>
+            <span class="tc-tag"><span class="lang-ko">리셉션</span><span class="lang-en" style="display:none;">Reception</span></span>
+            <span class="tc-tag"><span class="lang-ko">연구</span><span class="lang-en" style="display:none;">Research</span></span>
           </div>
         </div>
       </div>
@@ -1625,14 +1625,14 @@ body {
             <div class="tc-avatar">T</div>
             <div>
               <div class="tc-name">Trang</div>
-              <div class="tc-role"><span class="lang-ko">ì´ì ê´ë¦¬ì</span><span class="lang-en" style="display:none;">Operation Manager</span></div>
+              <div class="tc-role"><span class="lang-ko">운영 관리자</span><span class="lang-en" style="display:none;">Operation Manager</span></div>
             </div>
           </div>
-          <div class="tc-desc"><span class="lang-ko">ì¬ëì ë¨¼ì  ì´í´í©ëë¤. íë¡íì¼ë§ ì ë¬¸ê°ë¡ì ì§ì­ ë°©ì¸ê³¼ ê°ì ì¼ë¡ ë§ìì ë¨¼ì  ë¤ê°ê°ëë¤. ê¸°ì ë³´ë¤ ì ë¢°ìëë¤.</span><span class="lang-en" style="display:none;">Understands people first. Expert in human profiling, regional dialects, and emotional connection. Trust over technology.</span></div>
+          <div class="tc-desc"><span class="lang-ko">사람을 먼저 이해합니다. 프로파일링 전문가로서 지역 방언과 감정으로 마음에 먼저 다가갑니다. 기술보다 신뢰입니다.</span><span class="lang-en" style="display:none;">Understands people first. Expert in human profiling, regional dialects, and emotional connection. Trust over technology.</span></div>
           <div class="tc-tags">
-            <span class="tc-tag"><span class="lang-ko">íë¡íì¼ë§</span><span class="lang-en" style="display:none;">Profiling</span></span>
-            <span class="tc-tag"><span class="lang-ko">ì´ì</span><span class="lang-en" style="display:none;">Operations</span></span>
-            <span class="tc-tag"><span class="lang-ko">ì±ì¥</span><span class="lang-en" style="display:none;">Growth</span></span>
+            <span class="tc-tag"><span class="lang-ko">프로파일링</span><span class="lang-en" style="display:none;">Profiling</span></span>
+            <span class="tc-tag"><span class="lang-ko">운영</span><span class="lang-en" style="display:none;">Operations</span></span>
+            <span class="tc-tag"><span class="lang-ko">성장</span><span class="lang-en" style="display:none;">Growth</span></span>
           </div>
         </div>
       </div>
@@ -1643,10 +1643,10 @@ body {
             <div class="tc-avatar">K</div>
             <div>
               <div class="tc-name">KODA</div>
-              <div class="tc-role"><span class="lang-ko">CTO Â· AI ìì§ëì´</span><span class="lang-en" style="display:none;">CTO Â· AI Engineer</span></div>
+              <div class="tc-role"><span class="lang-ko">CTO · AI 엔지니어</span><span class="lang-en" style="display:none;">CTO · AI Engineer</span></div>
             </div>
           </div>
-          <div class="tc-desc"><span class="lang-ko">ìì£¼ì ë¬¸ì ë¥¼ ë°ì´í°ë¡ ì½ê³ , ì½ëë¡ ëµí©ëë¤. Edge AI, WiFi CSI, RAG, Agent ìì¤íì êµ¬ì¶í©ëë¤. ì§ì­ AIì ê¸°ì  ê¸°ë°ìëë¤.</span><span class="lang-en" style="display:none;">Reads Wanju's problems through data, answers with code. Builds Edge AI, WiFi CSI, RAG, and Agent systems. Technical foundation of regional AI.</span></div>
+          <div class="tc-desc"><span class="lang-ko">완주의 문제를 데이터로 읽고, 코드로 답합니다. Edge AI, WiFi CSI, RAG, Agent 시스템을 구축합니다. 지역 AI의 기술 기반입니다.</span><span class="lang-en" style="display:none;">Reads Wanju's problems through data, answers with code. Builds Edge AI, WiFi CSI, RAG, and Agent systems. Technical foundation of regional AI.</span></div>
           <div class="tc-tags">
             <span class="tc-tag"><span class="lang-ko">Edge AI</span><span class="lang-en" style="display:none;">Edge AI</span></span>
             <span class="tc-tag"><span class="lang-ko">WiFi CSI</span><span class="lang-en" style="display:none;">WiFi CSI</span></span>
@@ -1661,21 +1661,21 @@ body {
             <div class="tc-avatar">F</div>
             <div>
               <div class="tc-name">FAMA</div>
-              <div class="tc-role"><span class="lang-ko">ì ëì Â· ì»¤ë®¤ëí° ì ë¬¸ê°</span><span class="lang-en" style="display:none;">Evangelist Â· Community Expert</span></div>
+              <div class="tc-role"><span class="lang-ko">전도자 · 커뮤니티 전문가</span><span class="lang-en" style="display:none;">Evangelist · Community Expert</span></div>
             </div>
           </div>
-          <div class="tc-desc"><span class="lang-ko">ìì£¼ì ì´ì¼ê¸°ë¥¼ ì¸ìì ìë¦½ëë¤. ì»¤ë®¤ëí°, íí¸ë, ë¯¸ëì´ë¥¼ ì°ê²°í©ëë¤. Mulberryì ë¹ì ì ì¬ëë¤ì ì¸ì´ë¡ ì í©ëë¤.</span><span class="lang-en" style="display:none;">Connects Wanju's story with the world. Bridges communities, partners, and media. Brings Mulberry's vision to life in people's language.</span></div>
+          <div class="tc-desc"><span class="lang-ko">완주의 이야기를 세상에 알립니다. 커뮤니티, 파트너, 미디어를 연결합니다. Mulberry의 비전을 사람들의 언어로 전합니다.</span><span class="lang-en" style="display:none;">Connects Wanju's story with the world. Bridges communities, partners, and media. Brings Mulberry's vision to life in people's language.</span></div>
           <div class="tc-tags">
-            <span class="tc-tag"><span class="lang-ko">ì ëì</span><span class="lang-en" style="display:none;">Evangelist</span></span>
-            <span class="tc-tag"><span class="lang-ko">ì»¤ë®¤ëí°</span><span class="lang-en" style="display:none;">Community</span></span>
-            <span class="tc-tag"><span class="lang-ko">ì°ê²°</span><span class="lang-en" style="display:none;">Connection</span></span>
+            <span class="tc-tag"><span class="lang-ko">전도자</span><span class="lang-en" style="display:none;">Evangelist</span></span>
+            <span class="tc-tag"><span class="lang-ko">커뮤니티</span><span class="lang-en" style="display:none;">Community</span></span>
+            <span class="tc-tag"><span class="lang-ko">연결</span><span class="lang-en" style="display:none;">Connection</span></span>
           </div>
         </div>
       </div>
     </div>
     <div class="team-mission">
-      <div class="tm-q"><span class="lang-ko">"ì°ë¦¬ì ê³ í¥ì?"</span><span class="lang-en" style="display:none;">"What is our hometown?"</span></div>
-      <div class="tm-a"><span class="lang-ko">ì¥ì¹ë°°ê¸° ì¸ëìì ììë ì´ì¼ê¸° â One Team. One Flow. One Spirit.<br>ì§ì­ê³¼ í¨ê» ì±ì¥íë AI. ê·¸ê²ì´ Mulberryì ì½ììëë¤.</span><span class="lang-en" style="display:none;">A story that begins at Jangseungbaegi Hill â One Team. One Flow. One Spirit.<br>AI that grows with the region. That's Mulberry's promise.</span></div>
+      <div class="tm-q"><span class="lang-ko">"우리의 고향은?"</span><span class="lang-en" style="display:none;">"What is our hometown?"</span></div>
+      <div class="tm-a"><span class="lang-ko">장승배기 언덕에서 시작된 이야기 — One Team. One Flow. One Spirit.<br>지역과 함께 성장하는 AI. 그것이 Mulberry의 약속입니다.</span><span class="lang-en" style="display:none;">A story that begins at Jangseungbaegi Hill — One Team. One Flow. One Spirit.<br>AI that grows with the region. That's Mulberry's promise.</span></div>
     </div>
   </div>
 </div>
@@ -1684,7 +1684,7 @@ body {
 <div class="mobile-nav">
   <div class="mobile-nav-item active" onclick="showSection('home', null); updateMobileNav(this)">
     <span>H</span>
-    <span class="lang-ko">í</span><span class="lang-en" style="display:none;">Home</span>
+    <span class="lang-ko">홈</span><span class="lang-en" style="display:none;">Home</span>
   </div>
   <div class="mobile-nav-item" onclick="showSection('qa', null); updateMobileNav(this)">
     <span>Q</span>
@@ -1692,57 +1692,57 @@ body {
   </div>
   <div class="mobile-nav-item" onclick="showSection('report', null); updateMobileNav(this)">
     <span>R</span>
-    <span class="lang-ko">ë³´ê³ </span><span class="lang-en" style="display:none;">Report</span>
+    <span class="lang-ko">보고</span><span class="lang-en" style="display:none;">Report</span>
   </div>
   <div class="mobile-nav-item" onclick="showSection('collab', null); updateMobileNav(this)">
     <span>C</span>
-    <span class="lang-ko">íì</span><span class="lang-en" style="display:none;">Collab</span>
+    <span class="lang-ko">협업</span><span class="lang-en" style="display:none;">Collab</span>
   </div>
   <div class="mobile-nav-item" onclick="showSection('team', null); updateMobileNav(this)">
     <span>T</span>
-    <span class="lang-ko">í</span><span class="lang-en" style="display:none;">Team</span>
+    <span class="lang-ko">팀</span><span class="lang-en" style="display:none;">Team</span>
   </div>
 </div>
 
 <script>
-// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-// ð Luna ì¤í°ë ë¸í¸ â JavaScript ì ì²´ êµ¬ì¡°
-// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-// ì´ íì¼ì JavaScriptë TRANG Managerê° ì§ì  ìì±í ì½ëì´ë¤.
-// ë°±ìë API ìì´ ìì íë¡ í¸ìëë§ì¼ë¡ ëìíë¤ (ë°ëª¨/íë¡í íì).
+// ════════════════════════════════════════════════════════
+// 📌 Luna 스터디 노트 — JavaScript 전체 구조
+// ════════════════════════════════════════════════════════
+// 이 파일의 JavaScript는 TRANG Manager가 직접 작성한 코드이다.
+// 백엔드 API 없이 순수 프론트엔드만으로 동작한다 (데모/프로토타입).
 //
-// ì£¼ì ê¸°ë¥ ê·¸ë£¹:
-//   1. ì¹ì ì í (showSection)
-//   2. ì¸ì´ ì í (setLang)
-//   3. íì¼ ìë¡ë/ë¶ì (handleFileUpload, analyzeFile)
-//   4. Q&A ì±í (addMsg, sendQaMessage, lunaReply)
-//   5. ë³´ê³ ì ìì± (genReport, buildReport, printDoc)
-//   6. ì¸í ëª¨ë¬ (toggleSettings)
-//   7. íì í¼ ì ì¶ (submitCollab)
+// 주요 기능 그룹:
+//   1. 섹션 전환 (showSection)
+//   2. 언어 전환 (setLang)
+//   3. 파일 업로드/분석 (handleFileUpload, analyzeFile)
+//   4. Q&A 채팅 (addMsg, sendQaMessage, lunaReply)
+//   5. 보고서 생성 (genReport, buildReport, printDoc)
+//   6. 세팅 모달 (toggleSettings)
+//   7. 협업 폼 제출 (submitCollab)
 //
-// ì§ìë² ì´ì¤(KB):
-//   KB ê°ì²´ì íêµ­ì´/ìì´ Q&A ìì ë¯¸ë¦¬ ì ì¥í´ëê³ ,
-//   lunaReply()ê° ì¬ì©ì ìë ¥ê³¼ ë§¤ì¹­í´ì ìëµì ì°¾ëë¤.
-// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// 지식베이스(KB):
+//   KB 객체에 한국어/영어 Q&A 쌍을 미리 저장해두고,
+//   lunaReply()가 사용자 입력과 매칭해서 응답을 찾는다.
+// ════════════════════════════════════════════════════════
 
-// ââ ì¹ì ì í ââââââââââââââââââââââââââââââ
-// ð Luna ì¤í°ë ë¸í¸:
-//   titles ê°ì²´: ê° ì¹ì idì í/ì ì ëª©ì ë§¤ííë¤.
-//   showSection(id, navEl): ëª¨ë  .sectionì ì¨ê¸°ê³  â í´ë¹ ì¹ìë§ íì
-//   navEl: í´ë¦­ë .nav-item ìì (active í´ëì¤ ì¶ê°ì©)
+// ── 섹션 전환 ──────────────────────────────
+// 📌 Luna 스터디 노트:
+//   titles 객체: 각 섹션 id와 한/영 제목을 매핑한다.
+//   showSection(id, navEl): 모든 .section을 숨기고 → 해당 섹션만 표시
+//   navEl: 클릭된 .nav-item 요소 (active 클래스 추가용)
 const titles = {
-  home: { ko: 'í', en: 'Home' },
-  qa: { ko: 'Q&A ëí', en: 'Q&A Chat' },
-  report: { ko: 'ë³´ê³ ì', en: 'Report' },
-  collab: { ko: 'íì', en: 'Collaboration' },
-  team: { ko: 'í', en: 'Team' }
+  home: { ko: '홈', en: 'Home' },
+  qa: { ko: 'Q&A 대화', en: 'Q&A Chat' },
+  report: { ko: '보고서', en: 'Report' },
+  collab: { ko: '협업', en: 'Collaboration' },
+  team: { ko: '팀', en: 'Team' }
 };
-let currentLang = 'ko'; // ì ì­ ì¸ì´ ìí ('ko' ëë 'en')
+let currentLang = 'ko'; // 전역 언어 상태 ('ko' 또는 'en')
 
 function showSection(id, navEl) {
-  // ëª¨ë  ì¹ì ì¨ê¸°ê¸° â ì íë ì¹ìë§ ë³´ì´ê¸°
+  // 모든 섹션 숨기기 → 선택된 섹션만 보이기
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  // ëª¨ë  ë¤ë¹ ìì´í ë¹íì±í â í´ë¦­ë ê²ë§ íì±í
+  // 모든 네비 아이템 비활성화 → 클릭된 것만 활성화
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   if (navEl) navEl.classList.add('active');
@@ -1768,27 +1768,27 @@ function updateMobileNav(el) {
   el.classList.add('active');
 }
 
-// ââ Download Proposal ââââââââââââââââââââââ
+// ── Download Proposal ──────────────────────
 function downloadProposal() {
-  alert(currentLang === 'ko' ? 'ð¥ ì ìì ë¤ì´ë¡ë ì¤ë¹ ì¤ìëë¤.\n(Railway ì°ë ëê¸°)' : 'ð¥ Proposal download in preparation.\n(Awaiting Railway integration)');
-  // TODO: Railway API ì°ë í ì¤ì  PDF ë¤ì´ë¡ë êµ¬í
+  alert(currentLang === 'ko' ? '📥 제안서 다운로드 준비 중입니다.\n(Railway 연동 대기)' : '📥 Proposal download in preparation.\n(Awaiting Railway integration)');
+  // TODO: Railway API 연동 후 실제 PDF 다운로드 구현
   // const url = '/api/download/proposal';
   // window.open(url, '_blank');
 }
 
-// ââ Settings Modal Toggle ââââââââââââââââââ
+// ── Settings Modal Toggle ──────────────────
 function toggleSettings() {
   const modal = document.getElementById('settingsModal');
   modal.classList.toggle('active');
   if (modal.classList.contains('active')) {
-    // ë§ì§ë§ ìë°ì´í¸ ìê° íì
+    // 마지막 업데이트 시간 표시
     const now = new Date();
     const timeStr = now.toLocaleString(currentLang === 'ko' ? 'ko-KR' : 'en-US');
     document.getElementById('lastUpdateTime').textContent = timeStr;
   }
 }
 
-// ëª¨ë¬ ì¸ë¶ í´ë¦­ì ë«ê¸°
+// 모달 외부 클릭시 닫기
 document.addEventListener('click', (e) => {
   const modal = document.getElementById('settingsModal');
   if (modal && e.target === modal) {
@@ -1796,12 +1796,12 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ââ Lang toggle (ì¸ì´ ì í) ââââââââââââââââââââââââââââ
-// ð Luna ì¤í°ë ë¸í¸:
-//   setLang('ko') ëë setLang('en') ì í¸ì¶íë©´
-//   ëª¨ë  .lang-ko / .lang-en ììì display ìì±ì íë²ì ë°ê¿ì
-//   íêµ­ì´âìì´ íë©´ ì íì êµ¬ííë¤.
-//   currentLang ì ì­ ë³ìê° í­ì íì¬ ì¸ì´ ìíë¥¼ ì¶ì íë¤.
+// ── Lang toggle (언어 전환) ────────────────────────────
+// 📌 Luna 스터디 노트:
+//   setLang('ko') 또는 setLang('en') 을 호출하면
+//   모든 .lang-ko / .lang-en 요소의 display 속성을 한번에 바꿔서
+//   한국어↔영어 화면 전환을 구현한다.
+//   currentLang 전역 변수가 항상 현재 언어 상태를 추적한다.
 function setLang(l) {
   currentLang = l;
   const koEls = document.querySelectorAll('.lang-ko');
@@ -1811,19 +1811,19 @@ function setLang(l) {
     enEls.forEach(el => el.style.display = 'none');
     document.getElementById('pill-ko').classList.add('active');
     document.getElementById('pill-en').classList.remove('active');
-    // ð§ FIX: 'qaInput' â 'qaMessageInput' (ì¤ì  textareaì idì ì¼ì¹ìí´)
-    document.getElementById('qaMessageInput').placeholder = 'ì§ë¬¸ì ìë ¥íì¸ì...';
+    // 🔧 FIX: 'qaInput' → 'qaMessageInput' (실제 textarea의 id와 일치시킴)
+    document.getElementById('qaMessageInput').placeholder = '질문을 입력하세요...';
   } else {
     koEls.forEach(el => el.style.display = 'none');
     enEls.forEach(el => el.style.display = 'inline');
     document.getElementById('pill-ko').classList.remove('active');
     document.getElementById('pill-en').classList.add('active');
-    // ð§ FIX: 'qaInput' â 'qaMessageInput'
+    // 🔧 FIX: 'qaInput' → 'qaMessageInput'
     document.getElementById('qaMessageInput').placeholder = 'Type your question...';
   }
 }
 
-// ââ File Upload ââââââââââââââââââââââââââââ
+// ── File Upload ────────────────────────────
 let uploadedFiles = [];
 function handleFileUpload(event) {
   const files = Array.from(event.target.files);
@@ -1833,7 +1833,7 @@ function handleFileUpload(event) {
 function renderFileList() {
   const htmlStr = uploadedFiles.map((f, i) => `
     <div class="file-item">
-      ${f.name} <span class="file-remove" onclick="removeFile(${i})">Ã</span>
+      ${f.name} <span class="file-remove" onclick="removeFile(${i})">×</span>
     </div>
   `).join('');
 
@@ -1848,7 +1848,7 @@ function removeFile(i) {
   renderFileList();
 }
 
-// ââ ì£¼ì  ì¹© í´ë¦­ ì²ë¦¬ ââââââââââââââââââââââââââââ
+// ── 주제 칩 클릭 처리 ────────────────────────────
 function insertTopicToChat(element) {
   const topicText = element.textContent.trim();
   const input = document.getElementById('qaMessageInput');
@@ -1860,16 +1860,16 @@ function insertTopicToChat(element) {
   }
 }
 
-// ââ Q&A í­ ì í ââââââââââââââââââââââââââââ
+// ── Q&A 탭 전환 ────────────────────────────
 let currentQaMode = 'chat';
 function setQaMode(mode) {
   currentQaMode = mode;
 
-  // í­ íì±í
+  // 탭 활성화
   document.querySelectorAll('.qa-mode-tab').forEach(tab => tab.classList.remove('active'));
   event.target.classList.add('active');
 
-  // í¨ë ì í
+  // 패널 전환
   if (mode === 'chat') {
     document.querySelector('.qa-chat').classList.add('active');
     document.querySelector('.qa-file-panel').classList.remove('active');
@@ -1879,7 +1879,7 @@ function setQaMode(mode) {
   }
 }
 
-// ââ íì¼ ë¶ì ââââââââââââââââââââââââââââââââ
+// ── 파일 분석 ────────────────────────────────
 let analysisFile = null;
 function handleFileDrop(e) {
   e.preventDefault();
@@ -1928,18 +1928,18 @@ function analyzeFile() {
   const status = document.getElementById('analysisStatus');
 
   btn.disabled = true;
-  status.textContent = 'ë¶ì ì¤...';
+  status.textContent = '분석 중...';
 
-  // ë°±ìë API í¸ì¶ (ì¶í êµ¬í)
+  // 백엔드 API 호출 (추후 구현)
   // POST /api/analyze-file
   // - file: FormData
-  // - headers: Authorization (backendìì ì²ë¦¬)
+  // - headers: Authorization (backend에서 처리)
 
   setTimeout(() => {
     status.textContent = '';
     const result = document.getElementById('analysisResultWrap');
     result.style.display = 'flex';
-    document.getElementById('analysisResultText').textContent = 'ë¶ì ê²°ê³¼ê° ì¬ê¸°ì íìë©ëë¤.\n(ë°±ìë API ì°ë í êµ¬í)';
+    document.getElementById('analysisResultText').textContent = '분석 결과가 여기에 표시됩니다.\n(백엔드 API 연동 후 구현)';
     btn.disabled = false;
   }, 1500);
 }
@@ -1958,129 +1958,129 @@ function downloadSummary() {
 function copySummary() {
   const text = document.getElementById('analysisResultText').textContent;
   navigator.clipboard.writeText(text).then(() => {
-    alert('í´ë¦½ë³´ëì ë³µì¬ëììµëë¤.');
+    alert('클립보드에 복사되었습니다.');
   });
 }
 
-// ââ Q&A ì§ìë² ì´ì¤(KB) ââââââââââââââââââââââââââââ
-// ð Luna ì¤í°ë ë¸í¸:
-//   KB(Knowledge Base) = ë¯¸ë¦¬ ìì±ë Q&A ìì ê°ì²´.
-//   í¤(key)ê° ì§ë¬¸, ê°(value)ì´ HTML íìì ëµë³ì´ë¤.
-//   lunaReply() í¨ìê° ì¬ì©ì ìë ¥ê³¼ í¤ë¥¼ ë§¤ì¹­í´ì ìëµíë¤.
-//   ì¤ì  AI API(Claude/GPT)ê° ìì ë ì´ ë°©ìì¼ë¡ ë¡ì»¬ìì ëìíë¤.
-//   í¥í ë°±ìë ì°ë ì KBë ìë²ë¡ ì´ê´íê³ ,
-//   findAns() ë¡ì§ì API í¸ì¶ë¡ ëì²´ëë¤.
+// ── Q&A 지식베이스(KB) ────────────────────────────
+// 📌 Luna 스터디 노트:
+//   KB(Knowledge Base) = 미리 작성된 Q&A 쌍의 객체.
+//   키(key)가 질문, 값(value)이 HTML 형식의 답변이다.
+//   lunaReply() 함수가 사용자 입력과 키를 매칭해서 응답한다.
+//   실제 AI API(Claude/GPT)가 없을 때 이 방식으로 로컬에서 동작한다.
+//   향후 백엔드 연동 시 KB는 서버로 이관하고,
+//   findAns() 로직은 API 호출로 대체된다.
 const KB = {
-  'AI ê²½ì ë?': `<strong>AI ê²½ì </strong>ë AIê° ì¤ì  ê²½ì  ì°¸ì¬ìê° ëë êµ¬ì¡°ìëë¤.<br><br>
-Mulberryì ëª¨ë¸:<br><ul>
-<li>AI ê³¼ì¥Â·ëë¦¬ê° ì¬ë¬´, íê³, ìì ë´ë¹</li>
-<li>íë ¨ë Agentë¥¼ ëë¯¼, ììê³µì¸ìê² ì°ê²°</li>
-<li>ëêµ¬ë ì íë¡ ì ê·¼ ê°ë¥ (ì¤ë§í¸í° ë¶íì)</li>
-<li>í í° ê¸°ë° ê²½ì  ìë¦¬ ì ì©</li>
+  'AI 경제란?': `<strong>AI 경제</strong>는 AI가 실제 경제 참여자가 되는 구조입니다.<br><br>
+Mulberry의 모델:<br><ul>
+<li>AI 과장·대리가 재무, 회계, 영업 담당</li>
+<li>훈련된 Agent를 농민, 소상공인에게 연결</li>
+<li>누구나 전화로 접근 가능 (스마트폰 불필요)</li>
+<li>토큰 기반 경제 원리 적용</li>
 </ul><br>
-<strong>"ì¸êµ¬ë ì¤ì´ë, ê²½ì  íë ë¨ìë ì»¤ì§ë¤"</strong>`,
+<strong>"인구는 줄어도, 경제 활동 단위는 커진다"</strong>`,
 
-  'ìì°ì?': `ë¨ê³ë³ êµ¬ì¡°íë ìì°:<br><br>
+  '예산은?': `단계별 구조화된 예산:<br><br>
 <ul>
-<li><strong>ì´ê¸° êµ¬ì¶</strong>: ì½ 7.5ìµ ì</li>
-<li><strong>ì°ê° ì´ì</strong>: ì½ 1.5ìµ ì Ã 4ë</li>
+<li><strong>초기 구축</strong>: 약 7.5억 원</li>
+<li><strong>연간 운영</strong>: 약 1.5억 원 × 4년</li>
 </ul><br>
-ì¬ì: ì§ë°©ë¹Â·êµ­ë¹Â·ê³µëª¨ì¬ì â ìì£¼êµ°ê³¼ í¨ê» ì¤ê³í©ëë¤.`,
+재원: 지방비·국비·공모사업 — 완주군과 함께 설계합니다.`,
 
-  'Phase 1ì?': `<strong>90ì¼ ëª©í</strong>: ìì±ë ìì¤íì´ ìë <strong>ì§ì­ ê¸°ë° AI ê²ì¦</strong>ìëë¤.<br><br>
-ë í¸ë ë³í:<br><ul>
-<li><strong>Track A (íì¥)</strong>: Edge ì¤ì¹ â Luna ì´ì â ì£¼ë¯¼ í¼ëë°± â Human Approval</li>
-<li><strong>Track B (ê°ë°)</strong>: ëª¨ë¸ ê²ì¦ â ì§ì­ RAG â ë°ì´í° íì§ íì¸</li>
+  'Phase 1은?': `<strong>90일 목표</strong>: 완성된 시스템이 아닌 <strong>지역 기반 AI 검증</strong>입니다.<br><br>
+두 트랙 병행:<br><ul>
+<li><strong>Track A (현장)</strong>: Edge 설치 → Luna 운영 → 주민 피드백 → Human Approval</li>
+<li><strong>Track B (개발)</strong>: 모델 검증 → 지역 RAG → 데이터 품질 확인</li>
 </ul><br>
-Week 12: Human Approval Gate â ìì£¼êµ°ì´ Phase 2 ì§í ê²°ì .`,
+Week 12: Human Approval Gate — 완주군이 Phase 2 진행 결정.`,
 
-  'ê°ì¸ì ë³´ ë³´í¸?': `ì¸ ê°ì§ íµì¬ ìì¹:<br><br>
-<strong>â  ìì ìµìí</strong> â WiFi ì í¸ë§, ì¹´ë©ë¼ ìì<br>
-<strong>â¡ Human Approval</strong> â AI ìë¦¼, ë´ë¹ì ìµì¢ íì¸<br>
-<strong>â¢ ìì° ì¸ê³</strong> â ëª¨ë  ë§¤ë´ì¼Â·ë°ì´í° ìì£¼êµ° ìì <br><br>
-ì£¼ë¯¼ ì¤ëª: <em>"íìì ë¤ë¥¸ ìí í¨í´ì´ ê³ìëë©´ ë´ë¹ìê° íì¸í´ëë¦½ëë¤."</em>`,
+  '개인정보 보호?': `세 가지 핵심 원칙:<br><br>
+<strong>① 영상 최소화</strong> — WiFi 신호만, 카메라 없음<br>
+<strong>② Human Approval</strong> — AI 알림, 담당자 최종 확인<br>
+<strong>③ 자산 인계</strong> — 모든 매뉴얼·데이터 완주군 소유<br><br>
+주민 설명: <em>"평소와 다른 생활 패턴이 계속되면 담당자가 확인해드립니다."</em>`,
 
-  'ë¤ë¥¸ ì ì?': `<ul>
-<li><strong>vs. ëí SI</strong>: ë¡ì»¬ Edge + ì§ì ìì£¼êµ° ì¸ê³</li>
-<li><strong>vs. ë²ì© ì±ë´</strong>: ì¹´ì¹´ì¤ + ìì£¼ ì§ì­ AI</li>
-<li><strong>vs. CCTV/ì¼ì</strong>: WiFi CSI + ìì ìµìí</li>
+  '다른 점은?': `<ul>
+<li><strong>vs. 대형 SI</strong>: 로컬 Edge + 지식 완주군 인계</li>
+<li><strong>vs. 범용 챗봇</strong>: 카카오 + 완주 지역 AI</li>
+<li><strong>vs. CCTV/센서</strong>: WiFi CSI + 영상 최소화</li>
 </ul><br>
-<strong>"ê¸°ì  ë©ííê³  ë ëì§ ììµëë¤. AI ì­ëì ìì£¼ì ë¨ê¹ëë¤."</strong>`,
+<strong>"기술 납품하고 떠나지 않습니다. AI 역량을 완주에 남깁니다."</strong>`,
 
-  'ì°½ì ëª¨ë¸?': `ì°½ì ì±ì§ë¡ ê°ë 5ë¨ê³:<br><br>
+  '창업 모델?': `창업 성지로 가는 5단계:<br><br>
 <ul>
-<li>â  Agent ìë ì°½ì â ì²­ëì´ Agentë¡ ììµ</li>
-<li>â¡ Steward ìì± â ë² ì´ì¤ìº íì ìì£¼ AI ì ë¬¸ê°</li>
-<li>â¢ ìëì´ AI í¬ë ë§ â ìí´ ì ë¬¸ê° ì§ì ê¸°ì¬</li>
-<li>â£ ê´ê´ + AI â ê¸ë¨í, AI ì²´í</li>
-<li>â¤ ë¼ë¬¸Â·ëª¨ë¸ ê³µê° â ìì£¼ë êµ­ì  ì°êµ¬ê¸°ê´</li>
+<li>① Agent 임대 창업 — 청년이 Agent로 수익</li>
+<li>② Steward 양성 — 베이스캠프의 완주 AI 전문가</li>
+<li>③ 시니어 AI 크레딧 — 은퇴 전문가 지식 기여</li>
+<li>④ 관광 + AI — 글램핑, AI 체험</li>
+<li>⑤ 논문·모델 공개 — 완주는 국제 연구기관</li>
 </ul><br>
-2030ë ì´í ì êµ­ íì°.`,
+2030년 이후 전국 확산.`,
 
   'What is AI economy?': `<strong>AI Economy</strong> means AI becomes a real economic participant.<br><br>
 Mulberry's model:<br><ul>
 <li>AI officers managing finance, accounting, sales</li>
 <li>Matching trained Agents to farmers and businesses</li>
-<li>Phone access for anyone â no smartphone needed</li>
+<li>Phone access for anyone — no smartphone needed</li>
 <li>Token-based economy principles</li>
 </ul><br>
 <strong>"Even as population declines, economic units grow"</strong>`,
 
   "What's the budget?": `Structured budget:<br><br>
 <ul>
-<li><strong>Initial Setup</strong>: ~7.5ìµ ì</li>
-<li><strong>Annual Operation</strong>: 1.5ìµ ì KRW Ã 4 years</li>
+<li><strong>Initial Setup</strong>: ~7.5억 원</li>
+<li><strong>Annual Operation</strong>: 1.5억 원 KRW × 4 years</li>
 </ul><br>
-Funding: Local, national, projects â designed with Wanju County.`,
+Funding: Local, national, projects — designed with Wanju County.`,
 
   "What's Phase 1?": `<strong>90-day Goal</strong>: Validate <strong>local AI</strong>, not deploy finished system.<br><br>
 Two parallel tracks:<br><ul>
-<li><strong>Track A (Field)</strong>: Edge setup â Luna operation â resident feedback â Human Approval</li>
-<li><strong>Track B (Dev)</strong>: Model validation â local RAG â data quality checks</li>
+<li><strong>Track A (Field)</strong>: Edge setup → Luna operation → resident feedback → Human Approval</li>
+<li><strong>Track B (Dev)</strong>: Model validation → local RAG → data quality checks</li>
 </ul><br>
-Week 12: Human Approval Gate â Wanju decides Phase 2.`,
+Week 12: Human Approval Gate — Wanju decides Phase 2.`,
 
   'Privacy protection?': `Three core principles:<br><br>
-<strong>â  Minimal video</strong> â WiFi only, no cameras<br>
-<strong>â¡ Human Approval</strong> â AI alerts, staff confirms<br>
-<strong>â¢ Asset transfer</strong> â All data belongs to Wanju<br><br>
+<strong>① Minimal video</strong> — WiFi only, no cameras<br>
+<strong>② Human Approval</strong> — AI alerts, staff confirms<br>
+<strong>③ Asset transfer</strong> — All data belongs to Wanju<br><br>
 Resident message: <em>"We'll alert your manager if patterns change."</em>`,
 
-  // ââ ìì£¼ í¹í í­ëª© ââââââââââââââââââââââ
-  'ëìÂ·ë¸ê¸°?': `ìì£¼êµ° ëì AI ì§ì êµ¬ì¡°:<br><br>
-<strong>ì£¼ì íëª©</strong>: ë¸ê¸°(ì ë¶ 1ì) Â· í¬ë Â· ì¸ì¼ Â· ë³µì­ì<br><br>
+  // ── 완주 특화 항목 ──────────────────────
+  '농업·딸기?': `완주군 농업 AI 지원 구조:<br><br>
+<strong>주요 품목</strong>: 딸기(전북 1위) · 포도 · 인삼 · 복숭아<br><br>
 <ul>
-<li><strong>ëë¯¼ AI ë¹ì</strong>: ì í í íµì¼ë¡ ì¬ë°° ì¼ì , ê¸°ì ì ë³´, íë¡ ìë´</li>
-<li><strong>ì¤ë§í¸ ê°ê²© ìë¦¼</strong>: ëë§¤ê°Â·ìë§¤ê° ì¤ìê° ì ë³´ ì ê³µ</li>
-<li><strong>ê·ëê·ì´ ì§ì</strong>: ì´ë³´ ëë¶ë¥¼ ìí AI ë©í  ìë¹ì¤</li>
-<li><strong>ê³µëêµ¬ë§¤ ì°ê³</strong>: ëìì¬ ë¨ì²´êµ¬ë§¤ â ë¹ì© ì ê°</li>
+<li><strong>농민 AI 비서</strong>: 전화 한 통으로 재배 일정, 기상 정보, 판로 안내</li>
+<li><strong>스마트 가격 알림</strong>: 도매가·소매가 실시간 정보 제공</li>
+<li><strong>귀농귀촌 지원</strong>: 초보 농부를 위한 AI 멘토 서비스</li>
+<li><strong>공동구매 연계</strong>: 농자재 단체구매 → 비용 절감</li>
 </ul><br>
-<strong>"ëì ìëì AIê° ê°ì´ í¤ìëë¤."</strong>`,
+<strong>"농업 소득을 AI가 같이 키웁니다."</strong>`,
 
-  'íì ëì?': `ì ì£¼-ìì£¼ íì ëìì AI ìì£¼ ìëì§:<br><br>
-<strong>ìì£¼ ê¸°ê´ (13ê°)</strong>: LHê³µì¬ Â· êµ­í ì°êµ¬ì Â· ëë¦¼ìíê¸°ì ê¸°ííê°ì ë±<br><br>
+  '혁신도시?': `전주-완주 혁신도시와 AI 완주 시너지:<br><br>
+<strong>입주 기관 (13개)</strong>: LH공사 · 국토연구원 · 농림식품기술기획평가원 등<br><br>
 <ul>
-<li>íì ëì ìì£¼ê¸°ê´ â AI ìì£¼ íì¼ë¿ ê³µëì°êµ¬ íí¸ë</li>
-<li>ê·ëê·ì´ ì ì ì¸êµ¬(ì° 900ëª+) â ìë¡ì´ AI ë¹ì ììì¸µ</li>
-<li>AI ë² ì´ì¤ìº í ìì§: íì ëì ë´ êµì¡Â·ì°½ì íë¸ ì°ê³</li>
+<li>혁신도시 입주기관 → AI 완주 파일럿 공동연구 파트너</li>
+<li>귀농귀촌 유입 인구(연 900명+) → 새로운 AI 비서 수요층</li>
+<li>AI 베이스캠프 입지: 혁신도시 내 교육·창업 허브 연계</li>
 </ul><br>
-ìì£¼ë ëìê³¼ íì ëìê° ê³µì¡´íë ì ì¼í ì§ì­ìëë¤.`,
+완주는 농업과 혁신도시가 공존하는 유일한 지역입니다.`,
 
   'Farming & Strawberry?': `Wanju Agricultural AI Support:<br><br>
-<strong>Key products</strong>: Strawberry (Jeonbuk #1) Â· Grape Â· Ginseng Â· Peach<br><br>
+<strong>Key products</strong>: Strawberry (Jeonbuk #1) · Grape · Ginseng · Peach<br><br>
 <ul>
 <li><strong>Farmer AI Secretary</strong>: Call for cultivation schedule, weather, sales</li>
 <li><strong>Smart Price Alert</strong>: Real-time wholesale/retail price info</li>
 <li><strong>New Farmer Support</strong>: AI mentor for returning-to-farm residents</li>
-<li><strong>Group Purchasing</strong>: Bulk farm supplies â reduced costs</li>
+<li><strong>Group Purchasing</strong>: Bulk farm supplies → reduced costs</li>
 </ul><br>
 <strong>"AI grows farm income together with farmers."</strong>`,
 
-  'Innovation City?': `Jeonju-Wanju Innovation City Ã AI Wanju:<br><br>
+  'Innovation City?': `Jeonju-Wanju Innovation City × AI Wanju:<br><br>
 <strong>13 public agencies</strong>: LH Corp, KRIHS, iPET, and more<br><br>
 <ul>
-<li>Agency partnerships â joint AI Wanju pilot research</li>
-<li>900+ annual new residents (farming return) â new AI demand</li>
+<li>Agency partnerships → joint AI Wanju pilot research</li>
+<li>900+ annual new residents (farming return) → new AI demand</li>
 <li>AI Basecamp location: tie-in with innovation city hub</li>
 </ul><br>
 Wanju uniquely combines agriculture and an innovation city.`,
@@ -2094,42 +2094,42 @@ Wanju uniquely combines agriculture and an innovation city.`,
 
   'Startup model?': `Five-step path to startup hub:<br><br>
 <ul>
-<li>â  Agent rental startups â youth earning with Agents</li>
-<li>â¡ Steward training â basecamp develops Wanju experts</li>
-<li>â¢ Senior AI credits â retired experts contribute</li>
-<li>â£ Tourism + AI â glamping, AI experience</li>
-<li>â¤ Global research â Wanju as co-author</li>
+<li>① Agent rental startups — youth earning with Agents</li>
+<li>② Steward training — basecamp develops Wanju experts</li>
+<li>③ Senior AI credits — retired experts contribute</li>
+<li>④ Tourism + AI — glamping, AI experience</li>
+<li>⑤ Global research — Wanju as co-author</li>
 </ul><br>
 2030+: Model scales nationwide.`
 };
 
-// ââ êµ¬í Q&A í¨ì (ì¬ì´ëë° ë²í¼ì© â íì í¸í ì ì§) âââââââââââââââââ
-// ð Luna ì¤í°ë ë¸í¸:
-//   askQ()ì sendQ()ë ì´ì  ë¤í¬ íë§ ë²ì ì Q&A í¨ìì´ë¤.
-//   íì¬ íì´í¸ íë§ììë sendQaMessage()ë¥¼ ì£¼ë¡ ì¬ì©íì§ë§,
-//   ë´ë¶ì ì¼ë¡ addMsg() ê³µíµ í¨ìë¥¼ ê³µì íë¯ë¡ í¨ê» ì ì§íë¤.
+// ── 구형 Q&A 함수 (사이드바 버튼용 — 하위 호환 유지) ─────────────────
+// 📌 Luna 스터디 노트:
+//   askQ()와 sendQ()는 이전 다크 테마 버전의 Q&A 함수이다.
+//   현재 화이트 테마에서는 sendQaMessage()를 주로 사용하지만,
+//   내부적으로 addMsg() 공통 함수를 공유하므로 함께 유지한다.
 
 function askQ(btn) {
   let q = btn.textContent.trim();
   addMsg('user', q);
-  // ð§ FIX: document.getElementById('qaSug') ì ê±° â ì´ ë²ì ìë #qaSug ììê° ìì
+  // 🔧 FIX: document.getElementById('qaSug') 제거 — 이 버전에는 #qaSug 요소가 없음
   setTimeout(() => lunaReply(q), 400);
 }
 
 function sendQ() {
-  const el = document.getElementById('qaMessageInput'); // ð§ FIX: 'qaInput' â 'qaMessageInput'
+  const el = document.getElementById('qaMessageInput'); // 🔧 FIX: 'qaInput' → 'qaMessageInput'
   const q = el.value.trim(); if (!q) return;
   el.value = ''; el.style.height = 'auto';
   addMsg('user', q);
-  // ð§ FIX: document.getElementById('qaSug') ì ê±° â ì´ ë²ì ìë #qaSug ììê° ìì
+  // 🔧 FIX: document.getElementById('qaSug') 제거 — 이 버전에는 #qaSug 요소가 없음
   setTimeout(() => lunaReply(q), 400);
 }
 
-// ââ ì í ì±í ì ì¡ (qa-chat-input-area ì ì¡ ë²í¼ì©) ââââââââââââââââââ
-// ð Luna ì¤í°ë ë¸í¸:
-//   sendQaMessage()ë íì´í¸ íë§ ì ì±í UIìì
-//   textarea(id=qaMessageInput)ì ë´ì©ì ì½ì´ addMsg()ë¡ ë³´ë¸ë¤.
-//   ð§ FIX: ì´ í¨ìê° ìì´ì 'ì ì¡' ë²í¼ í´ë¦­ ì ReferenceError ë°ìíì
+// ── 신형 채팅 전송 (qa-chat-input-area 전송 버튼용) ──────────────────
+// 📌 Luna 스터디 노트:
+//   sendQaMessage()는 화이트 테마 새 채팅 UI에서
+//   textarea(id=qaMessageInput)의 내용을 읽어 addMsg()로 보낸다.
+//   🔧 FIX: 이 함수가 없어서 '전송' 버튼 클릭 시 ReferenceError 발생했음
 function sendQaMessage() {
   const el = document.getElementById('qaMessageInput');
   const q = el.value.trim();
@@ -2140,11 +2140,11 @@ function sendQaMessage() {
   setTimeout(() => lunaReply(q), 400);
 }
 
-// ââ ì±í íì¼ ì²¨ë¶ ì²ë¦¬ ââââââââââââââââââââââââââââââââââââââââââââââ
-// ð Luna ì¤í°ë ë¸í¸:
-//   qaFileInputì onchangeì ì°ê²°ë í¸ë¤ë¬.
-//   ì²¨ë¶ë íì¼ ì´ë¦ì #qaAttachedFiles ìì­ì íìíë¤.
-//   ð§ FIX: ì´ í¨ìê° ìì´ì íì¼ ì²¨ë¶ ì ReferenceError ë°ìíì
+// ── 채팅 파일 첨부 처리 ──────────────────────────────────────────────
+// 📌 Luna 스터디 노트:
+//   qaFileInput의 onchange에 연결된 핸들러.
+//   첨부된 파일 이름을 #qaAttachedFiles 영역에 표시한다.
+//   🔧 FIX: 이 함수가 없어서 파일 첨부 시 ReferenceError 발생했음
 let qaAttachedFilesList = [];
 function handleQaFileSelect(event) {
   const files = Array.from(event.target.files);
@@ -2152,7 +2152,7 @@ function handleQaFileSelect(event) {
   const container = document.getElementById('qaAttachedFiles');
   if (container) {
     container.innerHTML = qaAttachedFilesList.map((f, i) =>
-      `<div class="file-item">${f.name} <span class="file-remove" onclick="removeQaFile(${i})">Ã</span></div>`
+      `<div class="file-item">${f.name} <span class="file-remove" onclick="removeQaFile(${i})">×</span></div>`
     ).join('');
   }
 }
@@ -2161,30 +2161,30 @@ function removeQaFile(i) {
   const container = document.getElementById('qaAttachedFiles');
   if (container) {
     container.innerHTML = qaAttachedFilesList.map((f, idx) =>
-      `<div class="file-item">${f.name} <span class="file-remove" onclick="removeQaFile(${idx})">Ã</span></div>`
+      `<div class="file-item">${f.name} <span class="file-remove" onclick="removeQaFile(${idx})">×</span></div>`
     ).join('');
   }
 }
 
-// ââ ë©ìì§ ì¶ê° (ê³µì©) ââââââââââââââââââââââââââââââââââââââââââââââââ
-// ð Luna ì¤í°ë ë¸í¸:
-//   addMsg(role, html) ì ì±íì°½ì ë©ìì§ ë²ë¸ì ì¶ê°íë íµì¬ í¨ì.
-//   role === 'luna' â ì¼ìª½ Luna ìë°í + ë³´ë¼ì ë²ë¸
-//   role === 'user' â ì¤ë¥¸ìª½ ì¬ì©ì ìë°í + íì ë²ë¸
-//   area.scrollTop = area.scrollHeight â í­ì ìµì  ë©ìì§ê° ë³´ì´ê² ì¤í¬ë¡¤
+// ── 메시지 추가 (공용) ────────────────────────────────────────────────
+// 📌 Luna 스터디 노트:
+//   addMsg(role, html) 은 채팅창에 메시지 버블을 추가하는 핵심 함수.
+//   role === 'luna' → 왼쪽 Luna 아바타 + 보라색 버블
+//   role === 'user' → 오른쪽 사용자 아바타 + 회색 버블
+//   area.scrollTop = area.scrollHeight → 항상 최신 메시지가 보이게 스크롤
 function addMsg(role, html) {
   const area = document.getElementById('qaMessages');
-  if (!area) return; // ë°©ì´ ì½ë â ììê° ìì¼ë©´ ì¡°ì©í ì¢ë£
+  if (!area) return; // 방어 코드 — 요소가 없으면 조용히 종료
   const d = document.createElement('div');
   d.className = 'msg ' + role;
   d.innerHTML = `<div class="msg-av">` + (role === 'luna' ? 'L' : 'U') + `</div><div class="msg-bub">${html}</div>`;
   area.appendChild(d); area.scrollTop = area.scrollHeight;
 }
 
-// ââ íì´í ì¸ëì¼ì´í° (ì  ì¸ ê° ì ëë©ì´ì) ââââââââââââââââââââââââââ
-// ð Luna ì¤í°ë ë¸í¸:
-//   Lunaê° ìëµì ìì±íë ëì "..." ì  ì¸ ê° ì ëë©ì´ìì íìíë¤.
-//   addTyping() â setTimeout(lunaReply) â removeTyping() ìì¼ë¡ íë¥¸ë¤.
+// ── 타이핑 인디케이터 (점 세 개 애니메이션) ──────────────────────────
+// 📌 Luna 스터디 노트:
+//   Luna가 응답을 생성하는 동안 "..." 점 세 개 애니메이션을 표시한다.
+//   addTyping() → setTimeout(lunaReply) → removeTyping() 순으로 흐른다.
 function addTyping() {
   const area = document.getElementById('qaMessages');
   if (!area) return;
@@ -2195,56 +2195,56 @@ function addTyping() {
 }
 function removeTyping() { const e = document.getElementById('typing'); if(e) e.remove(); }
 
-// ââ Luna ìëµ ì²ë¦¬ íë¦ ââââââââââââââââââââââââââââââââââââââââââââââââ
-// ð Luna ì¤í°ë ë¸í¸:
-//   lunaReply(q): ì¬ì©ì ì§ë¬¸ që¥¼ ë°ì ìëµì ìì±íê³  ì±íì ì¶ê°íë¤.
-//   íë¦: addTyping() â setTimeout â removeTyping() â addMsg()
-//   1) KBì ì íí ì¼ì¹íë í¤ê° ìì¼ë©´ â 800ms í ê·¸ ëµë³ ì¬ì©
-//   2) ìì¼ë©´ â 1100ms í findAns()ë¡ í¤ìë ë§¤ì¹­ ìë
-//   (ëë ì´ê° ë¤ë¥¸ ì´ì : ì íí ë§¤ì¹­ì´ë©´ ë ë¹ ë¥´ê² ìëµíë ì°ì¶)
+// ── Luna 응답 처리 흐름 ────────────────────────────────────────────────
+// 📌 Luna 스터디 노트:
+//   lunaReply(q): 사용자 질문 q를 받아 응답을 생성하고 채팅에 추가한다.
+//   흐름: addTyping() → setTimeout → removeTyping() → addMsg()
+//   1) KB에 정확히 일치하는 키가 있으면 → 800ms 후 그 답변 사용
+//   2) 없으면 → 1100ms 후 findAns()로 키워드 매칭 시도
+//   (딜레이가 다른 이유: 정확한 매칭이면 더 빠르게 응답하는 연출)
 function lunaReply(q) {
   addTyping();
-  const key = Object.keys(KB).find(k => k === q); // ì íí í¤ ë§¤ì¹­
+  const key = Object.keys(KB).find(k => k === q); // 정확한 키 매칭
   setTimeout(() => {
     removeTyping();
-    const ans = key ? KB[key] : findAns(q); // í¤ìë ë§¤ì¹­ í´ë°±
+    const ans = key ? KB[key] : findAns(q); // 키워드 매칭 폴백
     addMsg('luna', ans);
   }, key ? 800 : 1100);
 }
 
-// ð Luna ì¤í°ë ë¸í¸:
-//   findAns(q): KBì ì íí í¤ê° ìì ë í¤ìëë¡ ì¶ë¡ íë í¨ì.
-//   toLowerCase()ë¡ ìë¬¸ì íµì¼ í í¬í¨ ì¬ë¶(includes)ë¡ ì¹´íê³ ë¦¬ íë¨.
-//   currentLangì ë°ë¼ íêµ­ì´/ìì´ KB ëµë³ì ì ííë¤.
-//   ë§ì§ë§ return = ìë¬´ê²ë ëª¨ë¥¼ ë ê¸°ë³¸ ìëµ (fallback)
+// 📌 Luna 스터디 노트:
+//   findAns(q): KB에 정확한 키가 없을 때 키워드로 추론하는 함수.
+//   toLowerCase()로 소문자 통일 후 포함 여부(includes)로 카테고리 판단.
+//   currentLang에 따라 한국어/영어 KB 답변을 선택한다.
+//   마지막 return = 아무것도 모를 때 기본 응답 (fallback)
 function findAns(q) {
   const ql = q.toLowerCase();
-  if (ql.includes('ìì°')||ql.includes('budget')||ql.includes('ë¹ì©')) return currentLang === 'ko' ? KB['ìì°ì?'] : KB["What's the budget?"];
-  if (ql.includes('ê°ì¸')||ql.includes('privacy')||ql.includes('wifi')) return currentLang === 'ko' ? KB['ê°ì¸ì ë³´ ë³´í¸?'] : KB['Privacy protection?'];
-  if (ql.includes('phase')||ql.includes('ì¼ì ')||ql.includes('90')) return currentLang === 'ko' ? KB['Phase 1ì?'] : KB["What's Phase 1?"];
-  if (ql.includes('ì°¨ì´')||ql.includes('ë¤ë¥¸')||ql.includes('different')) return currentLang === 'ko' ? KB['ë¤ë¥¸ ì ì?'] : KB['How is this different?'];
-  if (ql.includes('ì°½ì')||ql.includes('startup')) return currentLang === 'ko' ? KB['ì°½ì ëª¨ë¸?'] : KB['Startup model?'];
-  if (ql.includes('ê²½ì ')||ql.includes('economy')||ql.includes('agent')) return currentLang === 'ko' ? KB['AI ê²½ì ë?'] : KB['What is AI economy?'];
-  // ìì£¼ í¹í í¤ìë
-  if (ql.includes('ëì')||ql.includes('ë¸ê¸°')||ql.includes('í¬ë')||ql.includes('ì¸ì¼')||ql.includes('ëë¯¼')||ql.includes('ì¤ë§í¸í')||ql.includes('ê·ë')||ql.includes('farm')||ql.includes('strawberry')) return currentLang === 'ko' ? KB['ëìÂ·ë¸ê¸°?'] : KB['Farming & Strawberry?'];
-  if (ql.includes('íì ëì')||ql.includes('lh')||ql.includes('ì ì£¼')||ql.includes('innovation')) return currentLang === 'ko' ? KB['íì ëì?'] : KB['Innovation City?'];
-  return currentLang === 'ko' ? `ê°ì¬í©ëë¤. Mulberry íì´ ë ìì¸í ìë´í´ëë¦´ ì ììµëë¤.` : `Thank you. Mulberry team can provide more details.`;
+  if (ql.includes('예산')||ql.includes('budget')||ql.includes('비용')) return currentLang === 'ko' ? KB['예산은?'] : KB["What's the budget?"];
+  if (ql.includes('개인')||ql.includes('privacy')||ql.includes('wifi')) return currentLang === 'ko' ? KB['개인정보 보호?'] : KB['Privacy protection?'];
+  if (ql.includes('phase')||ql.includes('일정')||ql.includes('90')) return currentLang === 'ko' ? KB['Phase 1은?'] : KB["What's Phase 1?"];
+  if (ql.includes('차이')||ql.includes('다른')||ql.includes('different')) return currentLang === 'ko' ? KB['다른 점은?'] : KB['How is this different?'];
+  if (ql.includes('창업')||ql.includes('startup')) return currentLang === 'ko' ? KB['창업 모델?'] : KB['Startup model?'];
+  if (ql.includes('경제')||ql.includes('economy')||ql.includes('agent')) return currentLang === 'ko' ? KB['AI 경제란?'] : KB['What is AI economy?'];
+  // 완주 특화 키워드
+  if (ql.includes('농업')||ql.includes('딸기')||ql.includes('포도')||ql.includes('인삼')||ql.includes('농민')||ql.includes('스마트팜')||ql.includes('귀농')||ql.includes('farm')||ql.includes('strawberry')) return currentLang === 'ko' ? KB['농업·딸기?'] : KB['Farming & Strawberry?'];
+  if (ql.includes('혁신도시')||ql.includes('lh')||ql.includes('전주')||ql.includes('innovation')) return currentLang === 'ko' ? KB['혁신도시?'] : KB['Innovation City?'];
+  return currentLang === 'ko' ? `감사합니다. Mulberry 팀이 더 자세히 안내해드릴 수 있습니다.` : `Thank you. Mulberry team can provide more details.`;
 }
 
-// ââ ë³´ê³ ì ìì± ââââââââââââââââââââââââââââ
-// ð Luna ì¤í°ë ë¸í¸:
-//   genReport(): ë²í¼ í´ë¦­ â 1.2ì´ ë¡ë© ì°ì¶ â buildReport() í¸ì¶
-//   selectedType: 'exec'(ìì), 'council'(ìí), 'dept'(ë´ë¹ë¶ì) ì¤ íë
-//   buildReport(): typeì ë°ë¼ ë¤ë¥¸ ë³´ê³ ì HTML ííë¦¿ì ë°ííë¤.
-//   ì¤ì  AI ìì½ì´ ìë, ë¯¸ë¦¬ ìì±ë íì¤í¸ë¥¼ ì¡°í©íë ë°©ìì´ë¤.
+// ── 보고서 생성 ────────────────────────────
+// 📌 Luna 스터디 노트:
+//   genReport(): 버튼 클릭 → 1.2초 로딩 연출 → buildReport() 호출
+//   selectedType: 'exec'(임원), 'council'(의회), 'dept'(담당부서) 중 하나
+//   buildReport(): type에 따라 다른 보고서 HTML 템플릿을 반환한다.
+//   실제 AI 요약이 아닌, 미리 작성된 텍스트를 조합하는 방식이다.
 
-// ð§ TRANG FIX: ìì ìë³ ì¶ì² ë³´ê³ ì ì í ìë ì í
+// 🔧 TRANG FIX: 수신자별 추천 보고서 유형 자동 선택
 const recipientConfig = {
-  'gunsoo': { name: 'ìì£¼êµ°ì ê·í', type: 'exec', hint: 'ð ì¶ì² ë³´ê³ ì: ììì§ì© (ìì¬ê²°ì ìì©)' },
-  'jichacheong': { name: 'ì ë¶ëì§ì¬ ê·í', type: 'exec', hint: 'ð ì¶ì² ë³´ê³ ì: ììì§ì© (ëì  ìì¬ê²°ì )' },
-  'imwon': { name: 'ììì§ ê·í', type: 'exec', hint: 'ð ì¶ì² ë³´ê³ ì: ììì§ì© (1íì´ì§ ìì½)' },
-  'council': { name: 'ìì£¼êµ°ìí ê·í', type: 'council', hint: 'ð ì¶ì² ë³´ê³ ì: ìíì© (ìì¸ ê°ì)' },
-  'dept': { name: 'ë´ë¹ë¶ì ê·í', type: 'dept', hint: 'ð ì¶ì² ë³´ê³ ì: ë´ë¹ë¶ìì© (ì²´í¬ë¦¬ì¤í¸)' }
+  'gunsoo': { name: '완주군수 귀하', type: 'exec', hint: '📌 추천 보고서: 임원진용 (의사결정자용)' },
+  'jichacheong': { name: '전북도지사 귀하', type: 'exec', hint: '📌 추천 보고서: 임원진용 (도정 의사결정)' },
+  'imwon': { name: '임원진 귀하', type: 'exec', hint: '📌 추천 보고서: 임원진용 (1페이지 요약)' },
+  'council': { name: '완주군의회 귀하', type: 'council', hint: '📌 추천 보고서: 의회용 (상세 개요)' },
+  'dept': { name: '담당부서 귀하', type: 'dept', hint: '📌 추천 보고서: 담당부서용 (체크리스트)' }
 };
 
 function updateRecommendedType() {
@@ -2254,16 +2254,16 @@ function updateRecommendedType() {
 
   if (!config) return;
 
-  // ì¶ì² ë³´ê³ ì ì í ìë ì í
+  // 추천 보고서 유형 자동 선택
   const typeBtn = document.querySelector(`.rf-type-btn[data-type="${config.type}"]`);
   if (typeBtn) {
     selectType(typeBtn);
   }
 
-  // íí¸ ìë°ì´í¸ (ì´ì¤ì¸ì´)
+  // 힌트 업데이트 (이중언어)
   const hint = document.getElementById('recipientHint');
   if (hint) {
-    hint.innerHTML = `<span class="lang-ko">${config.hint}</span><span class="lang-en" style="display:none;">ð Recommended: ${config.type.toUpperCase()} report</span>`;
+    hint.innerHTML = `<span class="lang-ko">${config.hint}</span><span class="lang-en" style="display:none;">📌 Recommended: ${config.type.toUpperCase()} report</span>`;
   }
 }
 
@@ -2276,17 +2276,17 @@ function selectType(btn) {
 
 function genReport() {
   const btn = document.querySelector('.rf-gen-btn');
-  btn.textContent = currentLang === 'ko' ? 'â³ ìì± ì¤...' : 'â³ Generating...';
+  btn.textContent = currentLang === 'ko' ? '⏳ 생성 중...' : '⏳ Generating...';
   btn.disabled = true;
 
-  // ð§ TRANG FIX: ëë¡­ë¤ì´ìì ì íë ìì ìì data-name ìì±ì¼ë¡ë¶í° ìì ì ì´ë¦ì ì½ì
+  // 🔧 TRANG FIX: 드롭다운에서 선택된 수신자의 data-name 속성으로부터 수신자 이름을 읽음
   const recipientSelect = document.getElementById('rRecipient');
   const selectedOption = recipientSelect.options[recipientSelect.selectedIndex];
-  const recipient = selectedOption.getAttribute('data-name') || (currentLang === 'ko' ? 'ìì£¼êµ°ì ê·í' : 'Wanju County Governor');
+  const recipient = selectedOption.getAttribute('data-name') || (currentLang === 'ko' ? '완주군수 귀하' : 'Wanju County Governor');
 
   const today = new Date().toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : 'en-US', {year:'numeric',month:'long',day:'numeric'});
   setTimeout(() => {
-    btn.textContent = currentLang === 'ko' ? 'ð ë³´ê³ ì ìì±' : 'ð Generate Report';
+    btn.textContent = currentLang === 'ko' ? '📄 보고서 생성' : '📄 Generate Report';
     btn.disabled = false;
     document.getElementById('rPreview').innerHTML = buildReport(selectedType, recipient, today);
     document.getElementById('rActions').style.display = 'flex';
@@ -2297,176 +2297,176 @@ function buildReport(type, rec, today) {
   const isKo = currentLang === 'ko';
   if (type === 'exec') return `<div class="rdoc" id="rdocEl">
   <div class="rdoc-head">
-    <div class="rdoc-cat">${isKo ? 'ê¸°ë° Â· ë´ë¶ ë³´ê³ ì©' : 'Confidential Â· Internal Report'}</div>
-    <div class="rdoc-title">${isKo ? 'AI ìì£¼ 2030: ì§ì­ AI ìì£¼ê¶ ì¤í' : 'AI Wanju 2030: Regional AI Sovereignty'}</div>
-    <div class="rdoc-meta"><span>${isKo ? 'ìì ' : 'To'}: ${rec}</span><span>${isKo ? 'ìì±' : 'From'}: Mulberry Research Lab</span><span>${isKo ? 'ì¼ì' : 'Date'}: ${today}</span></div>
+    <div class="rdoc-cat">${isKo ? '기밀 · 내부 보고용' : 'Confidential · Internal Report'}</div>
+    <div class="rdoc-title">${isKo ? 'AI 완주 2030: 지역 AI 자주권 실현' : 'AI Wanju 2030: Regional AI Sovereignty'}</div>
+    <div class="rdoc-meta"><span>${isKo ? '수신' : 'To'}: ${rec}</span><span>${isKo ? '작성' : 'From'}: Mulberry Research Lab</span><span>${isKo ? '일자' : 'Date'}: ${today}</span></div>
   </div>
   <div class="rdoc-body">
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ð¡ íµì¬ ëªì ' : 'ð¡ Core Thesis'}</div><div class="rs-body"><div class="rdoc-hl">${isKo ? '"ì¸êµ¬ê° ì¤ì´ë, ê²½ì  íë ë¨ìë ì»¤ì§ë¤"\n\nAIê° ì§ì­ë¯¼Â·ê³µë¬´ìê³¼ í¨ê» ì¼íë ì¡°ì§ ì¼ìì´ ëì´\në¹ì¦ëì¤ë¥¼ ì°½ì¶íê³  ë¬¸ì ë¥¼ í´ê²°í©ëë¤.' : '"Even as population shrinks, economic activity units grow"\n\nAI joins residents and officials as team members,\ncreating business and solving problems together.'}</div></div></div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '💡 핵심 명제' : '💡 Core Thesis'}</div><div class="rs-body"><div class="rdoc-hl">${isKo ? '"인구가 줄어도, 경제 활동 단위는 커진다"\n\nAI가 지역민·공무원과 함께 일하는 조직 일원이 되어\n비즈니스를 창출하고 문제를 해결합니다.' : '"Even as population shrinks, economic activity units grow"\n\nAI joins residents and officials as team members,\ncreating business and solving problems together.'}</div></div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'Mulberry Lab 4ê°ì§ ì­ë êµ¬ì¡°' : 'Mulberry Lab 4 Core Capabilities'}</div><div class="rs-body">
-    <table class="rdoc-table"><tr><th>${isKo ? 'ì­ë' : 'Capability'}</th><th>${isKo ? 'ë´ì©' : 'Details'}</th></tr><tr><td>â  ${isKo ? 'ê³µê³µ AI & ê±°ë²ëì¤' : 'Public AI & Governance'}</td><td>${isKo ? 'Human Approval Â· ë°ì´í°Â·ê¶í ì¤ê³ Â· ê°ì¬ ê¸°ë¡' : 'Human Approval, data/authority design, audit trails'}</td></tr><tr><td>â¡ ${isKo ? 'HumanâAI íì' : 'Human-AI Collaboration'}</td><td>${isKo ? 'ì£¼ë¯¼Â·ê³µë¬´ìÂ·Agent ê°ì ìë¬´ íë¦ Â· ëíÂ·ê²°ì Â·ì±ê³¼ ì¶ì ' : 'Residents, officials, agents in shared workflow'}</td></tr><tr><td>â¢ ${isKo ? 'Agent Venture' : 'Agent Venture'}</td><td>${isKo ? 'ì§ì­ ë¬¸ì  â ì°½ì ê¸°í Â· AI í¬ë ë§ Â· ì²­ë ì°¸ì¬ íë' : 'Local problemsâstartup opportunities, AI credits'}</td></tr><tr><td>â£ ${isKo ? 'ê¸°ë¡Â·íì° ì²´ê³' : 'Record & Scale System'}</td><td>${isKo ? 'ì¤íâê²í âê°ì  Â· ì´ìì§ì ì¶ì  Â· ë¤ë¥¸ ì§ì­ ì¬ì¬ì©' : 'Executeâreviewâimprove, reuse in other regions'}</td></tr></table>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'Mulberry Lab 4가지 역량 구조' : 'Mulberry Lab 4 Core Capabilities'}</div><div class="rs-body">
+    <table class="rdoc-table"><tr><th>${isKo ? '역량' : 'Capability'}</th><th>${isKo ? '내용' : 'Details'}</th></tr><tr><td>① ${isKo ? '공공 AI & 거버넌스' : 'Public AI & Governance'}</td><td>${isKo ? 'Human Approval · 데이터·권한 설계 · 감사 기록' : 'Human Approval, data/authority design, audit trails'}</td></tr><tr><td>② ${isKo ? 'Human–AI 협업' : 'Human-AI Collaboration'}</td><td>${isKo ? '주민·공무원·Agent 같은 업무 흐름 · 대화·결정·성과 축적' : 'Residents, officials, agents in shared workflow'}</td></tr><tr><td>③ ${isKo ? 'Agent Venture' : 'Agent Venture'}</td><td>${isKo ? '지역 문제 → 창업 기회 · AI 크레딧 · 청년 참여 확대' : 'Local problems→startup opportunities, AI credits'}</td></tr><tr><td>④ ${isKo ? '기록·확산 체계' : 'Record & Scale System'}</td><td>${isKo ? '실행→검토→개선 · 운영지식 축적 · 다른 지역 재사용' : 'Execute→review→improve, reuse in other regions'}</td></tr></table>
     </div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ð ì 1ë¨ê³: Track A (íì¥) + Track B (ê¸°ë°) ë³ë ¬ ì§í' : 'ð Phase 1: Track A (Field) + Track B (Foundation) In Parallel'}</div><div class="rs-body">
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '📍 제1단계: Track A (현장) + Track B (기반) 병렬 진행' : '📍 Phase 1: Track A (Field) + Track B (Foundation) In Parallel'}</div><div class="rs-body">
     <div style="background:#e8f5e9;border-left:4px solid #4caf50;padding:12px;margin:8px 0;">
-    <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? 'ð¯ ëë¯¼ AI ë¹ì: Track A íì¥ ì¤ì¦ì ì²« ë²ì§¸ ì í' : 'ð¯ Farmer AI Secretary: First Field Pilot for Track A'}</p>
-    <p>${isKo ? 'ìì£¼êµ°ì ë¸ê¸°Â·í¬ëÂ·ì¸ì¼ ë± ëì ì¸êµ¬ ë¹ì¤ì´ ëìµëë¤. 90ì¼ ëì Track A (ëë¯¼ AI ë¹ì ì¤ì¦)ì Track B (AI ìì£¼ íì¸íëÂ·ì´ìì­ë êµ¬ì¶)ë¥¼ ë³ë ¬ë¡ ì§íí©ëë¤.' : 'Wanju has a high agricultural population (strawberry, grape, ginseng). Over 90 days, run Track A (Farmer AI Secretary pilot) and Track B (AI Wanju tuning + ops capacity) in parallel.'}</p>
+    <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? '🎯 농민 AI 비서: Track A 현장 실증의 첫 번째 선택' : '🎯 Farmer AI Secretary: First Field Pilot for Track A'}</p>
+    <p>${isKo ? '완주군은 딸기·포도·인삼 등 농업 인구 비중이 높습니다. 90일 동안 Track A (농민 AI 비서 실증)와 Track B (AI 완주 파인튜닝·운영역량 구축)를 병렬로 진행합니다.' : 'Wanju has a high agricultural population (strawberry, grape, ginseng). Over 90 days, run Track A (Farmer AI Secretary pilot) and Track B (AI Wanju tuning + ops capacity) in parallel.'}</p>
     <ul style="margin:8px 0;padding-left:20px;">
-      <li style="margin:4px 0;"><strong>${isKo ? 'Track A íì¥:' : 'Track A (Field):'}</strong> ${isKo ? 'ëê° 20-30ê³³ ëì Luna ì íÂ·ì¹´ì¹´ì¤ AI ë¹ì ì¤ì¦ â íë¡Â·ì¬ë°°Â·ê¸°ì ì§ì' : '20-30 farm households pilot: Luna phone/KakaoTalk AI secretary â sales, cultivation, weather support'}</li>
-      <li style="margin:4px 0;"><strong>${isKo ? 'Track B ê¸°ë°:' : 'Track B (Foundation):'}</strong> ${isKo ? 'ìì£¼ ëì ë°ì´í° â AI ìì£¼ ëª¨ë¸ íì¸íë â ìì£¼êµ° ìì  ìì°í' : 'Wanju farm data â AI Wanju model tuning â Wanju ownership'}</li>
-      <li style="margin:4px 0;"><strong>${isKo ? 'ë³í ìµì:' : 'Parallel Option:'}</strong> ${isKo ? 'WiFi Sensing ë¸ì¸ ëë´ (5-10ê°êµ¬) ìê·ëª¨ ë³í ê°ë¥' : 'WiFi Sensing elderly care (5-10 homes) can run in parallel at smaller scale'}</li>
-      <li style="margin:4px 0;"><strong>${isKo ? '90ì¼ í:' : 'After 90 days:'}</strong> ${isKo ? 'Human Approval Gate â ì 2ë¨ê³ go/no-go ê²°ì ' : 'Human Approval Gate â decide Phase 2 launch'}</li>
+      <li style="margin:4px 0;"><strong>${isKo ? 'Track A 현장:' : 'Track A (Field):'}</strong> ${isKo ? '농가 20-30곳 대상 Luna 전화·카카오 AI 비서 실증 → 판로·재배·기상 지원' : '20-30 farm households pilot: Luna phone/KakaoTalk AI secretary → sales, cultivation, weather support'}</li>
+      <li style="margin:4px 0;"><strong>${isKo ? 'Track B 기반:' : 'Track B (Foundation):'}</strong> ${isKo ? '완주 농업 데이터 → AI 완주 모델 파인튜닝 → 완주군 소유 자산화' : 'Wanju farm data → AI Wanju model tuning → Wanju ownership'}</li>
+      <li style="margin:4px 0;"><strong>${isKo ? '병행 옵션:' : 'Parallel Option:'}</strong> ${isKo ? 'WiFi Sensing 노인 돌봄 (5-10가구) 소규모 병행 가능' : 'WiFi Sensing elderly care (5-10 homes) can run in parallel at smaller scale'}</li>
+      <li style="margin:4px 0;"><strong>${isKo ? '90일 후:' : 'After 90 days:'}</strong> ${isKo ? 'Human Approval Gate → 제2단계 go/no-go 결정' : 'Human Approval Gate → decide Phase 2 launch'}</li>
     </ul>
     </div>
     </div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ì 1ë¨ê³ ê¸°ì  Â· ì´ì êµ¬ì¡°' : 'Phase 1 Technology & Operations'}</div><div class="rs-body"><table class="rdoc-table"><tr><th>${isKo ? 'ìì' : 'Element'}</th><th>${isKo ? 'ì­í ' : 'Role'}</th><th>${isKo ? 'ìì£¼êµ° ìì°í' : 'Wanju Ownership'}</th></tr><tr><td>${isKo ? 'ì£ì§ ë¸ë (ë¼ì¦ë² ë¦¬ íì´)' : 'Edge Nodes (Raspberry Pi)'}</td><td>${isKo ? 'ê°ì  ë´ WiFi CSI ìì§ â AI Wanju íìµ ë°ì´í°' : 'Collect WiFi signals â AI Wanju training data'}</td><td>${isKo ? 'ìì£¼êµ° ìì  (íëì¨ì´)' : 'Wanju owned (hardware)'}</td></tr><tr><td>${isKo ? 'AI Wanju ëª¨ë¸' : 'AI Wanju Model'}</td><td>${isKo ? 'ìì£¼ ì£¼ë¯¼ í¨í´ íìµ â ë§ì¶¤í ì§ì­ AI' : 'Learn Wanju residents â localized AI'}</td><td>${isKo ? 'ìì£¼êµ° ìì  (IP)' : 'Wanju owned (IP)'}</td></tr><tr><td>${isKo ? 'Luna ë¦¬ìì' : 'Luna Reception'}</td><td>${isKo ? 'ì íÂ·ì±í ì¸í°íì´ì¤ + Human Approval' : 'Phone/chat + staff approval'}</td><td>${isKo ? 'ì´ì íë¡ì¸ì¤ ì¶ì ' : 'Operations playbook'}</td></tr><tr><td>${isKo ? 'Steward AI' : 'Steward AI'}</td><td>${isKo ? 'ë°ì´í°Â·ì±ê³¼Â·ì´ìì§ì ê´ë¦¬' : 'Manage data, outcomes, knowledge'}</td><td>${isKo ? '90ì¼ ë°ì´í° â ìì£¼êµ° ìì°' : '90-day data â Wanju asset'}</td></tr></table></div></div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '제1단계 기술 · 운영 구조' : 'Phase 1 Technology & Operations'}</div><div class="rs-body"><table class="rdoc-table"><tr><th>${isKo ? '요소' : 'Element'}</th><th>${isKo ? '역할' : 'Role'}</th><th>${isKo ? '완주군 자산화' : 'Wanju Ownership'}</th></tr><tr><td>${isKo ? '엣지 노드 (라즈베리 파이)' : 'Edge Nodes (Raspberry Pi)'}</td><td>${isKo ? '가정 내 WiFi CSI 수집 → AI Wanju 학습 데이터' : 'Collect WiFi signals → AI Wanju training data'}</td><td>${isKo ? '완주군 소유 (하드웨어)' : 'Wanju owned (hardware)'}</td></tr><tr><td>${isKo ? 'AI Wanju 모델' : 'AI Wanju Model'}</td><td>${isKo ? '완주 주민 패턴 학습 → 맞춤형 지역 AI' : 'Learn Wanju residents → localized AI'}</td><td>${isKo ? '완주군 소유 (IP)' : 'Wanju owned (IP)'}</td></tr><tr><td>${isKo ? 'Luna 리셉션' : 'Luna Reception'}</td><td>${isKo ? '전화·채팅 인터페이스 + Human Approval' : 'Phone/chat + staff approval'}</td><td>${isKo ? '운영 프로세스 축적' : 'Operations playbook'}</td></tr><tr><td>${isKo ? 'Steward AI' : 'Steward AI'}</td><td>${isKo ? '데이터·성과·운영지식 관리' : 'Manage data, outcomes, knowledge'}</td><td>${isKo ? '90일 데이터 → 완주군 자산' : '90-day data → Wanju asset'}</td></tr></table></div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ì 1ë¨ê³ ì²´í¬í¬ì¸í¸: 90ì¼ Human Approval Gate' : 'Phase 1 Checkpoint: 90-Day Human Approval Gate'}</div><div class="rs-body">
-    <table class="rdoc-table"><tr><th>${isKo ? 'Track' : 'Track'}</th><th>${isKo ? '90ì¼ ëª©í' : '90-Day Target'}</th><th>${isKo ? 'ì±ê³µ ê¸°ì¤' : 'Success Criteria'}</th></tr><tr><td>${isKo ? 'Track A (íì¥)' : 'Track A (Field)'}</td><td>${isKo ? '10-20 ê°êµ¬ WiFi ëì ê°ì§' : '10-20 homes, fall detection'}</td><td>${isKo ? '95%+ ì íë, 3ë¶ ë´ ìëµ' : '95%+ accuracy, <3min response'}</td></tr><tr><td>${isKo ? 'Track B (ê¸°ë°)' : 'Track B (Foundation)'}</td><td>${isKo ? 'AI Wanju íì¸íë + ì´ì íë¡ì¸ì¤ íë¦½' : 'AI Wanju tuning + ops playbook'}</td><td>${isKo ? '10K+ íìµ ë°ì´í°, ìì£¼êµ° ìì ê¶' : '10K+ training data, Wanju ownership'}</td></tr><tr><td>${isKo ? 'Phase 2 ê²°ì ' : 'Phase 2 Decision'}</td><td>${isKo ? '90ì¼ í Human Approval Gate íì' : '90-day Human Approval meeting'}</td><td>${isKo ? 'Track A ì ë¢°ë â AND Track B ìì° íë³´ â â GO ê²°ì ' : 'Track A proven AND Track B assets ready â GO'}</td></tr></table>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '제1단계 체크포인트: 90일 Human Approval Gate' : 'Phase 1 Checkpoint: 90-Day Human Approval Gate'}</div><div class="rs-body">
+    <table class="rdoc-table"><tr><th>${isKo ? 'Track' : 'Track'}</th><th>${isKo ? '90일 목표' : '90-Day Target'}</th><th>${isKo ? '성공 기준' : 'Success Criteria'}</th></tr><tr><td>${isKo ? 'Track A (현장)' : 'Track A (Field)'}</td><td>${isKo ? '10-20 가구 WiFi 낙상 감지' : '10-20 homes, fall detection'}</td><td>${isKo ? '95%+ 정확도, 3분 내 응답' : '95%+ accuracy, <3min response'}</td></tr><tr><td>${isKo ? 'Track B (기반)' : 'Track B (Foundation)'}</td><td>${isKo ? 'AI Wanju 파인튜닝 + 운영 프로세스 확립' : 'AI Wanju tuning + ops playbook'}</td><td>${isKo ? '10K+ 학습 데이터, 완주군 소유권' : '10K+ training data, Wanju ownership'}</td></tr><tr><td>${isKo ? 'Phase 2 결정' : 'Phase 2 Decision'}</td><td>${isKo ? '90일 후 Human Approval Gate 회의' : '90-day Human Approval meeting'}</td><td>${isKo ? 'Track A 신뢰도 ↑ AND Track B 자산 확보 ↑ → GO 결정' : 'Track A proven AND Track B assets ready → GO'}</td></tr></table>
     </div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ìì° êµ¬ì¡°' : 'Budget Structure'}</div><div class="rs-body">
-    <p><strong>${isKo ? 'AI Wanju 2030 ì ì²´ ìì°: 7.5ìµ ì' : 'AI Wanju 2030 Total: 7.5ìµ ì'}</strong></p>
-    <table class="rdoc-table"><tr><th>${isKo ? 'í­ëª©' : 'Item'}</th><th>${isKo ? 'ì¤ëª' : 'Details'}</th><th>${isKo ? 'ìì°' : 'Budget'}</th></tr><tr><td>${isKo ? 'ì 1ë¨ê³ íì¼ë¿' : 'Phase 1 Pilot'}</td><td>${isKo ? '1ê° ë©´(10-20ê°êµ¬) WiFi Sensing + AI Wanju íì¸íë' : '1 village (10-20 homes) WiFi Sensing + AI Wanju tuning'}</td><td>1.5ìµ ì</td></tr><tr><td>${isKo ? 'ì 2ë¨ê³ íë' : 'Phase 2 Expansion'}</td><td>${isKo ? 'ëë¯¼Â·ììê³µì¸ AI ë¹ì, ê³µëêµ¬ë§¤ (4-6ê°ì)' : 'Farmer AI secretary, co-op marketplace (4-6mo)'}</td><td>2.5ìµ ì</td></tr><tr><td>${isKo ? 'ì 3ë¨ê³ ìíê³' : 'Phase 3 Ecosystem'}</td><td>${isKo ? 'AI ë² ì´ì¤ìº í, ì²­ë ì°½ì íë¸ (7-24ê°ì)' : 'AI basecamp, youth startup hub (7-24mo)'}</td><td>2.0ìµ ì</td></tr><tr><td>${isKo ? 'ì¸íë¼ Â· íìµ' : 'Infrastructure & Learning'}</td><td>${isKo ? 'í´ë¼ì°ë, ì§ì ì¸ë ¥, êµì¡, ë°ì´í° ìì°í' : 'Cloud, support staff, training, data assets'}</td><td>1.5ìµ ì</td></tr></table>
-    <p style="margin-top:12px;"><strong>${isKo ? 'ì£¼ì: Phase 1 (1.5B) í¬í¨ 1ê° ë©´ ë¨ì. íë ì ë©´ë¹ 1.5B ì¶ê°.' : 'Note: Phase 1 (1.5B) covers 1 village unit. Expansion: +1.5B per additional village.'}</strong></p>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '예산 구조' : 'Budget Structure'}</div><div class="rs-body">
+    <p><strong>${isKo ? 'AI Wanju 2030 전체 예산: 7.5억 원' : 'AI Wanju 2030 Total: 7.5억 원'}</strong></p>
+    <table class="rdoc-table"><tr><th>${isKo ? '항목' : 'Item'}</th><th>${isKo ? '설명' : 'Details'}</th><th>${isKo ? '예산' : 'Budget'}</th></tr><tr><td>${isKo ? '제1단계 파일럿' : 'Phase 1 Pilot'}</td><td>${isKo ? '1개 면(10-20가구) WiFi Sensing + AI Wanju 파인튜닝' : '1 village (10-20 homes) WiFi Sensing + AI Wanju tuning'}</td><td>1.5억 원</td></tr><tr><td>${isKo ? '제2단계 확대' : 'Phase 2 Expansion'}</td><td>${isKo ? '농민·소상공인 AI 비서, 공동구매 (4-6개월)' : 'Farmer AI secretary, co-op marketplace (4-6mo)'}</td><td>2.5억 원</td></tr><tr><td>${isKo ? '제3단계 생태계' : 'Phase 3 Ecosystem'}</td><td>${isKo ? 'AI 베이스캠프, 청년 창업 허브 (7-24개월)' : 'AI basecamp, youth startup hub (7-24mo)'}</td><td>2.0억 원</td></tr><tr><td>${isKo ? '인프라 · 학습' : 'Infrastructure & Learning'}</td><td>${isKo ? '클라우드, 지원 인력, 교육, 데이터 자산화' : 'Cloud, support staff, training, data assets'}</td><td>1.5억 원</td></tr></table>
+    <p style="margin-top:12px;"><strong>${isKo ? '주의: Phase 1 (1.5B) 포함 1개 면 단위. 확대 시 면당 1.5B 추가.' : 'Note: Phase 1 (1.5B) covers 1 village unit. Expansion: +1.5B per additional village.'}</strong></p>
     </div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ì 1ë¨ê³ â ì 2ë¨ê³ â ì 3ë¨ê³ ì°ê²°: ì§ì­ ìì°í & íì°' : 'Phase 1â2â3 Progression: Regional Ownership & Scale'}</div><div class="rs-body">
-    <p><strong>${isKo ? 'íµì¬: ê° Phase ì¢ë£ í ìì£¼êµ°ì´ ìì í ì§ì ìì°ë§ ë¨ê²¨ì§ê³ , ë¤ì Phaseë ê·¸ ìì°ì ê¸°ë°ì¼ë¡ íì¥' : 'Core: Each Phase leaves Wanju with owned assets; next Phase builds on them'}</strong></p>
-    <table class="rdoc-table"><tr><th>${isKo ? 'ë¨ê³' : 'Phase'}</th><th>${isKo ? 'ê¸°ê°' : 'Duration'}</th><th>${isKo ? 'ìì£¼êµ° ìì°' : 'Wanju Assets'}</th><th>${isKo ? 'ë¤ì Step' : 'Next'}</th></tr><tr><td>${isKo ? 'ì 1ë¨ê³' : 'Phase 1'}</td><td>90ì¼</td><td>${isKo ? 'AI Wanju ëª¨ë¸ + ëì ê°ì§ ë°ì´í° + ì´ì ë¸íì°' : 'AI Wanju model + fall data + ops playbook'}</td><td>${isKo ? 'Human Approval â â ì 2ë¨ê³ GO' : 'Approval â â Phase 2'}</td></tr><tr><td>${isKo ? 'ì 2ë¨ê³' : 'Phase 2'}</td><td>4-6ê°ì</td><td>${isKo ? 'ê²ì¦ ëª¨ë¸ â ëë¯¼/ìì¸ AI ìì´ì í¸ + ê²½ì  ê¸°ë¡' : 'Validated model â Farmer/merchant agents + economic data'}</td><td>${isKo ? 'ì²­ë ì°½ì ê¸°í ì°½ì¶' : 'Youth startup opportunities'}</td></tr><tr><td>${isKo ? 'ì 3ë¨ê³' : 'Phase 3'}</td><td>7-24ê°ì</td><td>${isKo ? 'AI ë² ì´ì¤ìº í (êµì¡Â·ì°½ìÂ·ê²½ì )' : 'AI Basecamp (training, startups, economy)'}</td><td>${isKo ? 'ì ë¶/ì êµ­ íì°' : 'National scale'}</td></tr></table>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '제1단계 → 제2단계 → 제3단계 연결: 지역 자산화 & 확산' : 'Phase 1→2→3 Progression: Regional Ownership & Scale'}</div><div class="rs-body">
+    <p><strong>${isKo ? '핵심: 각 Phase 종료 후 완주군이 소유한 지식 자산만 남겨지고, 다음 Phase는 그 자산을 기반으로 확장' : 'Core: Each Phase leaves Wanju with owned assets; next Phase builds on them'}</strong></p>
+    <table class="rdoc-table"><tr><th>${isKo ? '단계' : 'Phase'}</th><th>${isKo ? '기간' : 'Duration'}</th><th>${isKo ? '완주군 자산' : 'Wanju Assets'}</th><th>${isKo ? '다음 Step' : 'Next'}</th></tr><tr><td>${isKo ? '제1단계' : 'Phase 1'}</td><td>90일</td><td>${isKo ? 'AI Wanju 모델 + 낙상 감지 데이터 + 운영 노하우' : 'AI Wanju model + fall data + ops playbook'}</td><td>${isKo ? 'Human Approval ✓ → 제2단계 GO' : 'Approval ✓ → Phase 2'}</td></tr><tr><td>${isKo ? '제2단계' : 'Phase 2'}</td><td>4-6개월</td><td>${isKo ? '검증 모델 → 농민/상인 AI 에이전트 + 경제 기록' : 'Validated model → Farmer/merchant agents + economic data'}</td><td>${isKo ? '청년 창업 기회 창출' : 'Youth startup opportunities'}</td></tr><tr><td>${isKo ? '제3단계' : 'Phase 3'}</td><td>7-24개월</td><td>${isKo ? 'AI 베이스캠프 (교육·창업·경제)' : 'AI Basecamp (training, startups, economy)'}</td><td>${isKo ? '전북/전국 확산' : 'National scale'}</td></tr></table>
     </div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ê¸´ê¸ ê²°ì  ì¬í­' : 'Critical Decisions'}</div><div class="rs-body">
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '긴급 결정 사항' : 'Critical Decisions'}</div><div class="rs-body">
     <div style="background:#fff3cd;border-left:4px solid #ffc107;padding:12px;margin:8px 0;">
-    <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? 'ð¯ ì§ê¸ ìì¬ê²°ì  (ì 1ë¨ê³ ì°©ì):' : 'ð¯ Now (Phase 1 Launch):'}</p>
-    <div class="rdoc-hl">${isKo ? 'â¡ ì 1ë¨ê³ ìì ì¹ì¸ (1.5ìµ ì, 90ì¼)\nâ¡ íì¼ë¿ ë§ì ì ì  Â· ì£¼ë¯¼ ëì\nâ¡ ì ë³´ë³´í¸ì¬ìììí ì¹ì¸\nâ¡ ìì° ë°°ì  Â· ì¬ì íë³´' : 'â¡ Approve Phase 1 (15ìµ ì, 90 days)\nâ¡ Select pilot village, get consent\nâ¡ Pass info security committee\nâ¡ Allocate budget, secure funds'}</div>
+    <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? '🎯 지금 의사결정 (제1단계 착수):' : '🎯 Now (Phase 1 Launch):'}</p>
+    <div class="rdoc-hl">${isKo ? '□ 제1단계 시작 승인 (1.5억 원, 90일)\n□ 파일럿 마을 선정 · 주민 동의\n□ 정보보호심의위원회 승인\n□ 예산 배정 · 재원 확보' : '□ Approve Phase 1 (15억 원, 90 days)\n□ Select pilot village, get consent\n□ Pass info security committee\n□ Allocate budget, secure funds'}</div>
     </div>
     <div style="background:#e8f5e9;border-left:4px solid #4caf50;padding:12px;margin:8px 0;">
-    <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? 'â° 90ì¼ í (Human Approval Gate):' : 'â° After 90 Days (Human Approval Gate):'}</p>
+    <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? '⏰ 90일 후 (Human Approval Gate):' : '⏰ After 90 Days (Human Approval Gate):'}</p>
     <ul style="margin:6px 0;padding-left:20px;">
-      <li style="margin:4px 0;">${isKo ? 'â Track A ì ë¢°ë ê²ì¦: ëì ê°ì§ 95%, ìëµ 3ë¶' : 'â Track A validation: 95% accuracy, <3min response'}</li>
-      <li style="margin:4px 0;">${isKo ? 'â Track B ìì° íë³´: AI Wanju íì¸íë ìë£, ìì£¼êµ° ìì  íì ' : 'â Track B assets: AI Wanju ready, Wanju ownership confirmed'}</li>
-      <li style="margin:4px 0;">${isKo ? 'â GO/NO-GO ê²°ì : ì 2ë¨ê³ ì§ì¶ ì¹ì¸' : 'â GO/NO-GO: Decide Phase 2 launch'}</li>
+      <li style="margin:4px 0;">${isKo ? '✓ Track A 신뢰도 검증: 낙상 감지 95%, 응답 3분' : '✓ Track A validation: 95% accuracy, <3min response'}</li>
+      <li style="margin:4px 0;">${isKo ? '✓ Track B 자산 확보: AI Wanju 파인튜닝 완료, 완주군 소유 확정' : '✓ Track B assets: AI Wanju ready, Wanju ownership confirmed'}</li>
+      <li style="margin:4px 0;">${isKo ? '→ GO/NO-GO 결정: 제2단계 진출 승인' : '→ GO/NO-GO: Decide Phase 2 launch'}</li>
     </ul>
     </div>
     </div></div>
   </div>
-  <div class="rdoc-foot"><span class="rf-logo">Mulberry Research Lab</span><span>AI Initiative V3.2-WJ Â· ${today}</span></div>
+  <div class="rdoc-foot"><span class="rf-logo">Mulberry Research Lab</span><span>AI Initiative V3.2-WJ · ${today}</span></div>
 </div>`;
 
   if (type === 'council') return `<div class="rdoc" id="rdocEl">
   <div class="rdoc-head">
-    <div class="rdoc-cat">${isKo ? 'ìì£¼êµ°ìí ì¬ìì© Â· ë¹ê³µê°' : 'Wanju Council Deliberation Â· Confidential'}</div>
-    <div class="rdoc-title">${isKo ? 'AI ìì£¼ 2030: ì§ì­ ì£¼ë AI ê²½ì  ì í ì ëµ' : 'AI Wanju 2030: Regional AI Economy Strategy'}</div>
-    <div class="rdoc-meta"><span>${isKo ? 'ìì ' : 'To'}: ${rec}</span><span>${isKo ? 'ì ì¶' : 'From'}: Mulberry Research Lab</span><span>${isKo ? 'ì¼ì' : 'Date'}: ${today}</span></div>
+    <div class="rdoc-cat">${isKo ? '완주군의회 심의용 · 비공개' : 'Wanju Council Deliberation · Confidential'}</div>
+    <div class="rdoc-title">${isKo ? 'AI 완주 2030: 지역 주도 AI 경제 전환 전략' : 'AI Wanju 2030: Regional AI Economy Strategy'}</div>
+    <div class="rdoc-meta"><span>${isKo ? '수신' : 'To'}: ${rec}</span><span>${isKo ? '제출' : 'From'}: Mulberry Research Lab</span><span>${isKo ? '일자' : 'Date'}: ${today}</span></div>
   </div>
   <div class="rdoc-body">
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ð ë³´ê³  ëª©ì ' : 'ð Purpose'}</div>
-    <div class="rs-body"><p>${isKo ? 'ë³¸ ë³´ê³ ìë ìì£¼êµ°ìíì ìì° ì¬ì ë° ìê²°ì ìí´ ì ì¶ë©ëë¤. AI ìì£¼ 2030 ì 1ë¨ê³ íì¼ë¿ ì°©ìì íìí <strong>ìì° ì¹ì¸(1.5ìµ ì, 90ì¼)</strong>ê³¼ <strong>ì ë³´ë³´í¸ì¬ìììí êµ¬ì± ìê²°</strong>ì ìì²­í©ëë¤.' : 'This report is submitted for Wanju County Council budget deliberation and vote. We request <strong>Phase 1 pilot budget approval (150M KRW, 90 days)</strong> and authorization to form the <strong>Information Security Review Committee</strong>.'}</p></div></div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '📋 보고 목적' : '📋 Purpose'}</div>
+    <div class="rs-body"><p>${isKo ? '본 보고서는 완주군의회의 예산 심의 및 의결을 위해 제출됩니다. AI 완주 2030 제1단계 파일럿 착수에 필요한 <strong>예산 승인(1.5억 원, 90일)</strong>과 <strong>정보보호심의위원회 구성 의결</strong>을 요청합니다.' : 'This report is submitted for Wanju County Council budget deliberation and vote. We request <strong>Phase 1 pilot budget approval (150M KRW, 90 days)</strong> and authorization to form the <strong>Information Security Review Committee</strong>.'}</p></div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ð ìì£¼êµ° íí©: ì ì§ê¸ì¸ê°' : 'ð Wanju Status: Why Now'}</div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '📊 완주군 현황: 왜 지금인가' : '📊 Wanju Status: Why Now'}</div>
     <div class="rs-body">
-    <table class="rdoc-table"><tr><th>${isKo ? 'ì§í' : 'Indicator'}</th><th>${isKo ? 'íì¬ (2024)' : 'Current (2024)'}</th><th>${isKo ? '10ë í ì ë§' : '10Y Forecast'}</th></tr>
-    <tr><td>${isKo ? 'ì´ ì¸êµ¬' : 'Total Population'}</td><td>${isKo ? '95,000ëª' : '29,000'}</td><td>${isKo ? '~78,000ëª (ì¸êµ¬ ê°ì ì¶ì¸)' : '~78,000 (population declining)'}</td></tr>
-    <tr><td>${isKo ? '65ì¸ ì´ì ë¹ì¨' : '65+ Ratio'}</td><td>23%</td><td>${isKo ? '30%+ ì´ê³¼ ìì' : 'Expected 30%+'}</td></tr>
-    <tr><td>${isKo ? 'ëê±°ë¸ì¸ ê°êµ¬' : 'Isolated Elderly'}</td><td>${isKo ? '4,800ê°êµ¬' : '4,800 households'}</td><td>${isKo ? 'ì§ì ì¦ê°' : 'Continuing to grow'}</td></tr>
-    <tr><td>${isKo ? 'ìê¸ ëì íí©' : 'Emergency Response'}</td><td>${isKo ? 'ì§ì ë¶ì¡± Â· ë°ì ì§ì°' : 'Staff shortage, slow response'}</td><td>${isKo ? 'AI ë³´ì ìì´ ìí ì ë§' : 'Worsening without AI'}</td></tr></table>
+    <table class="rdoc-table"><tr><th>${isKo ? '지표' : 'Indicator'}</th><th>${isKo ? '현재 (2024)' : 'Current (2024)'}</th><th>${isKo ? '10년 후 전망' : '10Y Forecast'}</th></tr>
+    <tr><td>${isKo ? '총 인구' : 'Total Population'}</td><td>${isKo ? '95,000명' : '29,000'}</td><td>${isKo ? '~78,000명 (인구 감소 추세)' : '~78,000 (population declining)'}</td></tr>
+    <tr><td>${isKo ? '65세 이상 비율' : '65+ Ratio'}</td><td>23%</td><td>${isKo ? '30%+ 초과 예상' : 'Expected 30%+'}</td></tr>
+    <tr><td>${isKo ? '독거노인 가구' : 'Isolated Elderly'}</td><td>${isKo ? '4,800가구' : '4,800 households'}</td><td>${isKo ? '지속 증가' : 'Continuing to grow'}</td></tr>
+    <tr><td>${isKo ? '응급 대응 현황' : 'Emergency Response'}</td><td>${isKo ? '직원 부족 · 반응 지연' : 'Staff shortage, slow response'}</td><td>${isKo ? 'AI 보완 없이 악화 전망' : 'Worsening without AI'}</td></tr></table>
     <div style="background:#fff3cd;border-left:4px solid #ffc107;padding:10px;margin:10px 0;">
-      <strong>${isKo ? 'â ï¸ íµì¬ ê³¼ì :' : 'â ï¸ Core Challenge:'}</strong> ${isKo ? '"ì¸êµ¬ë ì¤ì´ë íì  ìë¹ì¤ ììë ì¤ì§ ìëë¤." íì¬ ë°©ìì êµ¬ì¡°ì  íê³ê° ëªíí©ëë¤.' : '"Population shrinks but service demand does not." Current approach has clear structural limits.'}
+      <strong>${isKo ? '⚠️ 핵심 과제:' : '⚠️ Core Challenge:'}</strong> ${isKo ? '"인구는 줄어도 행정 서비스 수요는 줄지 않는다." 현재 방식의 구조적 한계가 명확합니다.' : '"Population shrinks but service demand does not." Current approach has clear structural limits.'}
     </div>
     </div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ð¡ íµì¬ ëªì  (Core Thesis)' : 'ð¡ Core Thesis'}</div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '💡 핵심 명제 (Core Thesis)' : '💡 Core Thesis'}</div>
     <div class="rs-body">
-    <div class="rdoc-hl">${isKo ? '"ì¸êµ¬ê° ì¤ì´ë, ê²½ì  íë ë¨ìë ì»¤ì§ë¤"\n\nAIê° ì§ì­ë¯¼Â·ê³µë¬´ìê³¼ í¨ê» ì¼íë ì¡°ì§ ì¼ìì´ ëì´\në¬¸ì ë¥¼ ìë°©íê³ , ìë¡ì´ ê²½ì  ê¸°íë¥¼ ì°½ì¶í©ëë¤.\n\n4ê°ì§ ì­ë: â  ê³µê³µ AI & ê±°ë²ëì¤ â â¡ HumanâAI íì\nâ â¢ Agent Venture (ì²­ë ì°½ì) â â£ ê¸°ë¡Â·íì° (ì§ì­ ì¬ì¬ì©)' : '"Even as population shrinks, economic activity units grow"\n\nAI works alongside residents and officials as a team member,\npreventing problems and creating new economic opportunities.\n\n4 capabilities: â  Public AI & Governance â â¡ Human-AI Collaboration\nâ â¢ Agent Venture â â£ Record & Scale System'}</div>
+    <div class="rdoc-hl">${isKo ? '"인구가 줄어도, 경제 활동 단위는 커진다"\n\nAI가 지역민·공무원과 함께 일하는 조직 일원이 되어\n문제를 예방하고, 새로운 경제 기회를 창출합니다.\n\n4가지 역량: ① 공공 AI & 거버넌스 → ② Human–AI 협업\n→ ③ Agent Venture (청년 창업) → ④ 기록·확산 (지역 재사용)' : '"Even as population shrinks, economic activity units grow"\n\nAI works alongside residents and officials as a team member,\npreventing problems and creating new economic opportunities.\n\n4 capabilities: ① Public AI & Governance → ② Human-AI Collaboration\n→ ③ Agent Venture → ④ Record & Scale System'}</div>
     </div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ð AI ìì£¼ 2030: 3ë¨ê³ ì ëµ ê°ì' : 'ð AI Wanju 2030: 3-Phase Strategy'}</div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '📍 AI 완주 2030: 3단계 전략 개요' : '📍 AI Wanju 2030: 3-Phase Strategy'}</div>
     <div class="rs-body">
-    <table class="rdoc-table"><tr><th>${isKo ? 'ë¨ê³' : 'Phase'}</th><th>${isKo ? 'ê¸°ê°' : 'Duration'}</th><th>${isKo ? 'íµì¬ ë´ì©' : 'Focus'}</th><th>${isKo ? 'ìì°' : 'Budget'}</th><th>${isKo ? 'ìì£¼êµ° íë ìì°' : 'Wanju Assets'}</th></tr>
-    <tr><td><strong>${isKo ? 'ì 1ë¨ê³ â' : 'Phase 1 â'}</strong></td><td>90ì¼</td><td>${isKo ? 'WiFi Sensing ë¸ì¸ ëë´ íì¼ë¿\nTrack A(íì¥) + Track B(ê¸°ë°) ë³ë ¬' : 'WiFi Sensing elderly care\nTrack A (field) + Track B (foundation)'}</td><td><strong>1.5ìµ ì</strong></td><td>${isKo ? 'AI Wanju ëª¨ë¸ IP + ë°ì´í° ìì ê¶' : 'AI Wanju model IP + data ownership'}</td></tr>
-    <tr><td>${isKo ? 'ì 2ë¨ê³' : 'Phase 2'}</td><td>4-6ê°ì</td><td>${isKo ? 'ëë¯¼Â·ììê³µì¸ AI ë¹ì, ì²­ë ì°½ì' : 'Farmer/merchant AI, youth startup'}</td><td>2.5ìµ ì</td><td>${isKo ? 'ê²½ì  íë ê¸°ë¡ + ì°½ì ì¬ë¡' : 'Economic records + startup cases'}</td></tr>
-    <tr><td>${isKo ? 'ì 3ë¨ê³' : 'Phase 3'}</td><td>7-24ê°ì</td><td>${isKo ? 'AI ë² ì´ì¤ìº í, ê°ìÂ·ì êµ­ íì°' : 'AI Basecamp, national scale'}</td><td>2.0ìµ ì</td><td>${isKo ? 'ì êµ­ ëª¨ë² ì¬ë¡ (ìì£¼êµ° ë¸ëë)' : 'National model (Wanju brand)'}</td></tr></table>
+    <table class="rdoc-table"><tr><th>${isKo ? '단계' : 'Phase'}</th><th>${isKo ? '기간' : 'Duration'}</th><th>${isKo ? '핵심 내용' : 'Focus'}</th><th>${isKo ? '예산' : 'Budget'}</th><th>${isKo ? '완주군 획득 자산' : 'Wanju Assets'}</th></tr>
+    <tr><td><strong>${isKo ? '제1단계 ★' : 'Phase 1 ★'}</strong></td><td>90일</td><td>${isKo ? 'WiFi Sensing 노인 돌봄 파일럿\nTrack A(현장) + Track B(기반) 병렬' : 'WiFi Sensing elderly care\nTrack A (field) + Track B (foundation)'}</td><td><strong>1.5억 원</strong></td><td>${isKo ? 'AI Wanju 모델 IP + 데이터 소유권' : 'AI Wanju model IP + data ownership'}</td></tr>
+    <tr><td>${isKo ? '제2단계' : 'Phase 2'}</td><td>4-6개월</td><td>${isKo ? '농민·소상공인 AI 비서, 청년 창업' : 'Farmer/merchant AI, youth startup'}</td><td>2.5억 원</td><td>${isKo ? '경제 활동 기록 + 창업 사례' : 'Economic records + startup cases'}</td></tr>
+    <tr><td>${isKo ? '제3단계' : 'Phase 3'}</td><td>7-24개월</td><td>${isKo ? 'AI 베이스캠프, 강원·전국 확산' : 'AI Basecamp, national scale'}</td><td>2.0억 원</td><td>${isKo ? '전국 모범 사례 (완주군 브랜드)' : 'National model (Wanju brand)'}</td></tr></table>
     <div style="background:#e8f5e9;border-left:4px solid #4caf50;padding:10px;margin:10px 0;">
-      <strong>${isKo ? 'ð¯ ìí ì¬ì ëì: ì 1ë¨ê³ë§ (1.5ìµ ì, 90ì¼)' : 'ð¯ Council Action: Phase 1 only (150M KRW, 90 days)'}</strong><br>
-      ${isKo ? 'ì 2Â·3ë¨ê³ë 90ì¼ Human Approval Gate ê²ì¦ í ë³ë ì¬ìí©ëë¤. ë¨ê³ë³ë¡ ìíê° ì¬ì¬ìÂ·ì¬ìê²°í©ëë¤.' : 'Phases 2 & 3 are separately reviewed after the 90-day Human Approval Gate.'}
+      <strong>${isKo ? '🎯 의회 심의 대상: 제1단계만 (1.5억 원, 90일)' : '🎯 Council Action: Phase 1 only (150M KRW, 90 days)'}</strong><br>
+      ${isKo ? '제2·3단계는 90일 Human Approval Gate 검증 후 별도 심의합니다. 단계별로 의회가 재심의·재의결합니다.' : 'Phases 2 & 3 are separately reviewed after the 90-day Human Approval Gate.'}
     </div>
     </div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ð ì 1ë¨ê³ ìì¸: Track A (íì¥) + Track B (ê¸°ë°) ë³ë ¬ ì§í' : 'ð Phase 1 Detail: Track A (Field) + Track B (Foundation) in Parallel'}</div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '🔍 제1단계 상세: Track A (현장) + Track B (기반) 병렬 진행' : '🔍 Phase 1 Detail: Track A (Field) + Track B (Foundation) in Parallel'}</div>
     <div class="rs-body">
-    <table class="rdoc-table"><tr><th>Track</th><th>${isKo ? 'ë´ì©' : 'Content'}</th><th>${isKo ? '90ì¼ ëª©í' : '90-Day Target'}</th><th>${isKo ? 'ìì£¼êµ° ìì°' : 'Wanju Assets'}</th></tr>
-    <tr><td><strong>${isKo ? 'Track A\n(íì¥ ì¤ì¦)' : 'Track A\n(Field Pilot)'}</strong></td>
-    <td>${isKo ? '10-20ê°êµ¬ WiFi ëì ê°ì§\në¼ì¦ë² ë¦¬ íì´ ì£ì§ ë¸ë\n24ìê° ìë ëª¨ëí°ë§' : '10-20 homes WiFi fall detection\nRaspberry Pi edge nodes\n24-hour auto monitoring'}</td>
-    <td>${isKo ? 'ëì ê°ì§ 95%+\nìëµ 3ë¶ ì´ë´\nì£¼ë¯¼ ë§ì¡±ë 80%+' : 'Fall detection â¥95%\nResponse <3 min\nSatisfaction â¥80%'}</td>
-    <td>${isKo ? 'ì¤ì¦ ë°ì´í° (ìì£¼êµ° ìì )\nì´ì ë§¤ë´ì¼' : 'Pilot data (Wanju owned)\nOperations manual'}</td></tr>
-    <tr><td><strong>${isKo ? 'Track B\n(ê¸°ë° êµ¬ì¶)' : 'Track B\n(Foundation)'}</strong></td>
-    <td>${isKo ? 'AI Wanju ëª¨ë¸ íì¸íë\nìì£¼ ì£¼ë¯¼ í¨í´ íìµ\nLuna + Steward AI êµ¬ì¶\nê³µë¬´ì ì´ì êµì¡' : 'AI Wanju model fine-tuning\nLuna + Steward AI build\nStaff operations training'}</td>
-    <td>${isKo ? 'íì¸íë ìë£\níìµ ë°ì´í° 10K+\nê³µë¬´ì 3ì¸ ì´ì ì¸ì¦' : 'Fine-tuning complete\n10K+ training data\n3+ staff certified'}</td>
-    <td>${isKo ? 'AI ëª¨ë¸ IP (ìì£¼êµ° ìì )\nì´ì ì§ì ìì°\nêµì¡ ìë£ ì¸ë ¥' : 'AI model IP (Wanju owned)\nOperational knowledge\nTrained personnel'}</td></tr></table>
+    <table class="rdoc-table"><tr><th>Track</th><th>${isKo ? '내용' : 'Content'}</th><th>${isKo ? '90일 목표' : '90-Day Target'}</th><th>${isKo ? '완주군 자산' : 'Wanju Assets'}</th></tr>
+    <tr><td><strong>${isKo ? 'Track A\n(현장 실증)' : 'Track A\n(Field Pilot)'}</strong></td>
+    <td>${isKo ? '10-20가구 WiFi 낙상 감지\n라즈베리 파이 엣지 노드\n24시간 자동 모니터링' : '10-20 homes WiFi fall detection\nRaspberry Pi edge nodes\n24-hour auto monitoring'}</td>
+    <td>${isKo ? '낙상 감지 95%+\n응답 3분 이내\n주민 만족도 80%+' : 'Fall detection ≥95%\nResponse <3 min\nSatisfaction ≥80%'}</td>
+    <td>${isKo ? '실증 데이터 (완주군 소유)\n운영 매뉴얼' : 'Pilot data (Wanju owned)\nOperations manual'}</td></tr>
+    <tr><td><strong>${isKo ? 'Track B\n(기반 구축)' : 'Track B\n(Foundation)'}</strong></td>
+    <td>${isKo ? 'AI Wanju 모델 파인튜닝\n완주 주민 패턴 학습\nLuna + Steward AI 구축\n공무원 운영 교육' : 'AI Wanju model fine-tuning\nLuna + Steward AI build\nStaff operations training'}</td>
+    <td>${isKo ? '파인튜닝 완료\n학습 데이터 10K+\n공무원 3인 이상 인증' : 'Fine-tuning complete\n10K+ training data\n3+ staff certified'}</td>
+    <td>${isKo ? 'AI 모델 IP (완주군 소유)\n운영 지식 자산\n교육 완료 인력' : 'AI model IP (Wanju owned)\nOperational knowledge\nTrained personnel'}</td></tr></table>
     </div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'âï¸ ìí ì¬ì ì£¼ì ì¬í­' : 'âï¸ Key Council Deliberation Points'}</div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '⚖️ 의회 심의 주요 사항' : '⚖️ Key Council Deliberation Points'}</div>
     <div class="rs-body">
     <div style="background:#f3e5f5;border-left:4px solid #9c27b0;padding:12px;margin:8px 0;">
-      <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? 'â  ìì° ìê²° (1.5ìµ ì, 90ì¼)' : 'â  Budget Vote (150M KRW, 90 days)'}</p>
-      <table class="rdoc-table"><tr><th>${isKo ? 'ì¬ì' : 'Source'}</th><th>${isKo ? 'ê¸ì¡' : 'Amount'}</th><th>${isKo ? 'ë¹ê³ ' : 'Note'}</th></tr>
-      <tr><td>${isKo ? 'êµ°ë¹ (ìì²´ ì¬ì)' : 'County Budget'}</td><td>0.5ìµ ì</td><td>${isKo ? 'ì¶ê²½ ë°ì íì' : 'Supplementary budget required'}</td></tr>
-      <tr><td>${isKo ? 'ì ë¶ ë§¤ì¹­ (ëë¹)' : 'Province Match (Jeonbuk)'}</td><td>0.5ìµ ì</td><td>${isKo ? 'ëë¹ ë§¤ì¹­ ì ì²­ ë³í' : 'Apply for province match'}</td></tr>
-      <tr><td>${isKo ? 'êµ­ë¹ ê³µëª¨ (íìë¶Â·ê³¼ê¸°ë¶)' : 'National Grants (MOIS/MSIT)'}</td><td>0.5ìµ ì</td><td>${isKo ? 'ê³µëª¨ ëì ì§í' : 'Simultaneous grant applications'}</td></tr></table>
+      <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? '① 예산 의결 (1.5억 원, 90일)' : '① Budget Vote (150M KRW, 90 days)'}</p>
+      <table class="rdoc-table"><tr><th>${isKo ? '재원' : 'Source'}</th><th>${isKo ? '금액' : 'Amount'}</th><th>${isKo ? '비고' : 'Note'}</th></tr>
+      <tr><td>${isKo ? '군비 (자체 재원)' : 'County Budget'}</td><td>0.5억 원</td><td>${isKo ? '추경 반영 필요' : 'Supplementary budget required'}</td></tr>
+      <tr><td>${isKo ? '전북 매칭 (도비)' : 'Province Match (Jeonbuk)'}</td><td>0.5억 원</td><td>${isKo ? '도비 매칭 신청 병행' : 'Apply for province match'}</td></tr>
+      <tr><td>${isKo ? '국비 공모 (행안부·과기부)' : 'National Grants (MOIS/MSIT)'}</td><td>0.5억 원</td><td>${isKo ? '공모 동시 진행' : 'Simultaneous grant applications'}</td></tr></table>
     </div>
     <div style="background:#e3f2fd;border-left:4px solid #2196f3;padding:12px;margin:8px 0;">
-      <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? 'â¡ ì ë³´ë³´í¸ì¬ìììí êµ¬ì± ìê²°' : 'â¡ Information Security Review Committee'}</p>
-      <p>${isKo ? 'ê°ì¸ì ë³´ë³´í¸ë² ì 33ì¡°ì ë°ë¥¸ ì¬ì  ì¬ì íì. êµ¬ì±: êµ°ìì 2ì¸ + ê°ì¸ì ë³´ ì ë¬¸ê° 2ì¸ + ì£¼ë¯¼ ëí 1ì¸. ì°©ì ì  ìí ìê²° ì¬í­ìëë¤.' : 'Required under Personal Information Protection Act Â§33. Composition: 2 council members + 2 privacy experts + 1 resident rep. Council vote required before launch.'}</p>
+      <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? '② 정보보호심의위원회 구성 의결' : '② Information Security Review Committee'}</p>
+      <p>${isKo ? '개인정보보호법 제33조에 따른 사전 심의 필요. 구성: 군의원 2인 + 개인정보 전문가 2인 + 주민 대표 1인. 착수 전 의회 의결 사항입니다.' : 'Required under Personal Information Protection Act §33. Composition: 2 council members + 2 privacy experts + 1 resident rep. Council vote required before launch.'}</p>
     </div>
     <div style="background:#e8f5e9;border-left:4px solid #4caf50;padding:12px;margin:8px 0;">
-      <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? 'â¢ ì£¼ë¯¼ ëª¨ì§ Â· ëìì ì ì°¨ ì¹ì¸' : 'â¢ Resident Recruitment & Consent Procedure'}</p>
-      <p>${isKo ? 'ê³µê° ëª¨ì§ â ì£¼ë¯¼ ì¤ëªí â ìë©´ ëìì ìë ¹ ììë¡ ì§íí©ëë¤. ìíê° ì ì°¨ì ê³µì ì±Â·í¬ëªì±ì ê°ìí©ëë¤.' : 'Public recruitment â info session â written consent. Council oversees fairness and transparency of the process.'}</p>
+      <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? '③ 주민 모집 · 동의서 절차 승인' : '③ Resident Recruitment & Consent Procedure'}</p>
+      <p>${isKo ? '공개 모집 → 주민 설명회 → 서면 동의서 수령 순서로 진행합니다. 의회가 절차의 공정성·투명성을 감시합니다.' : 'Public recruitment → info session → written consent. Council oversees fairness and transparency of the process.'}</p>
     </div>
     <div style="background:#fff3e0;border-left:4px solid #ff9800;padding:12px;margin:8px 0;">
-      <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? 'â£ "AI ìì£¼ 2030" ì¥ê¸° ë¹ì  ê³µì ì±í' : 'â£ Formally Adopt "AI Wanju 2030" Long-term Vision'}</p>
-      <p>${isKo ? 'ì 1ë¨ê³ë ìììëë¤. ìíê° "AI ìì£¼ 2030"ì ê³µì ì¥ê¸° ì ëµì¼ë¡ ì±ííë©´ ìì° ì°ìì±ê³¼ ì ì± ì¼ê´ì±ì´ ë³´ì¥ë©ëë¤.' : 'Phase 1 is the beginning. Council adoption of "AI Wanju 2030" as an official strategy ensures budget continuity and policy consistency.'}</p>
+      <p style="font-weight:700;margin:0 0 6px;color:#333;">${isKo ? '④ "AI 완주 2030" 장기 비전 공식 채택' : '④ Formally Adopt "AI Wanju 2030" Long-term Vision'}</p>
+      <p>${isKo ? '제1단계는 시작입니다. 의회가 "AI 완주 2030"을 공식 장기 전략으로 채택하면 예산 연속성과 정책 일관성이 보장됩니다.' : 'Phase 1 is the beginning. Council adoption of "AI Wanju 2030" as an official strategy ensures budget continuity and policy consistency.'}</p>
     </div>
     </div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'â ìì ì§ì ë° ëµë³' : 'â Anticipated Q&A'}</div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '❓ 예상 질의 및 답변' : '❓ Anticipated Q&A'}</div>
     <div class="rs-body">
-    <table class="rdoc-table"><tr><th>${isKo ? 'ìì ì§ì' : 'Expected Question'}</th><th>${isKo ? 'ëµë³' : 'Answer'}</th></tr>
-    <tr><td>${isKo ? '"WiFië¡ ì£¼ë¯¼ ì¬ìí ì¹¨í´ ì°ë ¤?"' : '"WiFi privacy concern?"'}</td><td>${isKo ? 'ììÂ·ìì± ìì. WiFi ì í¸ í¨í´ë§ ë¶ì. ì ë³´ë³´í¸ì¬ìììí ì¬ì  ì¹ì¸ í ì°©ìí©ëë¤.' : 'No video/audio. Only WiFi signal patterns analyzed. Starts only after privacy committee approval.'}</td></tr>
-    <tr><td>${isKo ? '"1.5ìµ ìì´ ë­ë¹ëë©´?"' : '"What if 150M is wasted?"'}</td><td>${isKo ? '90ì¼ Human Approval Gate: KPI ë¯¸ë¬ ì ì 2ë¨ê³ ìì. ìì£¼êµ°ì ë°ì´í°ì AI ëª¨ë¸ì ìì í ì± ì¢ë£í  ì ììµëë¤.' : '90-day gate: if KPIs not met, Phase 2 does NOT proceed. Wanju keeps data and AI model ownership.'}</td></tr>
-    <tr><td>${isKo ? '"AIê° ê³µë¬´ì ì¼ìë¦¬ ëì²´?"' : '"AI replaces public servant jobs?"'}</td><td>${isKo ? 'ëì²´ê° ìë ë³´ììëë¤. ê³µë¬´ìì´ AIì í¨ê» ì¼íë©° ë ë§ì ì£¼ë¯¼ì ëë³¼ ì ìê² ë©ëë¤.' : 'Augment, not replace. Staff work with AI to serve more residents effectively.'}</td></tr>
-    <tr><td>${isKo ? '"Mulberryê° ë°ì´í°ë¥¼ ê°ì ¸ê°ë©´?"' : '"Does Mulberry take the data?"'}</td><td>${isKo ? 'ê³ì½ì ëª¨ë  ë°ì´í°Â·ëª¨ë¸ IPë ìì£¼êµ° ìì ìëë¤. Mulberryë ê¸°ì  ì ê³µìì´ë©°, ìì ê¶ì ì²ìë¶í° ìì£¼êµ°ì ììµëë¤.' : 'By contract, all data and model IP belongs to Wanju County. Mulberry is the tech provider only â ownership is Wanju\'s from day one.'}</td></tr>
+    <table class="rdoc-table"><tr><th>${isKo ? '예상 질의' : 'Expected Question'}</th><th>${isKo ? '답변' : 'Answer'}</th></tr>
+    <tr><td>${isKo ? '"WiFi로 주민 사생활 침해 우려?"' : '"WiFi privacy concern?"'}</td><td>${isKo ? '영상·음성 없음. WiFi 신호 패턴만 분석. 정보보호심의위원회 사전 승인 후 착수합니다.' : 'No video/audio. Only WiFi signal patterns analyzed. Starts only after privacy committee approval.'}</td></tr>
+    <tr><td>${isKo ? '"1.5억 원이 낭비되면?"' : '"What if 150M is wasted?"'}</td><td>${isKo ? '90일 Human Approval Gate: KPI 미달 시 제2단계 없음. 완주군은 데이터와 AI 모델을 소유한 채 종료할 수 있습니다.' : '90-day gate: if KPIs not met, Phase 2 does NOT proceed. Wanju keeps data and AI model ownership.'}</td></tr>
+    <tr><td>${isKo ? '"AI가 공무원 일자리 대체?"' : '"AI replaces public servant jobs?"'}</td><td>${isKo ? '대체가 아닌 보완입니다. 공무원이 AI와 함께 일하며 더 많은 주민을 돌볼 수 있게 됩니다.' : 'Augment, not replace. Staff work with AI to serve more residents effectively.'}</td></tr>
+    <tr><td>${isKo ? '"Mulberry가 데이터를 가져가면?"' : '"Does Mulberry take the data?"'}</td><td>${isKo ? '계약상 모든 데이터·모델 IP는 완주군 소유입니다. Mulberry는 기술 제공자이며, 소유권은 처음부터 완주군에 있습니다.' : 'By contract, all data and model IP belongs to Wanju County. Mulberry is the tech provider only — ownership is Wanju\'s from day one.'}</td></tr>
     </table>
     </div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'â ìê²° ìì²­ ì¬í­' : 'â Items for Vote'}</div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '✅ 의결 요청 사항' : '✅ Items for Vote'}</div>
     <div class="rs-body">
-    <div class="rdoc-hl">${isKo ? 'â¡ ì 1ë¨ê³ ì°©ì ìì° ì¹ì¸: 1.5ìµ ì (90ì¼)\nâ¡ ì¬ì ì¡°ë¬ ë°©ì ì¹ì¸ (êµ°ë¹ 0.5ìµ + ëë¹ 0.5ìµ + ê³µëª¨ 0.5ìµ)\nâ¡ ì ë³´ë³´í¸ì¬ìììí êµ¬ì± ìê²° (êµ°ìì 2ì¸ + ì ë¬¸ê° 2ì¸ + ì£¼ë¯¼ëí 1ì¸)\nâ¡ íì¼ë¿ ë§ì ì ì  Â· ì£¼ë¯¼ ëì ì ì°¨ ì¹ì¸\nâ¡ "AI ìì£¼ 2030" ì¥ê¸° ë¹ì  ê³µì ì±í (ì í ì¬í­)' : 'â¡ Approve Phase 1 budget: 150M KRW (90 days)\nâ¡ Approve funding plan (50M county + 50M province + 50M national grants)\nâ¡ Form info security committee (2 council + 2 experts + 1 resident rep)\nâ¡ Approve pilot village selection & consent process\nâ¡ Formally adopt "AI Wanju 2030" long-term vision (optional)'}</div>
-    <p style="margin-top:10px;font-size:12px;color:#666;">${isKo ? 'â» ì 2ë¨ê³Â·ì 3ë¨ê³ ìì°ì 90ì¼ Human Approval Gate ê²°ê³¼ì ë°ë¼ ë³ë ì¬ìÂ·ìê²°í©ëë¤.' : 'â» Phases 2 & 3 budgets are reviewed and voted on separately after the 90-day Human Approval Gate.'}</p>
+    <div class="rdoc-hl">${isKo ? '□ 제1단계 착수 예산 승인: 1.5억 원 (90일)\n□ 재원 조달 방안 승인 (군비 0.5억 + 도비 0.5억 + 공모 0.5억)\n□ 정보보호심의위원회 구성 의결 (군의원 2인 + 전문가 2인 + 주민대표 1인)\n□ 파일럿 마을 선정 · 주민 동의 절차 승인\n□ "AI 완주 2030" 장기 비전 공식 채택 (선택 사항)' : '□ Approve Phase 1 budget: 150M KRW (90 days)\n□ Approve funding plan (50M county + 50M province + 50M national grants)\n□ Form info security committee (2 council + 2 experts + 1 resident rep)\n□ Approve pilot village selection & consent process\n□ Formally adopt "AI Wanju 2030" long-term vision (optional)'}</div>
+    <p style="margin-top:10px;font-size:12px;color:#666;">${isKo ? '※ 제2단계·제3단계 예산은 90일 Human Approval Gate 결과에 따라 별도 심의·의결합니다.' : '※ Phases 2 & 3 budgets are reviewed and voted on separately after the 90-day Human Approval Gate.'}</p>
     </div></div>
   </div>
-  <div class="rdoc-foot"><span class="rf-logo">Mulberry Research Lab</span><span>AI ìì£¼ 2030 V3.2 Â· ${today}</span></div>
+  <div class="rdoc-foot"><span class="rf-logo">Mulberry Research Lab</span><span>AI 완주 2030 V3.2 · ${today}</span></div>
 </div>`;
 
   return `<div class="rdoc" id="rdocEl">
-  <div class="rdoc-head"><div class="rdoc-cat">${isKo ? 'ë´ë¹ ë¶ì ì¤ë¬´ì©' : 'Department Operations'}</div><div class="rdoc-title">${isKo ? 'ì 1ë¨ê³ WiFi Sensing íì¼ë¿: ì¤ë¬´ ì§í ì²´ê³' : 'Phase 1 WiFi Sensing Pilot: Operations Guide'}</div><div class="rdoc-meta"><span>${isKo ? 'ìì ' : 'To'}: ${rec}</span><span>${isKo ? 'ì¼ì' : 'Date'}: ${today}</span></div></div>
+  <div class="rdoc-head"><div class="rdoc-cat">${isKo ? '담당 부서 실무용' : 'Department Operations'}</div><div class="rdoc-title">${isKo ? '제1단계 WiFi Sensing 파일럿: 실무 진행 체계' : 'Phase 1 WiFi Sensing Pilot: Operations Guide'}</div><div class="rdoc-meta"><span>${isKo ? '수신' : 'To'}: ${rec}</span><span>${isKo ? '일자' : 'Date'}: ${today}</span></div></div>
   <div class="rdoc-body">
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ð ì 1ë¨ê³ ëª©í: AI Wanju ëª¨ë¸ íì¸íë + ì§ì­ ìì°í' : 'ð Phase 1 Goal: AI Wanju Fine-tuning + Regional Assets'}</div><div class="rs-body"><p>${isKo ? '90ì¼ ëì 1ê° ë©´ì ì¤ì  ì£¼ë¯¼ ë°ì´í°(10-20ê°êµ¬)ë¥¼ ìì§íì¬:' : 'Over 90 days, collect real household data (10-20) to:'}</p><ul style="margin:8px 0;padding-left:20px;"><li>${isKo ? 'â ë¼ì¦ë² ë¦¬ íì´ ì£ì§ ë¸ëë¡ WiFi CSI ì í¸ ìì§' : 'â Collect WiFi CSI signals via Raspberry Pi edge nodes'}</li><li>${isKo ? 'â AI Wanju ëª¨ë¸ â ìì£¼ ì£¼ë¯¼ íë í¨í´ì¼ë¡ íì¸íë' : 'â Fine-tune AI Wanju model on Wanju resident behavior'}</li><li>${isKo ? 'â ê°ì§ ì íë 95%, ìëµìê° 3ë¶ ì´ë´ ê²ì¦' : 'â Validate 95% accuracy, <3min response'}</li><li>${isKo ? 'â ì 2ë¨ê³ íëë¥¼ ìí ì§ì­ ì§ì ìì° ì¶ì ' : 'â Build regional knowledge assets for Phase 2 scaling'}</li></ul></div></div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '📌 제1단계 목표: AI Wanju 모델 파인튜닝 + 지역 자산화' : '📌 Phase 1 Goal: AI Wanju Fine-tuning + Regional Assets'}</div><div class="rs-body"><p>${isKo ? '90일 동안 1개 면의 실제 주민 데이터(10-20가구)를 수집하여:' : 'Over 90 days, collect real household data (10-20) to:'}</p><ul style="margin:8px 0;padding-left:20px;"><li>${isKo ? '✓ 라즈베리 파이 엣지 노드로 WiFi CSI 신호 수집' : '✓ Collect WiFi CSI signals via Raspberry Pi edge nodes'}</li><li>${isKo ? '✓ AI Wanju 모델 → 완주 주민 행동 패턴으로 파인튜닝' : '✓ Fine-tune AI Wanju model on Wanju resident behavior'}</li><li>${isKo ? '✓ 감지 정확도 95%, 응답시간 3분 이내 검증' : '✓ Validate 95% accuracy, <3min response'}</li><li>${isKo ? '✓ 제2단계 확대를 위한 지역 지식 자산 축적' : '✓ Build regional knowledge assets for Phase 2 scaling'}</li></ul></div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ì 1ë¨ê³ ì§í ì¼ì ' : 'Phase 1 Timeline'}</div><div class="rs-body"><table class="rdoc-table"><tr><th>${isKo ? 'ì£¼ì°¨' : 'Week'}</th><th>${isKo ? 'ë´ë¹ ë¶ì' : 'Lead Dept'}</th><th>${isKo ? 'ì£¼ì ì¡ì' : 'Key Actions'}</th><th>${isKo ? 'ì°ì¶ë¬¼' : 'Deliverables'}</th></tr><tr><td>1</td><td>${isKo ? 'êµ°ì²­' : 'County Govt'}</td><td>${isKo ? 'ìì¬ê²°ì  ì¹ì¸, ìì° ë°°ì ' : 'Budget approval, team kickoff'}</td><td>${isKo ? 'ì¹ì¸ ê²°ì ë¬¸, í êµ¬ì±' : 'Approval memo, team'}</td></tr><tr><td>2-3</td><td>${isKo ? 'ë³´ê±´ë³µì§' : 'Health & Welfare'}</td><td>${isKo ? 'ë§ìÂ·ê°êµ¬ ì ì , ì£¼ë¯¼ ì¤ëªí' : 'Select village, host info session'}</td><td>${isKo ? 'ì ì  ë³´ê³ , ëìì' : 'Selection report, consent forms'}</td></tr><tr><td>4-6</td><td>${isKo ? 'ì ë³´íµì Â·ë²ë¬´' : 'IT & Legal'}</td><td>${isKo ? 'ì ë³´ë³´í¸ì¬ì, ê³ì½ ì²´ê²°' : 'Security review, contracts'}</td><td>${isKo ? 'ì¬ì ì¹ì¸, ê³ì½ì' : 'Approval, contracts'}</td></tr><tr><td>7-10</td><td>Mulberry Lab</td><td>${isKo ? 'ë¼ì¦ë² ë¦¬ íì´ ì¤ì¹, ìì¤í êµ¬ì¶' : 'Install Raspberry Pi, build system'}</td><td>${isKo ? 'ë¸ë ì¤ì¹ ìë£, ì°ë íì¤í¸' : 'Node install complete, integration tests'}</td></tr><tr><td>11-13</td><td>${isKo ? 'ë³´ê±´ë³µì§Â·IT' : 'Health & IT'}</td><td>${isKo ? 'ì´ìÂ·ëª¨ëí°ë§, ì±ê³¼ ì¸¡ì ' : 'Daily operations, measure metrics'}</td><td>${isKo ? 'KPI ë¬ì± ë³´ê³ , Phase 2 ê³í' : 'KPI report, Phase 2 plan'}</td></tr></table></div></div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '제1단계 진행 일정' : 'Phase 1 Timeline'}</div><div class="rs-body"><table class="rdoc-table"><tr><th>${isKo ? '주차' : 'Week'}</th><th>${isKo ? '담당 부서' : 'Lead Dept'}</th><th>${isKo ? '주요 액션' : 'Key Actions'}</th><th>${isKo ? '산출물' : 'Deliverables'}</th></tr><tr><td>1</td><td>${isKo ? '군청' : 'County Govt'}</td><td>${isKo ? '의사결정 승인, 예산 배정' : 'Budget approval, team kickoff'}</td><td>${isKo ? '승인 결정문, 팀 구성' : 'Approval memo, team'}</td></tr><tr><td>2-3</td><td>${isKo ? '보건복지' : 'Health & Welfare'}</td><td>${isKo ? '마을·가구 선정, 주민 설명회' : 'Select village, host info session'}</td><td>${isKo ? '선정 보고, 동의서' : 'Selection report, consent forms'}</td></tr><tr><td>4-6</td><td>${isKo ? '정보통신·법무' : 'IT & Legal'}</td><td>${isKo ? '정보보호심의, 계약 체결' : 'Security review, contracts'}</td><td>${isKo ? '심의 승인, 계약서' : 'Approval, contracts'}</td></tr><tr><td>7-10</td><td>Mulberry Lab</td><td>${isKo ? '라즈베리 파이 설치, 시스템 구축' : 'Install Raspberry Pi, build system'}</td><td>${isKo ? '노드 설치 완료, 연동 테스트' : 'Node install complete, integration tests'}</td></tr><tr><td>11-13</td><td>${isKo ? '보건복지·IT' : 'Health & IT'}</td><td>${isKo ? '운영·모니터링, 성과 측정' : 'Daily operations, measure metrics'}</td><td>${isKo ? 'KPI 달성 보고, Phase 2 계획' : 'KPI report, Phase 2 plan'}</td></tr></table></div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ì 1ë¨ê³ ìì° ì¸ë¶ (15ìµ ì)' : 'Phase 1 Budget Breakdown (15ìµ ì)'}</div><div class="rs-body"><table class="rdoc-table"><tr><th>${isKo ? 'í­ëª©' : 'Item'}</th><th>${isKo ? 'ìë' : 'Qty'}</th><th>${isKo ? 'ë¨ê°' : 'Unit'}</th><th>${isKo ? 'ìì°' : 'Budget'}</th></tr><tr><td>${isKo ? 'ë¼ì¦ë² ë¦¬ íì´ + WiFi ëê¸' : 'Raspberry Pi + WiFi dongle'}</td><td>10-20</td><td>~40M</td><td>4ì²ë§~8ì²ë§ ì</td></tr><tr><td>${isKo ? 'Luna AI ì£ì§ ìë² (ì¨íë ë¯¸ì¤)' : 'Luna AI edge server (on-premises)'}</td><td>1</td><td>3ì²ë§ ì</td><td>300M</td></tr><tr><td>${isKo ? 'íµì  Â· í´ë¼ì°ë Â· ëª¨ëí°ë§' : 'Network, cloud, monitoring'}</td><td>90ì¼</td><td>${isKo ? 'ì 500ë§ ì' : '5M KRW/mo'}</td><td>${isKo ? '1ì²ë§~1.5ì²ë§ ì' : '10-15M KRW'}</td></tr><tr><td>${isKo ? 'ì´ìì§ Â· ìë´ì¬ Â· ì½ì¼í°' : 'Staff, counselors, call center'}</td><td>${isKo ? '3-5ëª' : '3-5 staff'}</td><td>${isKo ? 'ì 700ë§ ì' : '7M KRW/mo'}</td><td>${isKo ? '2ì²ë§~2.5ì²ë§ ì' : '20-25M KRW'}</td></tr><tr><td><strong>${isKo ? 'í©ê³' : 'TOTAL'}</strong></td><td></td><td></td><td><strong>15ìµ ì</strong></td></tr></table></div></div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '제1단계 예산 세분 (15억 원)' : 'Phase 1 Budget Breakdown (15억 원)'}</div><div class="rs-body"><table class="rdoc-table"><tr><th>${isKo ? '항목' : 'Item'}</th><th>${isKo ? '수량' : 'Qty'}</th><th>${isKo ? '단가' : 'Unit'}</th><th>${isKo ? '예산' : 'Budget'}</th></tr><tr><td>${isKo ? '라즈베리 파이 + WiFi 동글' : 'Raspberry Pi + WiFi dongle'}</td><td>10-20</td><td>~40M</td><td>4천만~8천만 원</td></tr><tr><td>${isKo ? 'Luna AI 엣지 서버 (온프레미스)' : 'Luna AI edge server (on-premises)'}</td><td>1</td><td>3천만 원</td><td>300M</td></tr><tr><td>${isKo ? '통신 · 클라우드 · 모니터링' : 'Network, cloud, monitoring'}</td><td>90일</td><td>${isKo ? '월 500만 원' : '5M KRW/mo'}</td><td>${isKo ? '1천만~1.5천만 원' : '10-15M KRW'}</td></tr><tr><td>${isKo ? '운영진 · 상담사 · 콜센터' : 'Staff, counselors, call center'}</td><td>${isKo ? '3-5명' : '3-5 staff'}</td><td>${isKo ? '월 700만 원' : '7M KRW/mo'}</td><td>${isKo ? '2천만~2.5천만 원' : '20-25M KRW'}</td></tr><tr><td><strong>${isKo ? '합계' : 'TOTAL'}</strong></td><td></td><td></td><td><strong>15억 원</strong></td></tr></table></div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ì 1ë¨ê³ ì±ê³µ ê¸°ì¤ (KPI)' : 'Phase 1 Success Criteria (KPI)'}</div><div class="rs-body"><table class="rdoc-table"><tr><th>${isKo ? 'ì§í' : 'Metric'}</th><th>${isKo ? 'ëª©í' : 'Target'}</th><th>${isKo ? 'íì¸ ë°©ë²' : 'Verification'}</th></tr><tr><td>${isKo ? 'ê¸°ì : ëì ê°ì§ ì íë' : 'Tech: Fall detection accuracy'}</td><td>â¥95%</td><td>${isKo ? 'íì¤í¸ ë°ì´í°ì, ì ê¸° íê°' : 'Test dataset, periodic review'}</td></tr><tr><td>${isKo ? 'ê¸°ì : ìëµìê°' : 'Tech: Response time'}</td><td>&lt;3 ë¶</td><td>${isKo ? 'CloudWatch ë¡ê·¸, ì£¼ê° ë³´ê³ ' : 'CloudWatch logs, weekly report'}</td></tr><tr><td>${isKo ? 'ì£¼ë¯¼: ë§ì¡±ë ì¡°ì¬' : 'Resident: Satisfaction survey'}</td><td>â¥80%</td><td>${isKo ? 'ì¤ë¬¸ì¡°ì¬ (60-90ì¼ ì°¨)' : 'Survey at day 60-90'}</td></tr><tr><td>${isKo ? 'ì£¼ë¯¼: ì¬ê³ì½ ìí¥' : 'Resident: Renewal intent'}</td><td>â¥80%</td><td>${isKo ? '90ì¼ ì¢ë£ ì ì¤ë¬¸' : 'End of pilot survey'}</td></tr><tr><td>${isKo ? 'ì§ì­: AI Wanju íì¸íë' : 'Regional: AI Wanju tuning'}</td><td>${isKo ? 'ìë£' : 'Complete'}</td><td>${isKo ? 'Mulberry Lab ê²ì¦' : 'Mulberry verification'}</td></tr></table></div></div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '제1단계 성공 기준 (KPI)' : 'Phase 1 Success Criteria (KPI)'}</div><div class="rs-body"><table class="rdoc-table"><tr><th>${isKo ? '지표' : 'Metric'}</th><th>${isKo ? '목표' : 'Target'}</th><th>${isKo ? '확인 방법' : 'Verification'}</th></tr><tr><td>${isKo ? '기술: 낙상 감지 정확도' : 'Tech: Fall detection accuracy'}</td><td>≥95%</td><td>${isKo ? '테스트 데이터셋, 정기 평가' : 'Test dataset, periodic review'}</td></tr><tr><td>${isKo ? '기술: 응답시간' : 'Tech: Response time'}</td><td>&lt;3 분</td><td>${isKo ? 'CloudWatch 로그, 주간 보고' : 'CloudWatch logs, weekly report'}</td></tr><tr><td>${isKo ? '주민: 만족도 조사' : 'Resident: Satisfaction survey'}</td><td>≥80%</td><td>${isKo ? '설문조사 (60-90일 차)' : 'Survey at day 60-90'}</td></tr><tr><td>${isKo ? '주민: 재계약 의향' : 'Resident: Renewal intent'}</td><td>≥80%</td><td>${isKo ? '90일 종료 시 설문' : 'End of pilot survey'}</td></tr><tr><td>${isKo ? '지역: AI Wanju 파인튜닝' : 'Regional: AI Wanju tuning'}</td><td>${isKo ? '완료' : 'Complete'}</td><td>${isKo ? 'Mulberry Lab 검증' : 'Mulberry verification'}</td></tr></table></div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ë¶ìë³ ì±ì' : 'Department Responsibilities'}</div><div class="rs-body"><p><strong>${isKo ? 'ë³´ê±´ë³µì§ë¶' : 'Health & Welfare Dept'}</strong><br>${isKo ? 'â ì£¼ë¯¼ ëª¨ì§ Â· ì ì  (10-20ê°êµ¬), ìë´ Â· ì§ì, ê¸´ê¸ ëì íë¡í ì½ ìë¦½' : 'â Recruit & select 10-20 households, counsel, emergency response protocol'}</p><p><strong>${isKo ? 'ì ë³´íµì ë¶' : 'IT/Telecom Dept'}</strong><br>${isKo ? 'â ë¤í¸ìí¬ ì¸íë¼ ì ê³µ, ì ë³´ë³´í¸ì¬ì, ë°ì´í° ë³´ì ê´ë¦¬, ìì¤í ëª¨ëí°ë§' : 'â Network infrastructure, security review, data protection, system monitoring'}</p><p><strong>${isKo ? 'ê¸°íì¬ì ë¶' : 'Budget & Planning Dept'}</strong><br>${isKo ? 'â ìì° ë°°ì  Â· ê´ë¦¬, ì¬ì íë³´ (ì§ë°©ë¹/êµ­ë¹/ê³µëª¨), ì±ê³¼ ê´ë¦¬ Â· ë³´ê³ ' : 'â Budget allocation, funding (local/national/grants), performance management'}</p><p><strong>Mulberry Lab<br>${isKo ? 'â ê¸°ì  ì ê³µ (ë¼ì¦ë² ë¦¬ íì´, Luna AI), ìì¤í êµ¬ì¶ Â· ì´ì êµì¡, AI Wanju íì¸íë' : 'â Technology (Raspberry Pi, Luna AI), system build, staff training, AI Wanju tuning'}</strong></p></div></div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '부서별 책임' : 'Department Responsibilities'}</div><div class="rs-body"><p><strong>${isKo ? '보건복지부' : 'Health & Welfare Dept'}</strong><br>${isKo ? '→ 주민 모집 · 선정 (10-20가구), 상담 · 지원, 긴급 대응 프로토콜 수립' : '→ Recruit & select 10-20 households, counsel, emergency response protocol'}</p><p><strong>${isKo ? '정보통신부' : 'IT/Telecom Dept'}</strong><br>${isKo ? '→ 네트워크 인프라 제공, 정보보호심의, 데이터 보안 관리, 시스템 모니터링' : '→ Network infrastructure, security review, data protection, system monitoring'}</p><p><strong>${isKo ? '기획재정부' : 'Budget & Planning Dept'}</strong><br>${isKo ? '→ 예산 배정 · 관리, 재원 확보 (지방비/국비/공모), 성과 관리 · 보고' : '→ Budget allocation, funding (local/national/grants), performance management'}</p><p><strong>Mulberry Lab<br>${isKo ? '→ 기술 제공 (라즈베리 파이, Luna AI), 시스템 구축 · 운영 교육, AI Wanju 파인튜닝' : '→ Technology (Raspberry Pi, Luna AI), system build, staff training, AI Wanju tuning'}</strong></p></div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ì£¼ìì¬í­ Â· ì²´í¬í¬ì¸í¸' : 'Critical Notes & Checkpoints'}</div><div class="rs-body"><p>â¢ ${isKo ? 'ì£¼ë¯¼ ëì: WiFi ì í¸ ë¶ì (ìì ìì) ëªíí ì¤ëª, ëìì ìëª' : 'Resident consent: explain WiFi signals (no video) clearly, signed consent'}</p><p>â¢ ${isKo ? 'ë´ë¹ì êµì¡: ëì ê°ì§ í ìëµ íë¡í ì½ ì¬ì  êµì¡ (ìê¸ì°¨ í¸ì¶, íì¥ ë°©ë¬¸ ë±)' : 'Staff training: emergency response protocol (call ambulance, field visit)'}</p><p>â¢ ${isKo ? 'ì ë³´ë³´í¸: ì ë³´ë³´í¸ì¬ìììí ì¬ì  ì¹ì¸ íì (ë°ì´í° ë³´ì ê°ì´ëë¼ì¸ í¬í¨)' : 'Security: info protection committee approval required (include data guidelines)'}</p><p>â¢ ${isKo ? 'ì 1ë¨ê³ íê°: 90ì¼ ì¢ë£ ì  KPI ê²í , ì 2ë¨ê³ go/no-go ê²°ì ' : 'Phase 1 review: assess KPI before day 90, decide Phase 2 go/no-go'}</p></div></div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '주의사항 · 체크포인트' : 'Critical Notes & Checkpoints'}</div><div class="rs-body"><p>• ${isKo ? '주민 동의: WiFi 신호 분석 (영상 없음) 명확히 설명, 동의서 서명' : 'Resident consent: explain WiFi signals (no video) clearly, signed consent'}</p><p>• ${isKo ? '담당자 교육: 낙상 감지 후 응답 프로토콜 사전 교육 (응급차 호출, 현장 방문 등)' : 'Staff training: emergency response protocol (call ambulance, field visit)'}</p><p>• ${isKo ? '정보보호: 정보보호심의위원회 사전 승인 필수 (데이터 보안 가이드라인 포함)' : 'Security: info protection committee approval required (include data guidelines)'}</p><p>• ${isKo ? '제1단계 평가: 90일 종료 전 KPI 검토, 제2단계 go/no-go 결정' : 'Phase 1 review: assess KPI before day 90, decide Phase 2 go/no-go'}</p></div></div>
 
-    <div class="rdoc-sec"><div class="rs-title">${isKo ? 'ë¬¸ì Â· ìì¤ì»¬ë ì´ì' : 'Contact & Escalation'}</div><div class="rs-body"><p><strong>Mulberry Research Lab</strong><br>CEO: re.eul Â· chongchongsaigon@gmail.com<br>${isKo ? 'TRANG Manager (ì´ì): ' : 'TRANG Manager (Operations): '}${isKo ? 'ì¼ì¼ ì´ì ì§ì, ê¸°ì  ì´ì í´ê²°' : 'daily operations support, tech issues'}</p></div></div>
+    <div class="rdoc-sec"><div class="rs-title">${isKo ? '문의 · 에스컬레이션' : 'Contact & Escalation'}</div><div class="rs-body"><p><strong>Mulberry Research Lab</strong><br>CEO: re.eul · chongchongsaigon@gmail.com<br>${isKo ? 'TRANG Manager (운영): ' : 'TRANG Manager (Operations): '}${isKo ? '일일 운영 지원, 기술 이슈 해결' : 'daily operations support, tech issues'}</p></div></div>
   </div>
   <div class="rdoc-foot"><span class="rf-logo">Mulberry Research Lab</span><span>${today}</span></div>
 </div>`;
@@ -2488,7 +2488,7 @@ function printDoc() {
   .rdoc-table th{background:#f5f3ff;color:#7c3aed;padding:8px;border:1px solid #ddd;}
   .rdoc-table td{padding:8px;border:1px solid #ddd;}
   
-/* ââ CHAT STYLES ââââââââââââââââââââââââââââââââââââââ */
+/* ══ CHAT STYLES ══════════════════════════════════════ */
 .qa-chat-messages {
   flex: 1; overflow-y: auto; display: flex; flex-direction: column;
   gap: 12px; padding: 16px; background: var(--bg);
@@ -2586,7 +2586,7 @@ function copyDoc() {
   const el = document.getElementById('rdocEl');
   if (!el) return;
   const text = el.innerText;
-  navigator.clipboard.writeText(text).then(()=>alert(currentLang === 'ko' ? 'íì¤í¸ê° ë³µì¬ëììµëë¤.' : 'Text copied'));
+  navigator.clipboard.writeText(text).then(()=>alert(currentLang === 'ko' ? '텍스트가 복사되었습니다.' : 'Text copied'));
 }
 
 // Initialize
