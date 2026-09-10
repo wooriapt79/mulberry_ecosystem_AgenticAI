@@ -741,10 +741,16 @@ body {
     z-index: 200 !important;
     transition: left 0.25s ease !important;
     box-shadow: none !important;
+    overflow-y: auto !important;
   }
   .sidebar.mobile-open {
     left: 0 !important;
     box-shadow: 4px 0 24px rgba(0,0,0,0.18) !important;
+  }
+
+  /* 모바일 오버레이에서 Luna 프로필 카드 숨김 */
+  .luna-card {
+    display: none !important;
   }
 
   /* Hamburger button */
