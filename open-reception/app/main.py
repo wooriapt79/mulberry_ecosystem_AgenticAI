@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated, Literal
 from uuid import uuid4
 
+from fastapi.staticfiles import StaticFiles
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -205,7 +206,7 @@ class KillSwitch(Base):
 
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./open_reception.sqlite3")
-# psycopg3 Ã­ÂÂ¸Ã­ÂÂ: Railway PostgreSQL URL Ã«Â³ÂÃ­ÂÂ
+# psycopg3 ÃÂ­ÃÂÃÂ¸ÃÂ­ÃÂÃÂ: Railway PostgreSQL URL ÃÂ«ÃÂ³ÃÂÃÂ­ÃÂÃÂ
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
 elif DATABASE_URL.startswith("postgresql://"):
@@ -221,11 +222,12 @@ SessionLocal = sessionmaker(engine, expire_on_commit=False)
 from pathlib import Path
 
 app = FastAPI(title="Luna Open Reception", version="0.4.0")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 _TEMPLATES_DIR = Path(__file__).parent / "templates"
 _templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
 
-# Demo router Ã¢ÂÂ active only when DEMO_MODE env var is set
+# Demo router ÃÂ¢ÃÂÃÂ active only when DEMO_MODE env var is set
 if os.getenv("DEMO_MODE", "").lower() in {"1", "true", "yes"}:
     from app.routers.demo import router as _demo_router
     app.include_router(_demo_router)
