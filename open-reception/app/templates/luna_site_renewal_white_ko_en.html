@@ -1132,7 +1132,7 @@ body {
           <h4><span class="lang-ko">API 설정</span><span class="lang-en" style="display:none;">API Configuration</span></h4>
           <div class="settings-item">
             <label><span class="lang-ko">상태</span><span class="lang-en" style="display:none;">Status</span></label>
-            <span class="status-badge active">✓ <span class="lang-ko">활성화</span><span class="lang-en" style="display:none;">Active</span></span>
+            <span class="status-badge" id="aiStatusBadge">⏳ <span class="lang-ko">확인 중...</span><span class="lang-en" style="display:none;">Checking...</span></span>
           </div>
           <div class="settings-item">
             <label><span class="lang-ko">공급자</span><span class="lang-en" style="display:none;">Provider</span></label>
@@ -1776,10 +1776,28 @@ function toggleSettings() {
   const modal = document.getElementById('settingsModal');
   modal.classList.toggle('active');
   if (modal.classList.contains('active')) {
-    // 마지막 업데이트 시간 표시
     const now = new Date();
-    const timeStr = now.toLocaleString(currentLang === 'ko' ? 'ko-KR' : 'en-US');
-    document.getElementById('lastUpdateTime').textContent = timeStr;
+    document.getElementById('lastUpdateTime').textContent = now.toLocaleString(currentLang === 'ko' ? 'ko-KR' : 'en-US');
+    const badge = document.getElementById('aiStatusBadge');
+    if (badge) {
+      fetch('/api/chat/status')
+        .then(r => r.json())
+        .then(d => {
+          if (d.available) {
+            badge.className = 'status-badge active';
+            badge.innerHTML = '✓ <span class="lang-ko">AI 연결됨</span><span class="lang-en" style="display:none;">AI Connected</span>';
+          } else {
+            badge.className = 'status-badge';
+            badge.style.color = '#f59e0b';
+            badge.innerHTML = '⏳ <span class="lang-ko">API 키 미설정</span><span class="lang-en" style="display:none;">API Key Not Set</span>';
+          }
+        })
+        .catch(() => {
+          badge.className = 'status-badge';
+          badge.style.color = '#ef4444';
+          badge.innerHTML = '✕ <span class="lang-ko">연결 오류</span><span class="lang-en" style="display:none;">Connection Error</span>';
+        });
+    }
   }
 }
 
@@ -2160,12 +2178,28 @@ function removeTyping() { const e = document.getElementById('typing'); if(e) e.r
 //   (딜레이가 다른 이유: 정확한 매칭이면 더 빠르게 응답하는 연출)
 function lunaReply(q) {
   addTyping();
-  const key = Object.keys(KB).find(k => k === q); // 정확한 키 매칭
-  setTimeout(() => {
+  const page = window.location.pathname.includes('wanju') ? 'wanju' : 'inje';
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({message: q, page: page})
+  })
+  .then(r => r.json())
+  .then(data => {
     removeTyping();
-    const ans = key ? KB[key] : findAns(q); // 키워드 매칭 폴백
+    const reply = data.reply || '잠시 후 다시 시도해 주세요.';
+    addMsg('luna', reply);
+    // localStorage 대화 로깅
+    const log = JSON.parse(localStorage.getItem('luna_chat_log') || '[]');
+    log.push({ts: new Date().toISOString(), page, q, a: reply});
+    if (log.length > 200) log.splice(0, log.length - 200);
+    localStorage.setItem('luna_chat_log', JSON.stringify(log));
+  })
+  .catch(() => {
+    removeTyping();
+    const ans = findAns(q);
     addMsg('luna', ans);
-  }, key ? 800 : 1100);
+  });
 }
 
 // 📌 Luna 스터디 노트:
