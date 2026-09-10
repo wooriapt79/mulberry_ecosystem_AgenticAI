@@ -52,9 +52,53 @@ table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0 
 th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--luna); }
 .ver { font-size: 11px; color: var(--dim); margin-top: 24px; }
+
+/* Mobile hamburger */
+.ham-btn {
+  display: none;
+  position: fixed;
+  top: 12px; right: 16px;
+  z-index: 1010;
+  background: var(--luna);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  width: 40px; height: 40px;
+  font-size: 20px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 950;
+}
+@media (max-width: 899px) {
+  .ham-btn { display: flex; }
+  aside.rail {
+    position: fixed !important;
+    top: 0; left: 0; bottom: 0;
+    width: 270px;
+    z-index: 960;
+    background: var(--bg);
+    padding: 52px 20px 40px;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    box-shadow: 2px 0 12px rgba(0,0,0,.12);
+  }
+  aside.rail.nav-open { transform: translateX(0); }
+  .nav-overlay.nav-open { display: block; }
+}
 </style>
 </head>
 <body>
+<button class="ham-btn" id="hamBtn" aria-label="메뉴 열기">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
 <div class="wrap">
 <div class="layout">
 <aside class="rail" id="toc">
@@ -289,12 +333,33 @@ th { color: var(--luna); }
 </div>
 </div>
 <script>
+const hamBtn = document.getElementById('hamBtn');
+const navOverlay = document.getElementById('navOverlay');
+const tocEl = document.getElementById('toc');
+
+function openNav() {
+  tocEl.classList.add('nav-open');
+  navOverlay.classList.add('nav-open');
+  hamBtn.textContent = '✕';
+  hamBtn.setAttribute('aria-label', '메뉴 닫기');
+}
+function closeNav() {
+  tocEl.classList.remove('nav-open');
+  navOverlay.classList.remove('nav-open');
+  hamBtn.textContent = '☰';
+  hamBtn.setAttribute('aria-label', '메뉴 열기');
+}
+hamBtn.addEventListener('click', () => tocEl.classList.contains('nav-open') ? closeNav() : openNav());
+navOverlay.addEventListener('click', closeNav);
+
 function openCh(id) {
   document.querySelectorAll('article').forEach(a => a.classList.remove('on'));
   const el = document.getElementById(id);
   if (el) {
     el.classList.add('on');
     history.replaceState(null,'','#'+id);
+    closeNav();
+    setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   }
   return false;
 }
