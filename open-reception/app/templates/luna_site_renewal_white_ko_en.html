@@ -716,15 +716,8 @@ body {
   display: none !important;
 }
 
-/* Mobile hamburger button - hidden on desktop */
-.mobile-menu-btn {
-  display: none;
-}
-
-/* Sidebar overlay backdrop - hidden on desktop */
-.sidebar-overlay {
-  display: none;
-}
+.mobile-menu-btn { display: none; }
+.sidebar-overlay { display: none; }
 
 /* ══ MOBILE OPTIMIZATION ══════════════════════ */
 @media (max-width: 768px) {
@@ -749,31 +742,26 @@ body {
     z-index: 200 !important;
     transition: left 0.25s ease !important;
     box-shadow: none !important;
+    overflow-y: auto !important;
   }
   .sidebar.mobile-open {
     left: 0 !important;
     box-shadow: 4px 0 24px rgba(0,0,0,0.18) !important;
   }
 
-  /* Hamburger button */
   .mobile-menu-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: none;
-    font-size: 22px;
-    cursor: pointer;
+    width: 36px; height: 36px;
+    border: none; background: none;
+    font-size: 22px; cursor: pointer;
     color: var(--text-primary);
-    border-radius: 6px;
-    flex-shrink: 0;
+    border-radius: 6px; flex-shrink: 0;
     margin-right: 4px;
   }
   .mobile-menu-btn:hover { background: var(--bg-tertiary); }
 
-  /* Overlay backdrop */
   .sidebar-overlay {
     display: none;
     position: fixed;
@@ -781,9 +769,9 @@ body {
     background: rgba(0,0,0,0.38);
     z-index: 199;
   }
-  .sidebar-overlay.mobile-open {
-    display: block;
-  }
+  .sidebar-overlay.mobile-open { display: block; }
+
+  .luna-card { display: none !important; }
 
   .main {
     flex: 1;
@@ -1854,6 +1842,7 @@ function showSection(id, navEl) {
   // 모든 네비 아이템 비활성화 → 클릭된 것만 활성화
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
+  closeMobileMenu();
   if (navEl) navEl.classList.add('active');
   updateTopbarTitle(id);
   closeMobileMenu(); // 모바일에서 메뉴 선택 후 자동 닫기
