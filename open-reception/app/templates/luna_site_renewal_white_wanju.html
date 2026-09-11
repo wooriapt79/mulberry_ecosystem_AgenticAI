@@ -708,6 +708,9 @@ body {
   display: none !important;
 }
 
+.mobile-menu-btn { display: none; }
+.sidebar-overlay { display: none; }
+
 /* ══ MOBILE OPTIMIZATION ══════════════════════ */
 @media (max-width: 768px) {
   :root {
@@ -720,23 +723,61 @@ body {
     height: 100vh;
   }
 
-  /* Hide sidebar on mobile */
+  /* Sidebar as slide-in overlay on mobile */
   .sidebar {
-    display: none !important;
-    width: 0 !important;
+    display: flex !important;
+    position: fixed !important;
+    left: -280px !important;
+    top: 0 !important;
+    height: 100vh !important;
+    width: 260px !important;
+    z-index: 200 !important;
+    transition: left 0.25s ease !important;
+    box-shadow: none !important;
+    overflow-y: auto !important;
   }
+  .sidebar.mobile-open {
+    left: 0 !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.18) !important;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border: none; background: none;
+    font-size: 22px; cursor: pointer;
+    color: var(--text-primary);
+    border-radius: 6px; flex-shrink: 0;
+    margin-right: 4px;
+  }
+  .mobile-menu-btn:hover { background: var(--bg-tertiary); }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.38);
+    z-index: 199;
+  }
+  .sidebar-overlay.mobile-open { display: block; }
+
+  .luna-card { display: none !important; }
 
   .main {
     flex: 1;
     height: calc(100vh - 56px);
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
   }
 
   .section {
-    padding-bottom: 60px;
+    padding-bottom: 80px;
     min-height: 100%;
     overflow-y: auto;
+    overflow-x: hidden;
   }
 
   /* Mobile bottom navigation */
@@ -1072,6 +1113,14 @@ body {
 }
 .qa-send-btn:hover { background: var(--purple-light); }
 .qa-send-btn:active { transform: scale(0.95); }
+.qa-save-btn {
+  font-size: 12px; padding: 5px 12px; border-radius: 6px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  color: var(--text-secondary); cursor: pointer; font-family: inherit;
+  transition: all 0.2s;
+}
+.qa-save-btn:hover { background: var(--purple-light); color: var(--purple); border-color: var(--purple); }
+.qa-save-btn:disabled { opacity: 0.5; cursor: default; }
 </style>
 </head>
 <body>
@@ -1124,10 +1173,14 @@ body {
   </div>
 </div>
 
+<!-- Sidebar overlay backdrop (mobile only) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileMenu()"></div>
+
 <!-- ══ MAIN ══════════════════════════════════════════ -->
 <div class="main">
   <div class="topbar">
-    <div class="topbar-title" id="topbar-title"><span class="lang-ko">홈</span><span class="lang-en" style="display:none;">Home</span></div>
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="메뉴">≡</button>
+    <div class="topbar-title" id="topbar-title"></div>
     <div class="topbar-pills">
       <div class="topbar-pill active" id="pill-ko" onclick="setLang('ko')">한국어</div>
       <div class="topbar-pill" id="pill-en" onclick="setLang('en')">English</div>
@@ -1290,6 +1343,14 @@ body {
           <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">WiFi 센싱</span><span class="lang-en" style="display:none;">WiFi Sensing</span></span>
           <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">예산</span><span class="lang-en" style="display:none;">Budget</span></span>
         </div>
+      </div>
+
+      <!-- 대화 저장 -->
+      <div class="qa-save-bar" id="qaSaveBar" style="display:none; padding:6px 12px; border-top:1px solid var(--border);">
+        <button class="qa-save-btn" id="qaSaveBtn" onclick="saveChatLog()">
+          <span class="lang-ko">💾 대화 저장</span><span class="lang-en" style="display:none;">💾 Save Chat</span>
+        </button>
+        <span class="qa-save-msg" id="qaSaveMsg" style="font-size:12px; color:var(--text-secondary); margin-left:8px;"></span>
       </div>
 
       <!-- 채팅 입력 영역 -->
@@ -1752,11 +1813,21 @@ const titles = {
 };
 let currentLang = 'ko'; // 전역 언어 상태 ('ko' 또는 'en')
 
+function toggleMobileMenu() {
+  document.querySelector('.sidebar').classList.toggle('mobile-open');
+  document.getElementById('sidebarOverlay').classList.toggle('mobile-open');
+}
+function closeMobileMenu() {
+  document.querySelector('.sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebarOverlay').classList.remove('mobile-open');
+}
+
 function showSection(id, navEl) {
   // 모든 섹션 숨기기 → 선택된 섹션만 보이기
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   // 모든 네비 아이템 비활성화 → 클릭된 것만 활성화
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  closeMobileMenu();
   document.getElementById('sec-' + id).classList.add('active');
   if (navEl) navEl.classList.add('active');
   updateTopbarTitle(id);
@@ -1972,6 +2043,7 @@ function analyzeFile() {
     result.style.display = 'flex';
     document.getElementById('analysisResultText').textContent = '분석 결과가 여기에 표시됩니다.\n(백엔드 API 연동 후 구현)';
     btn.disabled = false;
+    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 1500);
 }
 
@@ -2203,13 +2275,62 @@ function removeQaFile(i) {
 //   role === 'luna' → 왼쪽 Luna 아바타 + 보라색 버블
 //   role === 'user' → 오른쪽 사용자 아바타 + 회색 버블
 //   area.scrollTop = area.scrollHeight → 항상 최신 메시지가 보이게 스크롤
+// 세션 대화 기록 (저장용)
+const _chatSession = [];
+
 function addMsg(role, html) {
   const area = document.getElementById('qaMessages');
-  if (!area) return; // 방어 코드 — 요소가 없으면 조용히 종료
+  if (!area) return;
   const d = document.createElement('div');
   d.className = 'msg ' + role;
   d.innerHTML = `<div class="msg-av">` + (role === 'luna' ? 'L' : 'U') + `</div><div class="msg-bub">${html}</div>`;
   area.appendChild(d); area.scrollTop = area.scrollHeight;
+  _chatSession.push({ role, text: html.replace(/<[^>]*>/g, '') });
+  const saveBar = document.getElementById('qaSaveBar');
+  if (saveBar && _chatSession.length >= 2) saveBar.style.display = 'block';
+}
+
+// ── 대화 저장 (클라이언트 Blob 다운로드) ───────────────────────────────────
+function saveChatLog() {
+  const btn = document.getElementById('qaSaveBtn');
+  const msgEl = document.getElementById('qaSaveMsg');
+  if (!btn || _chatSession.length < 2) return;
+
+  const page = window.location.pathname.includes('wanju') ? 'wanju' : 'inje';
+  const regionLabel = page === 'wanju' ? '완주 (Wanju)' : '인제 (Inje)';
+  const regionUrl   = page === 'wanju'
+    ? 'https://dynamic-happiness-production-297d.up.railway.app/wanju'
+    : 'https://dynamic-happiness-production-297d.up.railway.app/inje';
+  const ts = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+  const tsFile = new Date().toISOString().slice(0,16).replace(/[-:T]/g, '').replace('T','_');
+
+  let md = `# Mulberry Research Lab · Luna AI 상담 기록\n\n---\n\n`;
+  md += `| 항목 | 내용 |\n|---|---|\n`;
+  md += `| 지역 | ${regionLabel} |\n| 일시 | ${ts} |\n\n---\n\n`;
+
+  let q = 1;
+  for (const m of _chatSession) {
+    if (m.role === 'user') {
+      md += `**Q${q}.** ${m.text}\n\n`;
+    } else {
+      md += `**A${q}.** ${m.text}\n\n---\n\n`;
+      q++;
+    }
+  }
+  md += `\n*Mulberry Research Lab · AI ${regionLabel} Initiative*  \n*${regionUrl}*  \n*이 문서는 고객 요청에 의해 저장된 상담 기록입니다.*\n`;
+
+  const blob = new Blob([md], { type: 'text/markdown; charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `luna_chat_${page}_${tsFile}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  if (msgEl) msgEl.textContent = currentLang === 'ko' ? '✅ 다운로드 완료' : '✅ Downloaded';
+  if (btn) { btn.textContent = currentLang === 'ko' ? '💾 다시 저장' : '💾 Save Again'; btn.disabled = false; }
 }
 
 // ── 타이핑 인디케이터 (점 세 개 애니메이션) ──────────────────────────
@@ -2335,8 +2456,10 @@ function genReport() {
   setTimeout(() => {
     btn.textContent = currentLang === 'ko' ? '📄 보고서 생성' : '📄 Generate Report';
     btn.disabled = false;
-    document.getElementById('rPreview').innerHTML = buildReport(selectedType, recipient, today);
+    const rPreview = document.getElementById('rPreview');
+    rPreview.innerHTML = buildReport(selectedType, recipient, today);
     document.getElementById('rActions').style.display = 'flex';
+    rPreview.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 1200);
 }
 
