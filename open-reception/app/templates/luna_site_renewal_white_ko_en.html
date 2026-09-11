@@ -2252,33 +2252,47 @@ function addMsg(role, html) {
   if (saveBar && _chatSession.length >= 2) saveBar.style.display = 'block';
 }
 
-// ── 대화 저장 ──────────────────────────────────────────────────────────────
-async function saveChatLog() {
+// ── 대화 저장 (클라이언트 Blob 다운로드) ───────────────────────────────────
+function saveChatLog() {
   const btn = document.getElementById('qaSaveBtn');
-  const msg = document.getElementById('qaSaveMsg');
+  const msgEl = document.getElementById('qaSaveMsg');
   if (!btn || _chatSession.length < 2) return;
-  btn.disabled = true;
-  msg.textContent = currentLang === 'ko' ? '저장 중...' : 'Saving...';
+
   const page = window.location.pathname.includes('wanju') ? 'wanju' : 'inje';
-  try {
-    const res = await fetch('/api/chat/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ page, messages: _chatSession }),
-    });
-    const data = await res.json();
-    if (data.id) {
-      msg.innerHTML = currentLang === 'ko'
-        ? `✅ 저장 완료 · <a href="/api/chat/download/${data.id}" download="${data.filename}" style="color:var(--purple);">다운로드 📥</a> (24시간 유효)`
-        : `✅ Saved · <a href="/api/chat/download/${data.id}" download="${data.filename}" style="color:var(--purple);">Download 📥</a> (valid 24h)`;
-      btn.textContent = currentLang === 'ko' ? '✅ 저장됨' : '✅ Saved';
+  const regionLabel = page === 'wanju' ? '완주 (Wanju)' : '인제 (Inje)';
+  const regionUrl   = page === 'wanju'
+    ? 'https://dynamic-happiness-production-297d.up.railway.app/wanju'
+    : 'https://dynamic-happiness-production-297d.up.railway.app/inje';
+  const ts = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+  const tsFile = new Date().toISOString().slice(0,16).replace(/[-:T]/g, '').replace('T','_');
+
+  let md = `# Mulberry Research Lab · Luna AI 상담 기록\n\n---\n\n`;
+  md += `| 항목 | 내용 |\n|---|---|\n`;
+  md += `| 지역 | ${regionLabel} |\n| 일시 | ${ts} |\n\n---\n\n`;
+
+  let q = 1;
+  for (const m of _chatSession) {
+    if (m.role === 'user') {
+      md += `**Q${q}.** ${m.text}\n\n`;
     } else {
-      throw new Error('save failed');
+      md += `**A${q}.** ${m.text}\n\n---\n\n`;
+      q++;
     }
-  } catch {
-    msg.textContent = currentLang === 'ko' ? '저장 실패. 다시 시도해주세요.' : 'Save failed. Please retry.';
-    btn.disabled = false;
   }
+  md += `\n*Mulberry Research Lab · AI ${regionLabel} Initiative*  \n*${regionUrl}*  \n*이 문서는 고객 요청에 의해 저장된 상담 기록입니다.*\n`;
+
+  const blob = new Blob([md], { type: 'text/markdown; charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `luna_chat_${page}_${tsFile}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  if (msgEl) msgEl.textContent = currentLang === 'ko' ? '✅ 다운로드 완료' : '✅ Downloaded';
+  if (btn) { btn.textContent = currentLang === 'ko' ? '💾 다시 저장' : '💾 Save Again'; btn.disabled = false; }
 }
 
 // ── 타이핑 인디케이터 (점 세 개 애니메이션) ──────────────────────────
