@@ -1113,6 +1113,14 @@ body {
 }
 .qa-send-btn:hover { background: var(--purple-light); }
 .qa-send-btn:active { transform: scale(0.95); }
+.qa-save-btn {
+  font-size: 12px; padding: 5px 12px; border-radius: 6px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  color: var(--text-secondary); cursor: pointer; font-family: inherit;
+  transition: all 0.2s;
+}
+.qa-save-btn:hover { background: var(--purple-light); color: var(--purple); border-color: var(--purple); }
+.qa-save-btn:disabled { opacity: 0.5; cursor: default; }
 </style>
 </head>
 <body>
@@ -1335,6 +1343,14 @@ body {
           <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">WiFi 센싱</span><span class="lang-en" style="display:none;">WiFi Sensing</span></span>
           <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">예산</span><span class="lang-en" style="display:none;">Budget</span></span>
         </div>
+      </div>
+
+      <!-- 대화 저장 -->
+      <div class="qa-save-bar" id="qaSaveBar" style="display:none; padding:6px 12px; border-top:1px solid var(--border);">
+        <button class="qa-save-btn" id="qaSaveBtn" onclick="saveChatLog()">
+          <span class="lang-ko">💾 대화 저장</span><span class="lang-en" style="display:none;">💾 Save Chat</span>
+        </button>
+        <span class="qa-save-msg" id="qaSaveMsg" style="font-size:12px; color:var(--text-secondary); margin-left:8px;"></span>
       </div>
 
       <!-- 채팅 입력 영역 -->
@@ -2259,13 +2275,48 @@ function removeQaFile(i) {
 //   role === 'luna' → 왼쪽 Luna 아바타 + 보라색 버블
 //   role === 'user' → 오른쪽 사용자 아바타 + 회색 버블
 //   area.scrollTop = area.scrollHeight → 항상 최신 메시지가 보이게 스크롤
+// 세션 대화 기록 (저장용)
+const _chatSession = [];
+
 function addMsg(role, html) {
   const area = document.getElementById('qaMessages');
-  if (!area) return; // 방어 코드 — 요소가 없으면 조용히 종료
+  if (!area) return;
   const d = document.createElement('div');
   d.className = 'msg ' + role;
   d.innerHTML = `<div class="msg-av">` + (role === 'luna' ? 'L' : 'U') + `</div><div class="msg-bub">${html}</div>`;
   area.appendChild(d); area.scrollTop = area.scrollHeight;
+  _chatSession.push({ role, text: html.replace(/<[^>]*>/g, '') });
+  const saveBar = document.getElementById('qaSaveBar');
+  if (saveBar && _chatSession.length >= 2) saveBar.style.display = 'block';
+}
+
+// ── 대화 저장 ──────────────────────────────────────────────────────────────
+async function saveChatLog() {
+  const btn = document.getElementById('qaSaveBtn');
+  const msg = document.getElementById('qaSaveMsg');
+  if (!btn || _chatSession.length < 2) return;
+  btn.disabled = true;
+  msg.textContent = currentLang === 'ko' ? '저장 중...' : 'Saving...';
+  const page = window.location.pathname.includes('wanju') ? 'wanju' : 'inje';
+  try {
+    const res = await fetch('/api/chat/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ page, messages: _chatSession }),
+    });
+    const data = await res.json();
+    if (data.id) {
+      msg.innerHTML = currentLang === 'ko'
+        ? `✅ 저장 완료 · <a href="/api/chat/download/${data.id}" download="${data.filename}" style="color:var(--purple);">다운로드 📥</a> (24시간 유효)`
+        : `✅ Saved · <a href="/api/chat/download/${data.id}" download="${data.filename}" style="color:var(--purple);">Download 📥</a> (valid 24h)`;
+      btn.textContent = currentLang === 'ko' ? '✅ 저장됨' : '✅ Saved';
+    } else {
+      throw new Error('save failed');
+    }
+  } catch {
+    msg.textContent = currentLang === 'ko' ? '저장 실패. 다시 시도해주세요.' : 'Save failed. Please retry.';
+    btn.disabled = false;
+  }
 }
 
 // ── 타이핑 인디케이터 (점 세 개 애니메이션) ──────────────────────────

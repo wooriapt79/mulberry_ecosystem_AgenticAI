@@ -5,13 +5,15 @@ import hmac
 import json
 import os
 import secrets
+import tempfile
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Annotated, Literal
 from uuid import uuid4
 
 from fastapi.staticfiles import StaticFiles
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint, case, create_engine, select, update
@@ -961,3 +963,111 @@ async def luna_chat(payload: ChatInput):
         return {"reply": "잌시 후 다시 시도해 주세요.", "status": "api_error"}
     except Exception:
         return {"reply": "연결에 문제가 발생했습니다. 잌시 후 다시 시도해 주세요.", "status": "error"}
+
+
+# ── 대화 저장 / 다운로드 ──────────────────────────────────────────────────────
+# 저장 디렉토리: /tmp/luna_chats  (Railway 재시작 시 삭제되는 임시 스토리지)
+# 보관 기간: 24시간 후 자동 만료 (다운로드 시 체크)
+
+_CHAT_DIR = Path(tempfile.gettempdir()) / "luna_chats"
+_CHAT_DIR.mkdir(exist_ok=True)
+
+_REGION_LABEL = {"inje": "인제 (Inje)", "wanju": "완주 (Wanju)"}
+_REGION_URL   = {
+    "inje":  "https://dynamic-happiness-production-297d.up.railway.app/inje",
+    "wanju": "https://dynamic-happiness-production-297d.up.railway.app/wanju",
+}
+
+class ChatMessage(BaseModel):
+    role: Literal["user", "luna"]
+    text: str
+
+class ChatSaveInput(BaseModel):
+    page: str = Field(default="inje", max_length=20)
+    messages: list[ChatMessage] = Field(min_length=1, max_length=200)
+
+def _build_md(page: str, messages: list[ChatMessage], saved_at: datetime) -> str:
+    region  = _REGION_LABEL.get(page, page)
+    url     = _REGION_URL.get(page, "")
+    ts      = saved_at.strftime("%Y-%m-%d %H:%M (UTC)")
+    lines   = [
+        "# Mulberry Research Lab · Luna AI 상담 기록",
+        "",
+        "---",
+        "",
+        f"| 항목 | 내용 |",
+        f"|---|---|",
+        f"| 지역 | {region} |",
+        f"| 일시 | {ts} |",
+        f"| 보관 | 저장 후 24시간 자동 삭제 |",
+        "",
+        "---",
+        "",
+    ]
+    q_num = 1
+    for msg in messages:
+        if msg.role == "user":
+            lines.append(f"**Q{q_num}.** {msg.text}")
+            lines.append("")
+        else:
+            lines.append(f"**A{q_num}.** {msg.text}")
+            lines.append("")
+            lines.append("---")
+            lines.append("")
+            q_num += 1
+    lines += [
+        "",
+        "---",
+        "",
+        f"*Mulberry Research Lab · AI {region} Initiative*  ",
+        f"*{url}*  ",
+        f"*이 문서는 자동 생성된 상담 기록입니다.*",
+    ]
+    return "\n".join(lines)
+
+@app.post("/api/chat/save")
+async def chat_save(payload: ChatSaveInput):
+    # 24시간 만료된 파일 정리
+    cutoff = now() - timedelta(hours=24)
+    for old in _CHAT_DIR.glob("*.md"):
+        try:
+            if datetime.fromtimestamp(old.stat().st_mtime, tz=timezone.utc) < cutoff:
+                old.unlink(missing_ok=True)
+        except Exception:
+            pass
+
+    file_id  = uuid4().hex
+    saved_at = now()
+    page     = payload.page if payload.page in _REGION_LABEL else "inje"
+    ts_str   = saved_at.strftime("%Y%m%d_%H%M%S")
+    filename = f"luna_chat_{page}_{ts_str}_{file_id[:8]}.md"
+    fpath    = _CHAT_DIR / filename
+
+    md_content = _build_md(page, payload.messages, saved_at)
+    fpath.write_text(md_content, encoding="utf-8")
+
+    return {"id": file_id, "filename": filename, "status": "saved"}
+
+@app.get("/api/chat/download/{file_id}")
+async def chat_download(file_id: str):
+    # file_id는 uuid hex (32자)
+    if not file_id.isalnum() or len(file_id) != 32:
+        raise HTTPException(status_code=400, detail="Invalid file id")
+
+    matches = list(_CHAT_DIR.glob(f"*_{file_id[:8]}.md"))
+    if not matches:
+        raise HTTPException(status_code=404, detail="파일을 찾을 수 없습니다. 24시간이 지나 삭제되었을 수 있습니다.")
+
+    fpath = matches[0]
+    # 24시간 만료 체크
+    mtime = datetime.fromtimestamp(fpath.stat().st_mtime, tz=timezone.utc)
+    if now() - mtime > timedelta(hours=24):
+        fpath.unlink(missing_ok=True)
+        raise HTTPException(status_code=410, detail="파일이 만료되었습니다. (24시간 초과)")
+
+    return FileResponse(
+        path=str(fpath),
+        media_type="text/markdown; charset=utf-8",
+        filename=fpath.name,
+        headers={"Content-Disposition": f'attachment; filename="{fpath.name}"'},
+    )
