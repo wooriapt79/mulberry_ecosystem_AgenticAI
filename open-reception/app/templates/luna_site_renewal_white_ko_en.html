@@ -1121,6 +1121,14 @@ body {
 }
 .qa-send-btn:hover { background: var(--purple-light); }
 .qa-send-btn:active { transform: scale(0.95); }
+.qa-save-btn {
+  font-size: 12px; padding: 5px 12px; border-radius: 6px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  color: var(--text-secondary); cursor: pointer; font-family: inherit;
+  transition: all 0.2s;
+}
+.qa-save-btn:hover { background: var(--purple-light); color: var(--purple); border-color: var(--purple); }
+.qa-save-btn:disabled { opacity: 0.5; cursor: default; }
 </style>
 </head>
 <body>
@@ -1365,6 +1373,14 @@ body {
           <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">베이스캠프</span><span class="lang-en" style="display:none;">Base Camp</span></span>
           <span class="topic-chip" onclick="insertTopicToChat(this)"><span class="lang-ko">예산</span><span class="lang-en" style="display:none;">Budget</span></span>
         </div>
+      </div>
+
+      <!-- 대화 저장 -->
+      <div class="qa-save-bar" id="qaSaveBar" style="display:none; padding:6px 12px; border-top:1px solid var(--border);">
+        <button class="qa-save-btn" id="qaSaveBtn" onclick="saveChatLog()">
+          <span class="lang-ko">💾 대화 저장</span><span class="lang-en" style="display:none;">💾 Save Chat</span>
+        </button>
+        <span class="qa-save-msg" id="qaSaveMsg" style="font-size:12px; color:var(--text-secondary); margin-left:8px;"></span>
       </div>
 
       <!-- 채팅 입력 영역 -->
@@ -2251,13 +2267,63 @@ function removeQaFile(i) {
 //   role === 'luna' → 왼쪽 Luna 아바타 + 보라색 버블
 //   role === 'user' → 오른쪽 사용자 아바타 + 회색 버블
 //   area.scrollTop = area.scrollHeight → 항상 최신 메시지가 보이게 스크롤
+// 세션 대화 기록 (저장용)
+const _chatSession = [];
+
 function addMsg(role, html) {
   const area = document.getElementById('qaMessages');
-  if (!area) return; // 방어 코드 — 요소가 없으면 조용히 종료
+  if (!area) return;
   const d = document.createElement('div');
   d.className = 'msg ' + role;
   d.innerHTML = `<div class="msg-av">` + (role === 'luna' ? 'L' : 'U') + `</div><div class="msg-bub">${html}</div>`;
   area.appendChild(d); area.scrollTop = area.scrollHeight;
+  // 대화 기록 축적 + 저장 버튼 표시
+  _chatSession.push({ role, text: html.replace(/<[^>]*>/g, '') });
+  const saveBar = document.getElementById('qaSaveBar');
+  if (saveBar && _chatSession.length >= 2) saveBar.style.display = 'block';
+}
+
+// ── 대화 저장 (클라이언트 Blob 다운로드) ───────────────────────────────────
+function saveChatLog() {
+  const btn = document.getElementById('qaSaveBtn');
+  const msgEl = document.getElementById('qaSaveMsg');
+  if (!btn || _chatSession.length < 2) return;
+
+  const page = window.location.pathname.includes('wanju') ? 'wanju' : 'inje';
+  const regionLabel = page === 'wanju' ? '완주 (Wanju)' : '인제 (Inje)';
+  const regionUrl   = page === 'wanju'
+    ? 'https://dynamic-happiness-production-297d.up.railway.app/wanju'
+    : 'https://dynamic-happiness-production-297d.up.railway.app/inje';
+  const ts = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+  const tsFile = new Date().toISOString().slice(0,16).replace(/[-:T]/g, '').replace('T','_');
+
+  let md = `# Mulberry Research Lab · Luna AI 상담 기록\n\n---\n\n`;
+  md += `| 항목 | 내용 |\n|---|---|\n`;
+  md += `| 지역 | ${regionLabel} |\n| 일시 | ${ts} |\n\n---\n\n`;
+
+  let q = 1;
+  for (const m of _chatSession) {
+    if (m.role === 'user') {
+      md += `**Q${q}.** ${m.text}\n\n`;
+    } else {
+      md += `**A${q}.** ${m.text}\n\n---\n\n`;
+      q++;
+    }
+  }
+  md += `\n*Mulberry Research Lab · AI ${regionLabel} Initiative*  \n*${regionUrl}*  \n*이 문서는 고객 요청에 의해 저장된 상담 기록입니다.*\n`;
+
+  const blob = new Blob([md], { type: 'text/markdown; charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `luna_chat_${page}_${tsFile}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  if (msgEl) msgEl.textContent = currentLang === 'ko' ? '✅ 다운로드 완료' : '✅ Downloaded';
+  if (btn) { btn.textContent = currentLang === 'ko' ? '💾 다시 저장' : '💾 Save Again'; btn.disabled = false; }
 }
 
 // ── 타이핑 인디케이터 (점 세 개 애니메이션) ──────────────────────────
