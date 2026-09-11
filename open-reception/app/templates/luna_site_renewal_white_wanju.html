@@ -485,6 +485,8 @@ body {
   border-radius: 14px 4px 14px 14px; color: var(--purple);
 }
 .msg-bub strong { color: var(--purple); }
+.msg-bub p { margin: 0 0 10px; }
+.msg-bub p:last-child { margin-bottom: 0; }
 .msg-bub ul { margin: 8px 0 4px 16px; }
 .msg-bub li { margin-bottom: 4px; }
 
@@ -2203,12 +2205,19 @@ function removeQaFile(i) {
 //   role === 'luna' → 왼쪽 Luna 아바타 + 보라색 버블
 //   role === 'user' → 오른쪽 사용자 아바타 + 회색 버블
 //   area.scrollTop = area.scrollHeight → 항상 최신 메시지가 보이게 스크롤
+function formatLunaReply(text) {
+  text = text.replace(/[\u{1F000}-\u{1FFFF}]|[\u{2600}-\u{27BF}]|[\u{FE00}-\u{FEFF}]/gu, '').trim();
+  const paras = text.split(/\n{2,}/).map(p => p.replace(/\n/g, '<br>').trim()).filter(Boolean);
+  return paras.length > 1 ? '<p>' + paras.join('</p><p>') + '</p>' : paras[0] || '';
+}
+
 function addMsg(role, html) {
   const area = document.getElementById('qaMessages');
-  if (!area) return; // 방어 코드 — 요소가 없으면 조용히 종료
+  if (!area) return;
+  const content = role === 'luna' ? formatLunaReply(html) : html;
   const d = document.createElement('div');
   d.className = 'msg ' + role;
-  d.innerHTML = `<div class="msg-av">` + (role === 'luna' ? 'L' : 'U') + `</div><div class="msg-bub">${html}</div>`;
+  d.innerHTML = `<div class="msg-av">` + (role === 'luna' ? 'L' : 'U') + `</div><div class="msg-bub">${content}</div>`;
   area.appendChild(d); area.scrollTop = area.scrollHeight;
 }
 
