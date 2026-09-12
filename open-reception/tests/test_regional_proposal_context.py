@@ -1,7 +1,15 @@
 import pytest
 from pydantic import ValidationError
 
-from app.main import ChatInput, build_luna_system_prompt, proposal_summary_text
+from app.main import (
+    ChatInput,
+    ProposalFeedback,
+    SessionLocal,
+    build_luna_system_prompt,
+    classify_proposal_feedback,
+    proposal_summary_text,
+    record_proposal_feedback,
+)
 
 
 def test_chat_input_accepts_only_supported_regions():
@@ -37,3 +45,25 @@ def test_summary_extractor_ignores_script_and_style_content():
     assert "AI Wanju 2030" in summary
     assert "function openCh" not in summary
     assert "@media" not in summary
+
+
+def test_feedback_classification_separates_questions_and_update_requests():
+    assert classify_proposal_feedback("예산 근거가 무엇인가요?") == ("budget", "question")
+    assert classify_proposal_feedback("KPI 항목을 추가해 주세요") == ("kpi", "proposal_update")
+
+
+def test_feedback_record_keeps_region_and_review_state():
+    with SessionLocal() as db:
+        feedback = record_proposal_feedback(
+            db,
+            page="wanju",
+            source="chat",
+            question="KPI 항목을 추가해 주세요",
+            response="검토 후보로 접수합니다.",
+        )
+        assert feedback.region == "wanju"
+        assert feedback.category == "kpi"
+        assert feedback.request_type == "proposal_update"
+        assert feedback.status == "received"
+        db.delete(db.get(ProposalFeedback, feedback.id))
+        db.commit()

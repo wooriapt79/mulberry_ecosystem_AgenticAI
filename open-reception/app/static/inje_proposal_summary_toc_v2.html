@@ -33,6 +33,7 @@ aside.rail a.ch {
   border-bottom: 1px solid #f2f2f2;
 }
 aside.rail a.ch:hover { color: var(--luna); }
+aside.rail a.ch.active { color: var(--luna); background: var(--luna-dim); }
 aside.rail a.ch span { color: var(--luna); font-weight: 700; margin-right: 6px; font-size: 11px; }
 .kicker { font-size: 12px; letter-spacing: .08em; color: var(--luna); margin-bottom: 8px; }
 .kicker a { color: var(--luna); text-decoration: none; }
@@ -358,10 +359,18 @@ hamBtn.addEventListener('click', () => tocEl.classList.contains('nav-open') ? cl
 navOverlay.addEventListener('click', closeNav);
 
 function openCh(id) {
+  if (id === 'toc') {
+    if (window.matchMedia('(max-width: 900px)').matches) openNav();
+    else tocEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return false;
+  }
   document.querySelectorAll('article').forEach(a => a.classList.remove('on'));
   const el = document.getElementById(id);
   if (el) {
     el.classList.add('on');
+    document.querySelectorAll('a.ch').forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+    });
     history.replaceState(null,'','#'+id);
     closeNav();
     setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);

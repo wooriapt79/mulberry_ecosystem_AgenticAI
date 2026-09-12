@@ -102,6 +102,7 @@ def test_v04_matching_migration_round_trip(tmp_path, monkeypatch):
         "matching_recommendations",
         "matching_candidates",
         "matching_decisions",
+        "proposal_feedback",
     } <= set(inspect(engine).get_table_names())
 
     command.downgrade(config, "0001_v03")

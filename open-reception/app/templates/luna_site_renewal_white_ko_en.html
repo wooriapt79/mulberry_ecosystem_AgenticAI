@@ -500,9 +500,18 @@ body {
   background: white; 
   border-radius: 14px 4px 14px 14px; color: var(--purple);
 }
-.msg-bub strong { color: var(--purple); }
-.msg-bub ul { margin: 8px 0 4px 16px; }
-.msg-bub li { margin-bottom: 4px; }
+.msg-bub strong { color: var(--purple); font-weight: 750; }
+.msg-bub p { margin: 0 0 10px; }
+.msg-bub p:last-child { margin-bottom: 0; }
+.msg-bub .msg-section-title {
+  margin: 14px 0 6px; padding-top: 10px;
+  border-top: 1px solid var(--border);
+  color: var(--purple); font-weight: 750; line-height: 1.45;
+}
+.msg-bub .msg-section-title:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.msg-bub ul, .msg-bub ol { margin: 6px 0 10px; padding-left: 20px; }
+.msg-bub li { margin-bottom: 5px; padding-left: 2px; }
+.msg-bub li:last-child { margin-bottom: 0; }
 
 .qa-sug {
   padding: 10px 24px 0; display: flex; flex-wrap: wrap; gap: 7px;
@@ -890,11 +899,35 @@ body {
   }
 
   /* Report adjustments */
+  #sec-report {
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
   .report-form-panel {
     width: 100%;
+    flex: 0 0 auto;
     border-right: none;
     border-bottom: 1px solid var(--border);
-    max-height: 200px;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .report-output-panel {
+    flex: 0 0 auto !important;
+    min-height: 320px;
+    overflow: visible !important;
+  }
+
+  .report-preview {
+    flex: 0 0 auto;
+    overflow: visible;
+    padding: 16px;
+  }
+
+  .rdoc {
+    width: 100%;
   }
 
   /* Team grid */
@@ -1360,10 +1393,10 @@ body {
   <div class="section" id="sec-qa">
     <!-- 탭 -->
     <div class="qa-mode-tabs">
-      <button class="qa-mode-tab active" onclick="setQaMode('chat')">
+      <button class="qa-mode-tab active" onclick="setQaMode('chat', this)">
         <span class="lang-ko">Q&A 채팅</span><span class="lang-en" style="display:none;">Q&A Chat</span>
       </button>
-      <button class="qa-mode-tab" onclick="setQaMode('file')">
+      <button class="qa-mode-tab" onclick="setQaMode('file', this)">
         <span class="lang-ko">파일 분석</span><span class="lang-en" style="display:none;">File Analysis</span>
       </button>
     </div>
@@ -1376,6 +1409,10 @@ body {
         <div class="chat-message">
           <div class="chat-avatar"><img src="/static/Co_Luna.png" alt="Luna"></div>
           <div class="chat-bubble"><span class="lang-ko">안녕하세요! 질문을 남겨주세요.</span><span class="lang-en" style="display:none;">Hi! Leave your question.</span></div>
+        </div>
+        <div style="font-size:11px;color:var(--text-tertiary);padding:0 8px 8px;">
+          <span class="lang-ko">개인정보는 입력하지 마세요. 질문과 답변은 제안서 보완 검토자료로 지역별 분류됩니다.</span>
+          <span class="lang-en" style="display:none;">Do not enter personal information. Questions and answers are classified by region for proposal review.</span>
         </div>
       </div>
 
@@ -1393,11 +1430,11 @@ body {
       </div>
 
       <!-- 대화 저장 -->
-      <div class="qa-save-bar" id="qaSaveBar" style="display:none; padding:6px 12px; border-top:1px solid var(--border);">
-        <button class="qa-save-btn" id="qaSaveBtn" onclick="saveChatLog()">
-          <span class="lang-ko">💾 대화 저장</span><span class="lang-en" style="display:none;">💾 Save Chat</span>
+      <div class="qa-save-bar" id="qaSaveBar" style="display:flex; align-items:center; padding:6px 12px; border-top:1px solid var(--border);">
+        <button class="qa-save-btn" id="qaSaveBtn" onclick="saveChatLog()" disabled>
+          <span class="lang-ko">현재 대화 저장</span><span class="lang-en" style="display:none;">Save Current Chat</span>
         </button>
-        <span class="qa-save-msg" id="qaSaveMsg" style="font-size:12px; color:var(--text-secondary); margin-left:8px;"></span>
+        <span class="qa-save-msg" id="qaSaveMsg" style="font-size:12px; color:var(--text-secondary); margin-left:8px;">질문과 답변이 완료되면 저장할 수 있습니다.</span>
       </div>
 
       <!-- 채팅 입력 영역 -->
@@ -1541,7 +1578,7 @@ body {
       </div>
       <button class="rf-gen-btn" onclick="genReport()"><span class="lang-ko">보고서 생성</span><span class="lang-en" style="display:none;">Generate Report</span></button>
     </div>
-    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+    <div class="report-output-panel" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
       <div class="report-preview" id="rPreview">
         <div class="rp-empty">
           <div class="rpe-icon">R</div>
@@ -2024,12 +2061,12 @@ function insertTopicToChat(element) {
 
 // ── Q&A 탭 전환 ────────────────────────────
 let currentQaMode = 'chat';
-function setQaMode(mode) {
+function setQaMode(mode, tabEl) {
   currentQaMode = mode;
 
   // 탭 활성화
   document.querySelectorAll('.qa-mode-tab').forEach(tab => tab.classList.remove('active'));
-  event.target.classList.add('active');
+  if (tabEl) tabEl.classList.add('active');
 
   // 패널 전환
   if (mode === 'chat') {
@@ -2092,19 +2129,26 @@ function analyzeFile() {
   btn.disabled = true;
   status.textContent = '분석 중...';
 
-  // 백엔드 API 호출 (추후 구현)
-  // POST /api/analyze-file
-  // - file: FormData
-  // - headers: Authorization (backend에서 처리)
+  const formData = new FormData();
+  formData.append('file', analysisFile);
+  formData.append('page', window.location.pathname.includes('wanju') ? 'wanju' : 'inje');
 
-  setTimeout(() => {
-    status.textContent = '';
-    const result = document.getElementById('analysisResultWrap');
-    result.style.display = 'flex';
-    document.getElementById('analysisResultText').textContent = '분석 결과가 여기에 표시됩니다.\n(백엔드 API 연동 후 구현)';
-    btn.disabled = false;
-    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 1500);
+  fetch('/api/analyze-file', { method: 'POST', body: formData })
+    .then(async response => {
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || '분석 요청 실패');
+      const result = document.getElementById('analysisResultWrap');
+      result.style.display = 'flex';
+      document.getElementById('analysisResultText').textContent = data.result || '분석 결과가 없습니다.';
+      status.textContent = data.feedback_id
+        ? '제안서 보완 검토자료로 접수되었습니다.'
+        : (data.status === 'ok' ? '분석은 완료됐지만 검토자료 접수는 재시도가 필요합니다.' : '');
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    })
+    .catch(error => {
+      status.textContent = error.message || '분석 중 오류가 발생했습니다.';
+    })
+    .finally(() => { btn.disabled = false; });
 }
 
 function downloadSummary() {
@@ -2297,19 +2341,140 @@ function removeQaFile(i) {
 //   role === 'user' → 오른쪽 사용자 아바타 + 회색 버블
 //   area.scrollTop = area.scrollHeight → 항상 최신 메시지가 보이게 스크롤
 // 세션 대화 기록 (저장용)
-const _chatSession = [];
+const _chatPage = window.location.pathname.includes('wanju') ? 'wanju' : 'inje';
+const _chatStorageKey = 'luna_chat_session_' + _chatPage;
+let _chatSession = [];
+try {
+  const storedSession = JSON.parse(sessionStorage.getItem(_chatStorageKey) || '[]');
+  if (Array.isArray(storedSession)) _chatSession = storedSession.slice(-40);
+} catch (_) {
+  _chatSession = [];
+}
 
-function addMsg(role, html) {
+function syncChatSaveState() {
+  const btn = document.getElementById('qaSaveBtn');
+  const msgEl = document.getElementById('qaSaveMsg');
+  const hasExchange = _chatSession.some(m => m.role === 'user') && _chatSession.some(m => m.role === 'luna');
+  if (btn) btn.disabled = !hasExchange;
+  if (msgEl && !hasExchange) {
+    msgEl.textContent = currentLang === 'ko'
+      ? '질문과 답변이 완료되면 저장할 수 있습니다.'
+      : 'Available after a question and answer are complete.';
+  }
+}
+
+function normalizeChatText(raw) {
+  const withBreaks = String(raw ?? '')
+    .replace(/<br\s*\/?\s*>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '- ')
+    .replace(/<\/(p|div|li|h[1-6])>/gi, '\n')
+    .replace(/<[^>]+>/g, '');
+  const decoder = document.createElement('textarea');
+  decoder.innerHTML = withBreaks;
+  return decoder.value.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function appendChatInline(target, text) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  for (const part of parts) {
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+      const strong = document.createElement('strong');
+      strong.textContent = part.slice(2, -2);
+      target.appendChild(strong);
+    } else {
+      target.appendChild(document.createTextNode(part));
+    }
+  }
+}
+
+function renderChatContent(container, raw) {
+  container.textContent = '';
+  const lines = normalizeChatText(raw).split('\n');
+  let list = null;
+  let listType = '';
+
+  for (const sourceLine of lines) {
+    const line = sourceLine.trim();
+    if (!line) {
+      list = null;
+      listType = '';
+      continue;
+    }
+
+    const heading = line.match(/^#{1,4}\s+(.+)$/);
+    const bullet = line.match(/^[-*•]\s+(.+)$/);
+    const numbered = line.match(/^\d+[.)]\s+(.+)$/);
+
+    if (heading) {
+      list = null;
+      listType = '';
+      const title = document.createElement('div');
+      title.className = 'msg-section-title';
+      appendChatInline(title, heading[1]);
+      container.appendChild(title);
+      continue;
+    }
+
+    if (bullet || numbered) {
+      const nextType = numbered ? 'ol' : 'ul';
+      if (!list || listType !== nextType) {
+        list = document.createElement(nextType);
+        listType = nextType;
+        container.appendChild(list);
+      }
+      const item = document.createElement('li');
+      appendChatInline(item, (bullet || numbered)[1]);
+      list.appendChild(item);
+      continue;
+    }
+
+    list = null;
+    listType = '';
+    const paragraph = document.createElement('p');
+    appendChatInline(paragraph, line);
+    container.appendChild(paragraph);
+  }
+}
+
+function createChatMessage(role, content) {
+  const row = document.createElement('div');
+  row.className = 'msg ' + role;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-av';
+  avatar.textContent = role === 'luna' ? 'L' : 'U';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bub';
+  renderChatContent(bubble, content);
+
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  return row;
+}
+
+function restoreChatSession() {
+  const area = document.getElementById('qaMessages');
+  if (!area || !_chatSession.length) {
+    syncChatSaveState();
+    return;
+  }
+  for (const message of _chatSession) {
+    area.appendChild(createChatMessage(message.role, message.text));
+  }
+  area.scrollTop = area.scrollHeight;
+  syncChatSaveState();
+}
+
+function addMsg(role, content) {
   const area = document.getElementById('qaMessages');
   if (!area) return;
-  const d = document.createElement('div');
-  d.className = 'msg ' + role;
-  d.innerHTML = `<div class="msg-av">` + (role === 'luna' ? 'L' : 'U') + `</div><div class="msg-bub">${html}</div>`;
-  area.appendChild(d); area.scrollTop = area.scrollHeight;
-  // 대화 기록 축적 + 저장 버튼 표시
-  _chatSession.push({ role, text: html.replace(/<[^>]*>/g, '') });
-  const saveBar = document.getElementById('qaSaveBar');
-  if (saveBar && _chatSession.length >= 2) saveBar.style.display = 'block';
+  const normalized = normalizeChatText(content);
+  area.appendChild(createChatMessage(role, normalized));
+  area.scrollTop = area.scrollHeight;
+  _chatSession.push({ role, text: normalized });
+  sessionStorage.setItem(_chatStorageKey, JSON.stringify(_chatSession.slice(-40)));
+  syncChatSaveState();
 }
 
 // ── 대화 저장 (클라이언트 Blob 다운로드) ───────────────────────────────────
@@ -2351,8 +2516,8 @@ function saveChatLog() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
-  if (msgEl) msgEl.textContent = currentLang === 'ko' ? '✅ 다운로드 완료' : '✅ Downloaded';
-  if (btn) { btn.textContent = currentLang === 'ko' ? '💾 다시 저장' : '💾 Save Again'; btn.disabled = false; }
+  if (msgEl) msgEl.textContent = currentLang === 'ko' ? '다운로드 완료' : 'Downloaded';
+  if (btn) { btn.textContent = currentLang === 'ko' ? '현재 대화 다시 저장' : 'Save Current Chat Again'; btn.disabled = false; }
 }
 
 // ── 타이핑 인디케이터 (점 세 개 애니메이션) ──────────────────────────
@@ -2478,7 +2643,9 @@ function genReport() {
     const rPreview = document.getElementById('rPreview');
     rPreview.innerHTML = buildReport(selectedType, recipient, today);
     document.getElementById('rActions').style.display = 'flex';
-    rPreview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    requestAnimationFrame(() => {
+      rPreview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }, 1200);
 }
 
@@ -2778,6 +2945,7 @@ function copyDoc() {
 }
 
 // Initialize
+restoreChatSession();
 setLang('ko');
 </script>
 </body>
