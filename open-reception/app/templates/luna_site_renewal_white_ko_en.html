@@ -2365,17 +2365,17 @@ function syncChatSaveState() {
 
 function normalizeChatText(raw) {
   const withBreaks = String(raw ?? '')
-    .replace(/<br\\s*\\/?\\s*>/gi, '\\n')
+    .replace(/<br\s*\/?\s*>/gi, '\n')
     .replace(/<li[^>]*>/gi, '- ')
-    .replace(/<\\/(p|div|li|h[1-6])>/gi, '\\n')
+    .replace(/<\/(p|div|li|h[1-6])>/gi, '\n')
     .replace(/<[^>]+>/g, '');
   const decoder = document.createElement('textarea');
   decoder.innerHTML = withBreaks;
-  return decoder.value.replace(/\\r\\n/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();
+  return decoder.value.replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 
 function appendChatInline(target, text) {
-  const parts = text.split(/(\\*\\*[^*]+\\*\\*)/g);
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
   for (const part of parts) {
     if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
       const strong = document.createElement('strong');
@@ -2389,7 +2389,7 @@ function appendChatInline(target, text) {
 
 function renderChatContent(container, raw) {
   container.textContent = '';
-  const lines = normalizeChatText(raw).split('\\n');
+  const lines = normalizeChatText(raw).split('\n');
   let list = null;
   let listType = '';
 
@@ -2401,9 +2401,9 @@ function renderChatContent(container, raw) {
       continue;
     }
 
-    const heading = line.match(/^#{1,4}\\s+(.+)$/);
-    const bullet = line.match(/^[-*•]\\s+(.+)$/);
-    const numbered = line.match(/^\\d+[.)]\\s+(.+)$/);
+    const heading = line.match(/^#{1,4}\s+(.+)$/);
+    const bullet = line.match(/^[-*•]\s+(.+)$/);
+    const numbered = line.match(/^\d+[.)]\s+(.+)$/);
 
     if (heading) {
       list = null;
