@@ -204,3 +204,12 @@ def test_luna_opens_capability_panel_with_current_scope():
         assert "나머지 기능은 지자체 협의와 운영 승인에 따라" in html
         assert ".capability-panel {" in html
         assert "background: #ffffff;" in html
+
+
+def test_capability_panel_remains_accessible_when_luna_card_is_hidden_on_mobile():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        assert ".luna-card { display: none !important; }" in html
+        assert 'class="nav-item mobile-capability-item"' in html
+        assert ".mobile-capability-item { display: none; }" in html
+        assert ".mobile-capability-item { display: flex; }" in html
