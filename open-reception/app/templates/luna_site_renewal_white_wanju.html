@@ -391,7 +391,11 @@ body {
 .hi-body .hi-text { font-size: 13px; color: var(--text-secondary); line-height: 1.75; }
 
 /* ══ PROPOSAL DOWNLOAD SECTION ══════════════════════════ */
-.proposal-section { margin: 32px 48px; padding: 8px 0; }
+.proposal-section {
+  margin: 32px 48px;
+  padding: 8px 0 32px;
+  border-bottom: 1px solid #d1d5db;
+}
 .proposal-card { text-align: center; }
 .prop-icon { display: none; }
 .prop-content { flex: 1; }
@@ -764,9 +768,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px; height: 36px;
+    width: 44px; height: 44px;
     border: none; background: none;
-    font-size: 22px; cursor: pointer;
+    font-size: 28px; cursor: pointer;
     color: var(--text-primary);
     border-radius: 6px; flex-shrink: 0;
     margin-right: 4px;
