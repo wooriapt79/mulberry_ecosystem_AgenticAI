@@ -98,7 +98,7 @@ def test_sidebar_is_compact_and_team_footer_is_text_only():
         assert "overflow-y: auto; min-height: 150px;" in html
         assert 'class="team-members-text">Luna · Trang · KODA · FAMA</div>' in html
         assert 'class="team-pill ' not in html
-        assert 'href="/static/mulberry_lab_team_directory_v2.html"' in html
+        assert 'href="/static/mulberry_lab_team_directory_v2.html?from=' in html
 
 
 def test_team_directory_uses_municipal_language_and_no_external_font():
