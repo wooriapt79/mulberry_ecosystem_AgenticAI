@@ -1027,7 +1027,7 @@ def classify_proposal_feedback(message: str) -> tuple[str, str]:
         "general",
     )
     update_words = (
-        "추가", "보완", "변경", "반영", "요청", "제안",
+        "추가", "보완", "변경", "반영", "요청", "제안해",
         "add", "change", "request", "include",
     )
     request_type = (
