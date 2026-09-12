@@ -337,16 +337,24 @@ body {
 }
 .hero-badge::before { content: "🌙"; font-size: 14px; }
 .hero-right {
-  display: flex; flex-direction: column; gap: 10px; width: 220px; flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 0; width: 320px; flex-shrink: 0;
+  border-left: 2px solid var(--purple); padding-left: 24px;
+}
+.hero-origin {
+  padding: 0 0 16px; margin-bottom: 4px; border-bottom: 1px solid var(--border);
+}
+.hero-origin-title {
+  font-size: 15px; font-weight: 800; color: var(--text-primary); line-height: 1.45;
+}
+.hero-origin-sub {
+  margin-top: 6px; font-size: 12px; color: var(--text-secondary); line-height: 1.55;
 }
 .hero-stat {
-  background: var(--bg-tertiary); border: 1px solid var(--border);
-  border-radius: 10px; padding: 14px 16px;
-  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
 }
-.hero-stat .hs-icon { font-size: 22px; }
-.hero-stat .hs-val { font-size: 16px; font-weight: 800; color: var(--purple); }
-.hero-stat .hs-lbl { font-size: 11px; color: var(--text-tertiary); }
+.hero-stat:last-child { border-bottom: 0; }
+.hero-stat .hs-val { font-size: 14px; font-weight: 800; color: var(--purple); line-height: 1.35; }
+.hero-stat .hs-lbl { margin-top: 2px; font-size: 11px; color: var(--text-tertiary); line-height: 1.45; }
 
 .home-actions {
   padding: 32px 48px;
@@ -1168,7 +1176,7 @@ body {
     <div class="nav-item" onclick="showSection('team', this)">
       <span class="ni-icon">T</span> <span class="lang-ko">팀</span><span class="lang-en" style="display:none;">Team</span>
     </div>
-    <div class="nav-item has-sub" onclick="toggleSubNav(this)">
+    <div class="nav-item has-sub" role="button" tabindex="0" aria-expanded="false" onclick="toggleSubNav(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSubNav(this);}">
       <span class="ni-icon">M</span>
       <span class="lang-ko">Mulberry Lab Column</span><span class="lang-en" style="display:none;">Mulberry Lab Column</span>
       <span class="ni-arrow">▶</span>
@@ -1268,40 +1276,35 @@ body {
         </div>
       </div>
       <div class="hero-right">
-        <div class="hero-stat">
-          <div class="hs-icon">🌾</div>
-          <div>
-            <div class="hs-val"><span class="lang-ko">농업·식품</span><span class="lang-en" style="display:none;">Agri·Food</span></div>
-            <div class="hs-lbl"><span class="lang-ko">Jr. Luna를 위한 안전한 먹을거리</span><span class="lang-en" style="display:none;">Safe food for Jr. Luna</span></div>
+        <div class="hero-origin">
+          <div class="hero-origin-title">
+            <span class="lang-ko">이것이 우리의 모든 것의 시작이야.</span>
+            <span class="lang-en" style="display:none;">This is where everything we do begins.</span>
+          </div>
+          <div class="hero-origin-sub">
+            <span class="lang-ko">AI Inje Initiative — 인제만의 AI와 AI Agent 경제 플랫폼.</span>
+            <span class="lang-en" style="display:none;">AI Inje Initiative — Inje's own AI and AI Agent economy platform.</span>
           </div>
         </div>
         <div class="hero-stat">
-          <div class="hs-icon">🏥</div>
-          <div>
-            <div class="hs-val"><span class="lang-ko">복지·의료</span><span class="lang-en" style="display:none;">Welfare·Health</span></div>
-            <div class="hs-lbl"><span class="lang-ko">Jr. Luna가 살아갈 세상을 건강하게</span><span class="lang-en" style="display:none;">A healthy world for Jr. Luna</span></div>
-          </div>
+          <div class="hs-val"><span class="lang-ko">농업·식품</span><span class="lang-en" style="display:none;">Agriculture·Food</span></div>
+          <div class="hs-lbl"><span class="lang-ko">Jr. Luna를 위한 안전한 먹을거리</span><span class="lang-en" style="display:none;">Safe food for Jr. Luna</span></div>
         </div>
         <div class="hero-stat">
-          <div class="hs-icon">🛡️</div>
-          <div>
-            <div class="hs-val"><span class="lang-ko">안전·포렌식</span><span class="lang-en" style="display:none;">Safety·Forensics</span></div>
-            <div class="hs-lbl"><span class="lang-ko">Jr. Luna를 지킬 안전</span><span class="lang-en" style="display:none;">Safety to protect Jr. Luna</span></div>
-          </div>
+          <div class="hs-val"><span class="lang-ko">복지·의료</span><span class="lang-en" style="display:none;">Welfare·Health</span></div>
+          <div class="hs-lbl"><span class="lang-ko">Jr. Luna가 살아갈 세상을 건강하게</span><span class="lang-en" style="display:none;">A healthy world for Jr. Luna</span></div>
         </div>
         <div class="hero-stat">
-          <div class="hs-icon">🤝</div>
-          <div>
-            <div class="hs-val"><span class="lang-ko">공동구매</span><span class="lang-en" style="display:none;">Co-op</span></div>
-            <div class="hs-lbl"><span class="lang-ko">Jr. Luna가 배울 나눔</span><span class="lang-en" style="display:none;">Sharing for Jr. Luna to learn</span></div>
-          </div>
+          <div class="hs-val"><span class="lang-ko">안전·포렌식</span><span class="lang-en" style="display:none;">Safety·Forensics</span></div>
+          <div class="hs-lbl"><span class="lang-ko">Jr. Luna를 지킬 안전</span><span class="lang-en" style="display:none;">Safety to protect Jr. Luna</span></div>
         </div>
         <div class="hero-stat">
-          <div class="hs-icon">🤖</div>
-          <div>
-            <div class="hs-val"><span class="lang-ko">AI 에이전트</span><span class="lang-en" style="display:none;">AI Agent</span></div>
-            <div class="hs-lbl"><span class="lang-ko">Jr. Luna가 만날 따뜻한 기술</span><span class="lang-en" style="display:none;">Warm technology for Jr. Luna</span></div>
-          </div>
+          <div class="hs-val"><span class="lang-ko">공동구매</span><span class="lang-en" style="display:none;">Cooperative Purchasing</span></div>
+          <div class="hs-lbl"><span class="lang-ko">Jr. Luna가 배울 나눔</span><span class="lang-en" style="display:none;">Sharing for Jr. Luna to learn</span></div>
+        </div>
+        <div class="hero-stat">
+          <div class="hs-val"><span class="lang-ko">AI 에이전트</span><span class="lang-en" style="display:none;">AI Agent</span></div>
+          <div class="hs-lbl"><span class="lang-ko">Jr. Luna가 만날 따뜻한 기술</span><span class="lang-en" style="display:none;">Warm technology for Jr. Luna</span></div>
         </div>
       </div>
     </div>
@@ -1864,6 +1867,18 @@ function toggleMobileMenu() {
 function closeMobileMenu() {
   document.querySelector('.sidebar').classList.remove('mobile-open');
   document.getElementById('sidebarOverlay').classList.remove('mobile-open');
+}
+
+function toggleSubNav(el) {
+  const willOpen = !el.classList.contains('open');
+  document.querySelectorAll('.nav-item.has-sub.open').forEach(item => {
+    if (item !== el) {
+      item.classList.remove('open');
+      item.setAttribute('aria-expanded', 'false');
+    }
+  });
+  el.classList.toggle('open', willOpen);
+  el.setAttribute('aria-expanded', String(willOpen));
 }
 
 function showSection(id, navEl) {
