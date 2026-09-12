@@ -500,9 +500,18 @@ body {
   background: white; 
   border-radius: 14px 4px 14px 14px; color: var(--purple);
 }
-.msg-bub strong { color: var(--purple); }
-.msg-bub ul { margin: 8px 0 4px 16px; }
-.msg-bub li { margin-bottom: 4px; }
+.msg-bub strong { color: var(--purple); font-weight: 750; }
+.msg-bub p { margin: 0 0 10px; }
+.msg-bub p:last-child { margin-bottom: 0; }
+.msg-bub .msg-section-title {
+  margin: 14px 0 6px; padding-top: 10px;
+  border-top: 1px solid var(--border);
+  color: var(--purple); font-weight: 750; line-height: 1.45;
+}
+.msg-bub .msg-section-title:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.msg-bub ul, .msg-bub ol { margin: 6px 0 10px; padding-left: 20px; }
+.msg-bub li { margin-bottom: 5px; padding-left: 2px; }
+.msg-bub li:last-child { margin-bottom: 0; }
 
 .qa-sug {
   padding: 10px 24px 0; display: flex; flex-wrap: wrap; gap: 7px;
@@ -2354,6 +2363,96 @@ function syncChatSaveState() {
   }
 }
 
+function normalizeChatText(raw) {
+  const withBreaks = String(raw ?? '')
+    .replace(/<br\\s*\\/?\\s*>/gi, '\\n')
+    .replace(/<li[^>]*>/gi, '- ')
+    .replace(/<\\/(p|div|li|h[1-6])>/gi, '\\n')
+    .replace(/<[^>]+>/g, '');
+  const decoder = document.createElement('textarea');
+  decoder.innerHTML = withBreaks;
+  return decoder.value.replace(/\\r\\n/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();
+}
+
+function appendChatInline(target, text) {
+  const parts = text.split(/(\\*\\*[^*]+\\*\\*)/g);
+  for (const part of parts) {
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+      const strong = document.createElement('strong');
+      strong.textContent = part.slice(2, -2);
+      target.appendChild(strong);
+    } else {
+      target.appendChild(document.createTextNode(part));
+    }
+  }
+}
+
+function renderChatContent(container, raw) {
+  container.textContent = '';
+  const lines = normalizeChatText(raw).split('\\n');
+  let list = null;
+  let listType = '';
+
+  for (const sourceLine of lines) {
+    const line = sourceLine.trim();
+    if (!line) {
+      list = null;
+      listType = '';
+      continue;
+    }
+
+    const heading = line.match(/^#{1,4}\\s+(.+)$/);
+    const bullet = line.match(/^[-*•]\\s+(.+)$/);
+    const numbered = line.match(/^\\d+[.)]\\s+(.+)$/);
+
+    if (heading) {
+      list = null;
+      listType = '';
+      const title = document.createElement('div');
+      title.className = 'msg-section-title';
+      appendChatInline(title, heading[1]);
+      container.appendChild(title);
+      continue;
+    }
+
+    if (bullet || numbered) {
+      const nextType = numbered ? 'ol' : 'ul';
+      if (!list || listType !== nextType) {
+        list = document.createElement(nextType);
+        listType = nextType;
+        container.appendChild(list);
+      }
+      const item = document.createElement('li');
+      appendChatInline(item, (bullet || numbered)[1]);
+      list.appendChild(item);
+      continue;
+    }
+
+    list = null;
+    listType = '';
+    const paragraph = document.createElement('p');
+    appendChatInline(paragraph, line);
+    container.appendChild(paragraph);
+  }
+}
+
+function createChatMessage(role, content) {
+  const row = document.createElement('div');
+  row.className = 'msg ' + role;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-av';
+  avatar.textContent = role === 'luna' ? 'L' : 'U';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bub';
+  renderChatContent(bubble, content);
+
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  return row;
+}
+
 function restoreChatSession() {
   const area = document.getElementById('qaMessages');
   if (!area || !_chatSession.length) {
@@ -2361,25 +2460,19 @@ function restoreChatSession() {
     return;
   }
   for (const message of _chatSession) {
-    const d = document.createElement('div');
-    d.className = 'msg ' + message.role;
-    d.innerHTML = `<div class="msg-av">${message.role === 'luna' ? 'L' : 'U'}</div><div class="msg-bub"></div>`;
-    d.querySelector('.msg-bub').textContent = message.text;
-    area.appendChild(d);
+    area.appendChild(createChatMessage(message.role, message.text));
   }
   area.scrollTop = area.scrollHeight;
   syncChatSaveState();
 }
 
-function addMsg(role, html) {
+function addMsg(role, content) {
   const area = document.getElementById('qaMessages');
   if (!area) return;
-  const d = document.createElement('div');
-  d.className = 'msg ' + role;
-  d.innerHTML = `<div class="msg-av">` + (role === 'luna' ? 'L' : 'U') + `</div><div class="msg-bub">${html}</div>`;
-  area.appendChild(d); area.scrollTop = area.scrollHeight;
-  // 대화 기록 축적 + 저장 버튼 표시
-  _chatSession.push({ role, text: html.replace(/<[^>]*>/g, '') });
+  const normalized = normalizeChatText(content);
+  area.appendChild(createChatMessage(role, normalized));
+  area.scrollTop = area.scrollHeight;
+  _chatSession.push({ role, text: normalized });
   sessionStorage.setItem(_chatStorageKey, JSON.stringify(_chatSession.slice(-40)));
   syncChatSaveState();
 }
