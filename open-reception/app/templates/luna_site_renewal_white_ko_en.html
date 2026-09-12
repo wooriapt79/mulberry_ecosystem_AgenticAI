@@ -1393,11 +1393,11 @@ body {
       </div>
 
       <!-- 대화 저장 -->
-      <div class="qa-save-bar" id="qaSaveBar" style="display:none; padding:6px 12px; border-top:1px solid var(--border);">
-        <button class="qa-save-btn" id="qaSaveBtn" onclick="saveChatLog()">
-          <span class="lang-ko">💾 대화 저장</span><span class="lang-en" style="display:none;">💾 Save Chat</span>
+      <div class="qa-save-bar" id="qaSaveBar" style="display:flex; align-items:center; padding:6px 12px; border-top:1px solid var(--border);">
+        <button class="qa-save-btn" id="qaSaveBtn" onclick="saveChatLog()" disabled>
+          <span class="lang-ko">현재 대화 저장</span><span class="lang-en" style="display:none;">Save Current Chat</span>
         </button>
-        <span class="qa-save-msg" id="qaSaveMsg" style="font-size:12px; color:var(--text-secondary); margin-left:8px;"></span>
+        <span class="qa-save-msg" id="qaSaveMsg" style="font-size:12px; color:var(--text-secondary); margin-left:8px;">질문과 답변이 완료되면 저장할 수 있습니다.</span>
       </div>
 
       <!-- 채팅 입력 영역 -->
@@ -2297,7 +2297,44 @@ function removeQaFile(i) {
 //   role === 'user' → 오른쪽 사용자 아바타 + 회색 버블
 //   area.scrollTop = area.scrollHeight → 항상 최신 메시지가 보이게 스크롤
 // 세션 대화 기록 (저장용)
-const _chatSession = [];
+const _chatPage = window.location.pathname.includes('wanju') ? 'wanju' : 'inje';
+const _chatStorageKey = 'luna_chat_session_' + _chatPage;
+let _chatSession = [];
+try {
+  const storedSession = JSON.parse(sessionStorage.getItem(_chatStorageKey) || '[]');
+  if (Array.isArray(storedSession)) _chatSession = storedSession.slice(-40);
+} catch (_) {
+  _chatSession = [];
+}
+
+function syncChatSaveState() {
+  const btn = document.getElementById('qaSaveBtn');
+  const msgEl = document.getElementById('qaSaveMsg');
+  const hasExchange = _chatSession.some(m => m.role === 'user') && _chatSession.some(m => m.role === 'luna');
+  if (btn) btn.disabled = !hasExchange;
+  if (msgEl && !hasExchange) {
+    msgEl.textContent = currentLang === 'ko'
+      ? '질문과 답변이 완료되면 저장할 수 있습니다.'
+      : 'Available after a question and answer are complete.';
+  }
+}
+
+function restoreChatSession() {
+  const area = document.getElementById('qaMessages');
+  if (!area || !_chatSession.length) {
+    syncChatSaveState();
+    return;
+  }
+  for (const message of _chatSession) {
+    const d = document.createElement('div');
+    d.className = 'msg ' + message.role;
+    d.innerHTML = `<div class="msg-av">${message.role === 'luna' ? 'L' : 'U'}</div><div class="msg-bub"></div>`;
+    d.querySelector('.msg-bub').textContent = message.text;
+    area.appendChild(d);
+  }
+  area.scrollTop = area.scrollHeight;
+  syncChatSaveState();
+}
 
 function addMsg(role, html) {
   const area = document.getElementById('qaMessages');
@@ -2308,8 +2345,8 @@ function addMsg(role, html) {
   area.appendChild(d); area.scrollTop = area.scrollHeight;
   // 대화 기록 축적 + 저장 버튼 표시
   _chatSession.push({ role, text: html.replace(/<[^>]*>/g, '') });
-  const saveBar = document.getElementById('qaSaveBar');
-  if (saveBar && _chatSession.length >= 2) saveBar.style.display = 'block';
+  sessionStorage.setItem(_chatStorageKey, JSON.stringify(_chatSession.slice(-40)));
+  syncChatSaveState();
 }
 
 // ── 대화 저장 (클라이언트 Blob 다운로드) ───────────────────────────────────
@@ -2351,8 +2388,8 @@ function saveChatLog() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
-  if (msgEl) msgEl.textContent = currentLang === 'ko' ? '✅ 다운로드 완료' : '✅ Downloaded';
-  if (btn) { btn.textContent = currentLang === 'ko' ? '💾 다시 저장' : '💾 Save Again'; btn.disabled = false; }
+  if (msgEl) msgEl.textContent = currentLang === 'ko' ? '다운로드 완료' : 'Downloaded';
+  if (btn) { btn.textContent = currentLang === 'ko' ? '현재 대화 다시 저장' : 'Save Current Chat Again'; btn.disabled = false; }
 }
 
 // ── 타이핑 인디케이터 (점 세 개 애니메이션) ──────────────────────────
@@ -2778,6 +2815,7 @@ function copyDoc() {
 }
 
 // Initialize
+restoreChatSession();
 setLang('ko');
 </script>
 </body>
