@@ -1216,6 +1216,56 @@ body {
 }
 .qa-save-btn:hover { background: var(--purple-light); color: var(--purple); border-color: var(--purple); }
 .qa-save-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* Open Reception capability panel */
+.luna-capability-trigger { border: 0; padding: 0; background: transparent; cursor: pointer; border-radius: 50%; }
+.luna-capability-trigger:focus-visible { outline: 3px solid var(--purple-light); outline-offset: 3px; }
+.capability-link {
+  border: 0; background: transparent; color: var(--purple); padding: 2px 0;
+  font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.capability-link:hover { text-decoration: underline; }
+.capability-modal {
+  position: fixed; inset: 0; z-index: 1200; display: none;
+  align-items: center; justify-content: center; padding: 20px;
+  background: rgba(17, 24, 39, 0.52);
+}
+.capability-modal.active { display: flex; }
+.capability-panel {
+  width: min(680px, 100%); max-height: min(760px, 88vh); overflow-y: auto;
+  background: #ffffff; border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(17, 24, 39, 0.22);
+}
+.capability-header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 18px;
+  padding: 21px 22px; border-bottom: 1px solid var(--border);
+}
+.capability-header h3 { margin: 0 0 5px; color: var(--text-primary); font-size: 18px; }
+.capability-header p { margin: 0; color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.capability-close {
+  border: 1px solid var(--border); border-radius: 8px; background: #ffffff;
+  color: var(--text-secondary); padding: 6px 10px; font-size: 11px; cursor: pointer;
+}
+.capability-body { padding: 20px 22px 24px; }
+.capability-status {
+  border: 1px solid var(--purple-light); border-radius: 11px;
+  background: #faf7ff; padding: 15px 16px; margin-bottom: 20px;
+}
+.capability-status-label { color: var(--purple); font-size: 11px; font-weight: 800; margin-bottom: 5px; }
+.capability-status strong { color: var(--text-primary); font-size: 14px; }
+.capability-intro { color: var(--text-secondary); font-size: 13px; line-height: 1.7; margin-bottom: 17px; }
+.capability-section-title { color: var(--text-primary); font-size: 13px; font-weight: 800; margin-bottom: 8px; }
+.capability-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
+.capability-list li {
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 12px; line-height: 1.5;
+}
+.capability-note { margin-top: 17px; color: var(--text-tertiary); font-size: 11px; line-height: 1.65; }
+@media (max-width: 768px) {
+  .capability-modal { align-items: flex-end; padding: 0; }
+  .capability-panel { width: 100%; max-height: 86vh; border-radius: 18px 18px 0 0; }
+  .capability-header, .capability-body { padding-left: 18px; padding-right: 18px; }
+}
 </style>
 </head>
 <body>
@@ -1231,10 +1281,13 @@ body {
   </div>
 
   <div class="luna-card">
-    <img src="/static/Co_Luna.png" style="width: 240px; height: 240px; border-radius: 50%; object-fit: cover;" />
+    <button class="luna-capability-trigger" type="button" onclick="openCapabilityPanel()" aria-haspopup="dialog">
+      <img src="/static/Co_Luna.png" style="width: 240px; height: 240px; border-radius: 50%; object-fit: cover;" alt="Luna · Open Reception 기능 보기" />
+    </button>
     <div class="luna-name">Luna</div>
     <div class="luna-role"><span class="lang-ko">AI 리셉션 · 연구 리드</span><span class="lang-en" style="display:none;">AI Reception · Research Lead</span></div>
     <div class="luna-status"><span class="lang-ko">ON Mode</span><span class="lang-en" style="display:none;">ON Mode</span></div>
+    <button class="capability-link" type="button" onclick="openCapabilityPanel()"><span class="lang-ko">Open Reception 기능 보기</span><span class="lang-en" style="display:none;">View Open Reception capabilities</span></button>
   </div>
 
   <div class="sb-section-label"><span class="lang-ko">메뉴</span><span class="lang-en" style="display:none;">Menu</span></div>
@@ -1329,6 +1382,38 @@ body {
             <a class="primary" href="/static/AI%20Inje%20Initiative.pdf" download="AI_Inje_Initiative_Whitepaper.pdf"><span class="lang-ko">PDF 다운로드</span><span class="lang-en" style="display:none;">Download PDF</span></a>
           </div>
         </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- Open Reception Capability Panel -->
+  <div class="capability-modal" id="capabilityModal" role="dialog" aria-modal="true" aria-labelledby="capabilityTitle">
+    <div class="capability-panel">
+      <div class="capability-header">
+        <div>
+          <h3 id="capabilityTitle"><span class="lang-ko">Open Reception 기능</span><span class="lang-en" style="display:none;">Open Reception Capabilities</span></h3>
+          <p><span class="lang-ko">질문에서 검토와 실행으로 이어지는 지자체 Reception Gateway</span><span class="lang-en" style="display:none;">A municipal reception gateway from questions to review and action</span></p>
+        </div>
+        <button class="capability-close" type="button" onclick="closeCapabilityPanel()"><span class="lang-ko">닫기</span><span class="lang-en" style="display:none;">Close</span></button>
+      </div>
+      <div class="capability-body">
+        <div class="capability-status">
+          <div class="capability-status-label"><span class="lang-ko">현재 활성</span><span class="lang-en" style="display:none;">Currently active</span></div>
+          <strong><span class="lang-ko">지자체 제안서 Q&amp;A 리셉션</span><span class="lang-en" style="display:none;">Municipal proposal Q&amp;A reception</span></strong>
+        </div>
+        <p class="capability-intro"><span class="lang-ko">Open Reception은 지자체의 안내·접수·검토·Human 연결까지 지원하도록 설계되었습니다.</span><span class="lang-en" style="display:none;">Open Reception is designed to support municipal guidance, intake, review and human handoff.</span></p>
+        <div class="capability-section-title"><span class="lang-ko">설계된 확장 기능</span><span class="lang-en" style="display:none;">Designed extensions</span></div>
+        <ul class="capability-list">
+          <li><span class="lang-ko">질문 의도 자동 분류</span><span class="lang-en" style="display:none;">Question intent classification</span></li>
+          <li><span class="lang-ko">관련 공식 자료 기반 답변과 추가 자료 제공</span><span class="lang-en" style="display:none;">Official-source answers and supporting documents</span></li>
+          <li><span class="lang-ko">미해결 질문의 담당팀 검토 요청</span><span class="lang-en" style="display:none;">Team review requests for unresolved questions</span></li>
+          <li><span class="lang-ko">접수번호 및 처리 상태 확인</span><span class="lang-en" style="display:none;">Reference number and status tracking</span></li>
+          <li><span class="lang-ko">Human Approval</span><span class="lang-en" style="display:none;">Human Approval</span></li>
+          <li><span class="lang-ko">반복 질문의 Column·FAQ 전환</span><span class="lang-en" style="display:none;">Recurring questions converted to Columns and FAQs</span></li>
+          <li><span class="lang-ko">요청 결과의 제안서·정책자료 반영</span><span class="lang-en" style="display:none;">Approved outcomes reflected in proposals and policy materials</span></li>
+          <li><span class="lang-ko">지자체별 데이터·문서 분리</span><span class="lang-en" style="display:none;">Municipality-specific data and document separation</span></li>
+        </ul>
+        <p class="capability-note"><span class="lang-ko">나머지 기능은 지자체 협의와 운영 승인에 따라 단계적으로 적용됩니다.</span><span class="lang-en" style="display:none;">Other capabilities are enabled in phases following municipal consultation and operational approval.</span></p>
       </div>
     </div>
   </div>
@@ -2044,6 +2129,22 @@ function downloadProposal() {
 }
 
 // ── Settings Modal Toggle ──────────────────
+function openCapabilityPanel() {
+  const modal = document.getElementById('capabilityModal');
+  if (!modal) return;
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  const closeButton = modal.querySelector('.capability-close');
+  if (closeButton) closeButton.focus();
+}
+
+function closeCapabilityPanel() {
+  const modal = document.getElementById('capabilityModal');
+  if (!modal) return;
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
 function toggleSettings() {
   const modal = document.getElementById('settingsModal');
   modal.classList.toggle('active');
@@ -3036,6 +3137,14 @@ function copyDoc() {
 // Initialize
 restoreChatSession();
 setLang('ko');
+
+document.addEventListener('click', event => {
+  const modal = document.getElementById('capabilityModal');
+  if (modal && event.target === modal) closeCapabilityPanel();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeCapabilityPanel();
+});
 </script>
 </body>
 </html>
