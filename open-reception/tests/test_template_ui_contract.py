@@ -76,3 +76,16 @@ def test_mobile_report_output_uses_vertical_visible_layout():
         assert ".report-output-panel {\n    flex: 0 0 auto !important;" in html
         assert ".report-preview {\n    flex: 0 0 auto;\n    overflow: visible;" in html
         assert "requestAnimationFrame(() =>" in html
+
+
+def test_chat_answers_use_safe_structured_renderer():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        assert "function normalizeChatText(raw)" in html
+        assert "function renderChatContent(container, raw)" in html
+        assert "function createChatMessage(role, content)" in html
+        assert "appendChatInline(title, heading[1])" in html
+        assert "document.createElement(nextType)" in html
+        assert '<div class="msg-bub">${html}</div>' not in html
+        assert ".msg-bub .msg-section-title" in html
+        assert ".msg-bub p { margin: 0 0 10px; }" in html
