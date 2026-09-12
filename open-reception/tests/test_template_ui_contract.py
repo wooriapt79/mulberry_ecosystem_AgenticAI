@@ -28,3 +28,16 @@ def test_hero_pillars_are_text_only_and_keep_the_origin_statement():
         assert html.count(expected_initiative) == 1
         for title in ("농업·식품", "복지·의료", "안전·포렌식", "공동구매", "AI 에이전트"):
             assert title in html
+
+
+
+def test_chat_save_control_is_text_only_visible_and_session_backed():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        assert 'id="qaSaveBar" style="display:flex' in html
+        assert 'id="qaSaveBtn" onclick="saveChatLog()" disabled' in html
+        assert "현재 대화 저장" in html
+        assert "💾 대화 저장" not in html
+        assert "💾 다시 저장" not in html
+        assert "'luna_chat_session_' + _chatPage" in html
+        assert "restoreChatSession();" in html
