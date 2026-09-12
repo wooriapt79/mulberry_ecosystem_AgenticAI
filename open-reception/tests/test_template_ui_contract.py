@@ -20,6 +20,11 @@ def test_hero_pillars_are_text_only_and_keep_the_origin_statement():
         html = template.read_text(encoding="utf-8")
         assert 'class="hs-icon"' not in html
         assert html.count("이것이 우리의 모든 것의 시작이야.") == 1
-        assert html.count("AI Inje Initiative — 인제만의 AI와 AI Agent 경제 플랫폼.") == 1
+        expected_initiative = (
+            "AI Inje Initiative — 인제만의 AI와 AI Agent 경제 플랫폼."
+            if template.name == "luna_site_renewal_white_ko_en.html"
+            else "AI Wanju Initiative — 완주만의 AI와 AI Agent 경제 플랫폼."
+        )
+        assert html.count(expected_initiative) == 1
         for title in ("농업·식품", "복지·의료", "안전·포렌식", "공동구매", "AI 에이전트"):
             assert title in html
