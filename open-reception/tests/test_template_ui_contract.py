@@ -184,3 +184,10 @@ def test_arka_columns_use_standard_mobile_navigation():
         assert "function toggleNav()" in html
         assert "event.key === 'Escape'" in html
         assert 'class="ham-btn"' not in html
+
+
+def test_inje_proposal_library_panel_has_opaque_white_background():
+    html = TEMPLATES[0].read_text(encoding="utf-8")
+    panel_css = html.split(".proposal-library-panel {", 1)[1].split("}", 1)[0]
+    assert "background: #ffffff;" in panel_css
+    assert "background: var(--bg-primary);" not in panel_css
