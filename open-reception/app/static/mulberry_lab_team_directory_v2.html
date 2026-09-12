@@ -80,6 +80,7 @@
     text-decoration:none; transition:background .15s ease, color .15s ease;
   }
   .nav-panel a:hover{background:rgba(201,162,75,0.16); color:#8a6a1f;}
+  .nav-panel a.directory-home-link{color:var(--purple);border-bottom:1px solid var(--line);margin-bottom:3px;}
 
   section{margin-bottom:44px; scroll-margin-top:20px;}
   .section-head{
@@ -144,6 +145,7 @@
       <span></span><span></span><span></span>
     </button>
     <nav class="nav-panel" id="navPanel">
+      <a class="directory-home-link" id="directoryHomeLink" href="/inje">메인 홈</a>
       <a href="#core-team">핵심 팀</a>
       <a href="#ai-agents">자율 AI 에이전트</a>
       <a href="#partners">연구 협력·지원 환경</a>
@@ -224,7 +226,11 @@
 
 </div>
 <script>
-  const menuBtn = document.getElementById('menuBtn');
+  const sourcePage = new URLSearchParams(window.location.search).get('from') === 'wanju' ? 'wanju' : 'inje';
+const directoryHomeLink = document.getElementById('directoryHomeLink');
+directoryHomeLink.href = sourcePage === 'wanju' ? '/wanju' : '/inje';
+
+const menuBtn = document.getElementById('menuBtn');
   const navPanel = document.getElementById('navPanel');
 
   menuBtn.addEventListener('click', function(e){
