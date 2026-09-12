@@ -1360,10 +1360,10 @@ body {
   <div class="section" id="sec-qa">
     <!-- 탭 -->
     <div class="qa-mode-tabs">
-      <button class="qa-mode-tab active" onclick="setQaMode('chat')">
+      <button class="qa-mode-tab active" onclick="setQaMode('chat', this)">
         <span class="lang-ko">Q&A 채팅</span><span class="lang-en" style="display:none;">Q&A Chat</span>
       </button>
-      <button class="qa-mode-tab" onclick="setQaMode('file')">
+      <button class="qa-mode-tab" onclick="setQaMode('file', this)">
         <span class="lang-ko">파일 분석</span><span class="lang-en" style="display:none;">File Analysis</span>
       </button>
     </div>
@@ -1376,6 +1376,10 @@ body {
         <div class="chat-message">
           <div class="chat-avatar"><img src="/static/Co_Luna.png" alt="Luna"></div>
           <div class="chat-bubble"><span class="lang-ko">안녕하세요! 질문을 남겨주세요.</span><span class="lang-en" style="display:none;">Hi! Leave your question.</span></div>
+        </div>
+        <div style="font-size:11px;color:var(--text-tertiary);padding:0 8px 8px;">
+          <span class="lang-ko">개인정보는 입력하지 마세요. 질문과 답변은 제안서 보완 검토자료로 지역별 분류됩니다.</span>
+          <span class="lang-en" style="display:none;">Do not enter personal information. Questions and answers are classified by region for proposal review.</span>
         </div>
       </div>
 
@@ -2024,12 +2028,12 @@ function insertTopicToChat(element) {
 
 // ── Q&A 탭 전환 ────────────────────────────
 let currentQaMode = 'chat';
-function setQaMode(mode) {
+function setQaMode(mode, tabEl) {
   currentQaMode = mode;
 
   // 탭 활성화
   document.querySelectorAll('.qa-mode-tab').forEach(tab => tab.classList.remove('active'));
-  event.target.classList.add('active');
+  if (tabEl) tabEl.classList.add('active');
 
   // 패널 전환
   if (mode === 'chat') {
@@ -2092,19 +2096,26 @@ function analyzeFile() {
   btn.disabled = true;
   status.textContent = '분석 중...';
 
-  // 백엔드 API 호출 (추후 구현)
-  // POST /api/analyze-file
-  // - file: FormData
-  // - headers: Authorization (backend에서 처리)
+  const formData = new FormData();
+  formData.append('file', analysisFile);
+  formData.append('page', window.location.pathname.includes('wanju') ? 'wanju' : 'inje');
 
-  setTimeout(() => {
-    status.textContent = '';
-    const result = document.getElementById('analysisResultWrap');
-    result.style.display = 'flex';
-    document.getElementById('analysisResultText').textContent = '분석 결과가 여기에 표시됩니다.\n(백엔드 API 연동 후 구현)';
-    btn.disabled = false;
-    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 1500);
+  fetch('/api/analyze-file', { method: 'POST', body: formData })
+    .then(async response => {
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || '분석 요청 실패');
+      const result = document.getElementById('analysisResultWrap');
+      result.style.display = 'flex';
+      document.getElementById('analysisResultText').textContent = data.result || '분석 결과가 없습니다.';
+      status.textContent = data.feedback_id
+        ? '제안서 보완 검토자료로 접수되었습니다.'
+        : (data.status === 'ok' ? '분석은 완료됐지만 검토자료 접수는 재시도가 필요합니다.' : '');
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    })
+    .catch(error => {
+      status.textContent = error.message || '분석 중 오류가 발생했습니다.';
+    })
+    .finally(() => { btn.disabled = false; });
 }
 
 function downloadSummary() {
