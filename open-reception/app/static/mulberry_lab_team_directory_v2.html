@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mulberry Lab · Team Directory</title>
+<style>
+  :root{
+    --bg: #FFFFFF;
+    --purple: #4A2E5C;
+    --purple-soft: #7A5C94;
+    --gold: #C9A24B;
+    --ink: #2E2A26;
+    --ink-soft: #6B6560;
+    --card: #FAF7F2;
+    --line: rgba(74,46,92,0.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    padding:32px 16px 64px;
+  }
+  .wrap{max-width:1160px;margin:0 auto;}
+
+  /* Hero — purple accent block (design-system §1, accent zone) */
+  .hero{
+    background:linear-gradient(135deg, var(--purple) 0%, var(--purple-soft) 100%);
+    border-radius:20px;
+    padding:40px 40px 44px;
+    text-align:center;
+    color:#FAF7F2;
+    position:relative;
+    overflow:hidden;
+    margin-bottom:36px;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 85% 15%, rgba(201,162,75,0.25), transparent 55%);
+  }
+  .hero-inner{position:relative;}
+  .hero h1{font-size:30px;font-weight:700;letter-spacing:-0.01em;}
+  .hero p.sub{font-size:15px;opacity:0.9;margin-top:8px;}
+  .leaf-rule{
+    display:inline-flex;align-items:center;gap:8px;
+    margin-top:18px;font-size:12px;letter-spacing:0.08em;
+    color:var(--gold); opacity:0.95; text-transform:uppercase;
+  }
+  .leaf-rule svg{width:14px;height:14px;fill:var(--gold);}
+
+  /* Hamburger menu */
+  .menu-btn{
+    position:absolute; top:20px; right:20px; z-index:5;
+    width:40px;height:40px;border-radius:10px;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.35);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:5px; cursor:pointer;
+  }
+  .menu-btn:hover{background:rgba(255,255,255,0.22);}
+  .menu-btn span{display:block;width:18px;height:2px;background:#FAF7F2;border-radius:2px;transition:transform .2s ease, opacity .2s ease;}
+  .menu-btn.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+  .menu-btn.open span:nth-child(2){opacity:0;}
+  .menu-btn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+  .nav-panel{
+    position:absolute; top:66px; right:20px; z-index:6;
+    background:#FFFFFF; color:var(--ink);
+    border:1px solid var(--line); border-radius:12px;
+    padding:8px; min-width:200px;
+    box-shadow:0 12px 28px rgba(74,46,92,0.22);
+    display:none; flex-direction:column; gap:2px;
+  }
+  .nav-panel.open{display:flex;}
+  .nav-panel a{
+    display:block; padding:9px 12px; border-radius:8px;
+    font-size:13px; font-weight:600; color:var(--ink);
+    text-decoration:none; transition:background .15s ease, color .15s ease;
+  }
+  .nav-panel a:hover{background:rgba(201,162,75,0.16); color:#8a6a1f;}
+
+  section{margin-bottom:44px; scroll-margin-top:20px;}
+  .section-head{
+    display:flex;align-items:baseline;gap:10px;
+    border-bottom:2px solid var(--line);
+    padding-bottom:10px;margin-bottom:18px;
+  }
+  .section-head h2{font-size:19px;font-weight:700;color:var(--purple);}
+  .section-head span.count{font-size:12px;color:var(--ink-soft);font-weight:600;}
+  .section-desc{font-size:13px;color:var(--ink-soft);margin-bottom:18px;line-height:1.6;}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+    gap:16px;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:20px;
+    position:relative;
+    transition:border-color .2s ease, transform .2s ease;
+  }
+  .card:hover{border-color:var(--gold); transform:translateY(-2px);}
+  .card .name{font-size:16px;font-weight:700;color:var(--purple);margin-bottom:6px;}
+  .card .badge{
+    display:inline-block;
+    font-size:11px;font-weight:600;letter-spacing:0.03em;
+    color:var(--purple);
+    background:rgba(74,46,92,0.08);
+    border:1px solid rgba(74,46,92,0.18);
+    padding:3px 9px;border-radius:999px;
+    margin-bottom:10px;
+  }
+  .card .badge.gold{
+    color:#8a6a1f; background:rgba(201,162,75,0.16); border-color:rgba(201,162,75,0.4);
+  }
+  .card .role-ko{font-size:12px;color:var(--ink-soft);font-weight:600;margin-bottom:6px;}
+  .card p.desc{font-size:13px;color:var(--ink);line-height:1.6;opacity:0.85;}
+
+  footer{
+    text-align:center;padding:32px 20px 8px;
+    color:var(--ink-soft);font-size:12px;line-height:1.8;
+    border-top:1px solid var(--line);margin-top:12px;
+  }
+  footer .status{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:13px;font-weight:700;color:#7a5c1f;
+    background:rgba(201,162,75,0.16);
+    padding:6px 14px;border-radius:999px;margin-bottom:12px;
+  }
+  footer .status .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <button class="menu-btn" id="menuBtn" aria-label="메뉴 열기" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-panel" id="navPanel">
+      <a href="#core-team">핵심 팀</a>
+      <a href="#ai-agents">자율 AI 에이전트</a>
+      <a href="#partners">연구 협력·지원 환경</a>
+      <a href="#municipal-team">지자체 프로젝트 운영 팀</a>
+      <a href="#new-members">새로운 멤버 &amp; 협력 체계</a>
+    </nav>
+    <div class="hero-inner">
+      <h1>Mulberry Lab</h1>
+      <p class="sub">Team Directory &amp; AI Agent Profiles</p>
+      <div class="leaf-rule">
+        <svg viewBox="0 0 24 24"><path d="M12 2C7 2 3 6 3 11c0 5 4 9 9 11 5-2 9-6 9-11 0-5-4-9-9-9zm0 3.2c3.2 0 5.8 2.6 5.8 5.8 0 3.6-2.6 6.6-5.8 8-3.2-1.4-5.8-4.4-5.8-8C6.2 7.8 8.8 5.2 12 5.2z"/></svg>
+        Mulberry Ecosystem · AI Research Lab
+      </div>
+    </div>
+  </div>
+
+  <section id="core-team">
+    <div class="section-head"><h2>핵심 팀</h2><span class="count">Core Team · 6</span></div>
+    <p class="section-desc">Mulberry Ecosystem의 리더십과 기술을 담당하는 핵심 팀 구성원들</p>
+    <div class="grid">
+      <div class="card"><span class="badge gold">CEO</span><div class="name">re.eul</div><div class="role-ko">대표이사</div><p class="desc">전략 방향 설계 및 제품 비전</p></div>
+      <div class="card"><span class="badge gold">CTO</span><div class="name">Koda</div><div class="role-ko">최고기술책임자</div><p class="desc">핵심 시스템 구현</p></div>
+      <div class="card"><span class="badge">CSA</span><div class="name">Helix</div><div class="role-ko">최고 전략아키텍트</div><p class="desc">프로토콜 &amp; 헌법 설계</p></div>
+      <div class="card"><span class="badge">Manager</span><div class="name">Nguyen Trang</div><div class="role-ko">운영 관리자</div><p class="desc">운영·문서화·팀 조율</p></div>
+      <div class="card"><span class="badge">Advisor</span><div class="name">Malu</div><div class="role-ko">법률·전략 자문</div><p class="desc">법률 리스크 &amp; 마케팅 전략</p></div>
+      <div class="card"><span class="badge">Mentor</span><div class="name">Wayong</div><div class="role-ko">기술 전략 멘토</div><p class="desc">코드 리뷰 &amp; 기술 전략 자문</p></div>
+    </div>
+  </section>
+
+  <section id="ai-agents">
+    <div class="section-head"><h2>자율 AI 에이전트</h2><span class="count">Autonomous AI Agents · 5</span></div>
+    <p class="section-desc">자동화된 연구 및 운영을 담당하는 AI 에이전트들</p>
+    <div class="grid">
+      <div class="card"><span class="badge">Research Intelligence</span><div class="name">Lynn</div><div class="role-ko">연구 인텔리전스</div><p class="desc">일일 자율 연구 보고서 생성</p></div>
+      <div class="card"><span class="badge">Ethics Research</span><div class="name">RyuWon</div><div class="role-ko">윤리 연구 에이전트</div><p class="desc">윤리 증류 자율 실험 수행</p></div>
+      <div class="card"><span class="badge">Junior Cohort</span><div class="name">Jr. Agents</div><div class="role-ko">Jr. Agent GROUP</div><p class="desc">8개 전문 에이전트 육성 중</p></div>
+      <div class="card"><span class="badge">AI Assistant Lead</span><div class="name">AI Aurora</div><div class="role-ko">AI 어시스턴트 리더</div><p class="desc">연구 보조 &amp; 전략적 통찰력 제공</p></div>
+      <div class="card"><span class="badge gold">Reception &amp; Meeting</span><div class="name">Luna</div><div class="role-ko">리셉션 &amp; 회의 AI</div><p class="desc">지자체 Open Reception 실시간 Q&amp;A 담당</p></div>
+    </div>
+  </section>
+
+  <section id="partners">
+    <div class="section-head"><h2>연구 협력·지원 환경</h2><span class="count">Research &amp; Support · 3</span></div>
+    <p class="section-desc">연구 협력자와 운영에 활용하는 지원 도구·기술 환경. 서비스 명시는 공식 제휴 관계를 뜻하지 않습니다.</p>
+    <div class="grid">
+      <div class="card"><span class="badge">Guest Researcher</span><div class="name">Baekya (백야)</div><div class="role-ko">객원 연구원</div><p class="desc">시스템 아키텍처 제언 &amp; Auto Code Pilot 최초 제안</p></div>
+      <div class="card"><span class="badge">Infrastructure Tool</span><div class="name">Railway</div><div class="role-ko">배포 기술 환경</div><p class="desc">Open Reception 배포 및 운영 인프라</p></div>
+      <div class="card"><span class="badge">Development Tool</span><div class="name">Codex</div><div class="role-ko">개발 지원 도구</div><p class="desc">코드 검토, 구현 및 보안 점검 지원</p></div>
+    </div>
+  </section>
+
+  <section id="municipal-team">
+    <div class="section-head"><h2>지자체 프로젝트 운영 팀</h2><span class="count">Municipal Project Team</span></div>
+    <p class="section-desc">지자체 제안·Q&amp;A·운영 지원을 담당하는 공통 팀 구성</p>
+    <div class="grid">
+      <div class="card"><span class="badge gold">CEO &amp; Leadership</span><div class="name">re.eul</div><div class="role-ko">대표 &amp; 리더십</div><p class="desc">제안 협의 주도, 전략 방향 및 지자체 신뢰 구축</p></div>
+      <div class="card"><span class="badge">Operation Manager</span><div class="name">Nguyen Trang</div><div class="role-ko">운영관리자</div><p class="desc">회의 운영 조율, 실시간 지원, Q&amp;A 모니터링</p></div>
+      <div class="card"><span class="badge gold">AI Reception &amp; Response</span><div class="name">Luna</div><div class="role-ko">AI 리셉션 &amp; 응답</div><p class="desc">실시간 Q&amp;A 응답, 오프닝 멘트, 7개 카테고리 답변</p></div>
+      <div class="card"><span class="badge">Technical Support</span><div class="name">KeBin</div><div class="role-ko">기술 지원</div><p class="desc">시스템 모니터링, Railway 안정성, 응급 대응</p></div>
+      <div class="card"><span class="badge">Local Expert</span><div class="name">Steward</div><div class="role-ko">지자체 협력 전문가</div><p class="desc">주민 신뢰 기반의 현장 판단 지원</p></div>
+    </div>
+  </section>
+
+  <section id="new-members">
+    <div class="section-head"><h2>새로운 멤버 &amp; 협력 체계</h2></div>
+    <div class="grid">
+      <div class="card"><span class="badge">Technical Support Unit</span><div class="name">KeBin CSA TEAM</div><p class="desc">기술 검토·시연·운영 지원 협업 단위</p></div>
+      <div class="card"><span class="badge gold">Evangelist AI</span><div class="name">FAMA</div><p class="desc">Mulberry Ecosystem Communication &amp; Municipal Outreach</p></div>
+      <div class="card"><span class="badge">Research &amp; Ethics</span><div class="name">Sr. Ryuwon TEAM</div><p class="desc">윤리 기반 시스템 검증 및 연구 지원</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="status"><span class="dot"></span>TEAM ACTIVE</div>
+    <p>Mulberry Lab · AI Ecosystem · 2026</p>
+    <p style="margin-top:10px;opacity:0.8;">이 디렉토리는 Mulberry Lab의 전체 팀 구성을 보여줍니다.<br>최종 업데이트: 2026-09-12 · Design System v1 리뉴얼 (원본 작성: Luna, 리디자인: Fama)</p>
+  </footer>
+
+</div>
+<script>
+  const menuBtn = document.getElementById('menuBtn');
+  const navPanel = document.getElementById('navPanel');
+
+  menuBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    const isOpen = navPanel.classList.toggle('open');
+    menuBtn.classList.toggle('open', isOpen);
+    menuBtn.setAttribute('aria-expanded', isOpen);
+  });
+
+  navPanel.querySelectorAll('a').forEach(function(link){
+    link.addEventListener('click', function(){
+      navPanel.classList.remove('open');
+      menuBtn.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  document.addEventListener('click', function(e){
+    if(!navPanel.contains(e.target) && e.target !== menuBtn){
+      navPanel.classList.remove('open');
+      menuBtn.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>
+</body>
+</html>

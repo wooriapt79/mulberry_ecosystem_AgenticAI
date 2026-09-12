@@ -89,3 +89,25 @@ def test_chat_answers_use_safe_structured_renderer():
         assert '<div class="msg-bub">${html}</div>' not in html
         assert ".msg-bub .msg-section-title" in html
         assert ".msg-bub p { margin: 0 0 10px; }" in html
+
+
+def test_sidebar_is_compact_and_team_footer_is_text_only():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        assert "width: 190px; height: 190px;" in html
+        assert "overflow-y: auto; min-height: 150px;" in html
+        assert 'class="team-members-text">Luna · Trang · KODA · FAMA</div>' in html
+        assert 'class="team-pill ' not in html
+        assert 'href="/static/mulberry_lab_team_directory_v2.html"' in html
+
+
+def test_team_directory_uses_municipal_language_and_no_external_font():
+    directory = Path(__file__).parents[1] / "app" / "static" / "mulberry_lab_team_directory_v2.html"
+    html = directory.read_text(encoding="utf-8")
+    assert "지자체 프로젝트 운영 팀" in html
+    assert "지자체 제안·Q&amp;A·운영 지원" in html
+    assert "지자체 Open Reception 실시간 Q&amp;A 담당" in html
+    assert "인제 회의 핵심 팀" not in html
+    assert "외부 연구 파트너" not in html
+    assert "공식 제휴 관계를 뜻하지 않습니다." in html
+    assert "cdn.jsdelivr.net" not in html
