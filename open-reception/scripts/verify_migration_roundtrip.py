@@ -52,4 +52,5 @@ with engine.connect() as connection:
     )).scalar_one()
 assert missing_timestamp_count == 0
 assert backfill_count == passport_count
-assert revision == "0002_v04"
+assert "proposal_feedback" in inspect(engine).get_table_names()
+assert revision == "0003_feedback"
