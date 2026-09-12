@@ -87,6 +87,15 @@ Reception Core v0.1에서는 익명 Visitor 흐름을 별도로 추가하고 있
 - `GET /admin/audit/verify`
 - `POST /admin/kill-switch`
 
+### 지역 제안서 Q&A·파일 분석
+
+- `POST /api/chat` — 인제·완주 Summary를 기준으로 답변하고 제안서 검토자료를 지역별 접수
+- `POST /api/analyze-file` — 텍스트 파일을 해당 지역 Summary와 비교하여 보완 후보 추출
+- `GET /api/proposal-feedback` — 권한 있는 검토자가 지역·상태별 접수자료 조회
+- `PATCH /api/proposal-feedback/{feedback_id}` — `received → reviewing → incorporated/deferred` 상태 관리
+
+Q&A는 질문과 추가·변경 요청을 구분하고 예산·일정·KPI·거버넌스·근거자료 카테고리로 분류합니다. 파일 분석은 `.txt`, `.md`, `.csv`, `.html`만 허용하며 2MB를 넘는 파일은 거부합니다. 업로드 파일 원문과 파일명은 DB에 저장하지 않고 분석 결과만 제안서 검토자료로 접수합니다. 개인정보는 요청하지 않으며 화면에서도 입력하지 않도록 안내합니다.
+
 Reception Core의 Case API는 PR #20 이후 별도 작업 묶음에서 추가합니다. 현재 도메인 계약을 공개 API로 오인하면 안 됩니다.
 
 ## Matching v0.4 안전 기준
