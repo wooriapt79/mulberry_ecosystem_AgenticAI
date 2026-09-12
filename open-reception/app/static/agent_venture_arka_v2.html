@@ -137,53 +137,44 @@ aside.rail a.item:hover { color: var(--luna); }
 }
 footer { margin-top: 36px; font-size: 12px; color: var(--dim); }
 
-/* Mobile hamburger */
-.ham-btn {
+/* Standard Column mobile navigation */
+.menu {
   display: none;
   position: fixed;
-  top: 12px; right: 16px;
+  right: 16px; bottom: 16px;
   z-index: 1010;
-  background: var(--luna);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  width: 40px; height: 40px;
-  font-size: 20px;
+  width: 46px; height: 46px;
+  border: 0; border-radius: 50%;
+  background: var(--luna); color: #fff;
+  font-size: 20px; line-height: 1;
   cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
 }
 .nav-overlay {
   display: none;
-  position: fixed;
-  inset: 0;
+  position: fixed; inset: 0;
   background: rgba(0,0,0,.35);
   z-index: 950;
 }
 @media (max-width: 899px) {
-  .ham-btn { display: flex; }
+  .menu { display: block; }
   aside.rail {
     position: fixed !important;
-    top: 0; left: 0; bottom: 0;
-    width: 240px;
-    z-index: 960;
+    top: 0; left: -290px; bottom: 0;
+    width: 280px; z-index: 960;
     background: var(--bg);
     padding: 52px 20px 40px;
     overflow-y: auto;
-    transform: translateX(-100%);
-    transition: transform .25s ease;
+    transition: left .2s ease;
     box-shadow: 2px 0 12px rgba(0,0,0,.12);
-    border-bottom: none;
-    border-right: 1px solid var(--line);
+    border: 0; border-right: 1px solid var(--line);
   }
-  aside.rail.nav-open { transform: translateX(0); }
-  .nav-overlay.nav-open { display: block; }
+  body.nav-open aside.rail { left: 0; }
+  body.nav-open .nav-overlay { display: block; }
 }
 </style>
 </head>
 <body id="top">
-<button class="ham-btn" id="hamBtn" aria-label="메뉴 열기">☰</button>
+<button class="menu" id="menuBtn" aria-label="목차 열기" aria-expanded="false">☰</button>
 <div class="nav-overlay" id="navOverlay"></div>
 <div class="top">
     <div class="brand">Mulberry Lab</div>
@@ -313,30 +304,30 @@ footer { margin-top: 36px; font-size: 12px; color: var(--dim); }
   </main>
 </div>
 <script>
-const hamBtn = document.getElementById('hamBtn');
+const menuBtn = document.getElementById('menuBtn');
 const navOverlay = document.getElementById('navOverlay');
 const railEl = document.querySelector('aside.rail');
 
 function openNav() {
-  railEl.classList.add('nav-open');
-  navOverlay.classList.add('nav-open');
-  hamBtn.textContent = '✕';
-  hamBtn.setAttribute('aria-label', '메뉴 닫기');
+  document.body.classList.add('nav-open');
+  menuBtn.setAttribute('aria-expanded', 'true');
 }
 function closeNav() {
-  railEl.classList.remove('nav-open');
-  navOverlay.classList.remove('nav-open');
-  hamBtn.textContent = '☰';
-  hamBtn.setAttribute('aria-label', '메뉴 열기');
+  document.body.classList.remove('nav-open');
+  menuBtn.setAttribute('aria-expanded', 'false');
 }
-hamBtn.addEventListener('click', () => railEl.classList.contains('nav-open') ? closeNav() : openNav());
+function toggleNav() {
+  document.body.classList.contains('nav-open') ? closeNav() : openNav();
+}
+menuBtn.addEventListener('click', toggleNav);
 navOverlay.addEventListener('click', closeNav);
-
-// 사이드바 링크 클릭시 메뉴 닫기
-railEl.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', () => {
+railEl.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
     if (window.innerWidth < 900) closeNav();
   });
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') closeNav();
 });
 </script>
 </body>

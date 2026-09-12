@@ -169,3 +169,25 @@ def test_column_menu_lists_arka_and_kebin_once():
         assert html.count("KeBin Column <small") == 1
         assert "AI 경제와 Agent Venture" in html
         assert "AI 시대의 지자체 경제용어" in html
+
+
+def test_arka_columns_use_standard_mobile_navigation():
+    static_dir = Path(__file__).parents[1] / "app" / "static"
+    for name in ("agent_venture_arka_v2.html", "agent_wanju_venture_arka_v2.html"):
+        html = (static_dir / name).read_text(encoding="utf-8")
+        assert 'class="menu" id="menuBtn"' in html
+        assert "right: 16px; bottom: 16px;" in html
+        assert "width: 46px; height: 46px;" in html
+        assert "border: 0; border-radius: 50%;" in html
+        assert "width: 280px; z-index: 960;" in html
+        assert "body.nav-open aside.rail { left: 0; }" in html
+        assert "function toggleNav()" in html
+        assert "event.key === 'Escape'" in html
+        assert 'class="ham-btn"' not in html
+
+
+def test_inje_proposal_library_panel_has_opaque_white_background():
+    html = TEMPLATES[0].read_text(encoding="utf-8")
+    panel_css = html.split(".proposal-library-panel {", 1)[1].split("}", 1)[0]
+    assert "background: #ffffff;" in panel_css
+    assert "background: var(--bg-primary);" not in panel_css
