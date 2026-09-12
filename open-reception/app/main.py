@@ -6,6 +6,7 @@ from functools import lru_cache
 from html.parser import HTMLParser
 import json
 import os
+import re
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Literal
@@ -13,7 +14,7 @@ from uuid import uuid4
 
 from fastapi.staticfiles import StaticFiles
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint, case, create_engine, select, update
@@ -244,7 +245,65 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 _TEMPLATES_DIR = Path(__file__).parent / "templates"
 _templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
 
-# Demo router ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ active only when DEMO_MODE env var is set
+_HTML_COMMENT_RE = re.compile(r"<!--(?!\[if\b).*?-->", re.IGNORECASE | re.DOTALL)
+_STYLE_BLOCK_RE = re.compile(r"(<style\b[^>]*>)(.*?)(</style>)", re.IGNORECASE | re.DOTALL)
+_SCRIPT_BLOCK_RE = re.compile(r"(<script\b[^>]*>)(.*?)(</script>)", re.IGNORECASE | re.DOTALL)
+_CSS_COMMENT_RE = re.compile(r"/\*.*?\*/", re.DOTALL)
+_JS_FULL_LINE_COMMENT_RE = re.compile(r"(?m)^[ \t]*//[^\n]*(?:\n|$)")
+
+
+def _compact_style_block(match: re.Match[str]) -> str:
+    css = _CSS_COMMENT_RE.sub("", match.group(2))
+    css = re.sub(r"\s+", " ", css)
+    css = re.sub(r"\s*([{}:;,])\s*", r"\1", css)
+    return f"{match.group(1)}{css.strip()}{match.group(3)}"
+
+
+def _compact_script_block(match: re.Match[str]) -> str:
+    javascript = _JS_FULL_LINE_COMMENT_RE.sub("", match.group(2))
+    javascript = "\n".join(
+        line.rstrip() for line in javascript.splitlines() if line.strip()
+    )
+    return f"{match.group(1)}{javascript}{match.group(3)}"
+
+
+@lru_cache(maxsize=32)
+def prepare_public_html(source: str) -> str:
+    """Remove deployment-only notes and safely compact public HTML responses."""
+    compacted = _HTML_COMMENT_RE.sub("", source)
+    compacted = _STYLE_BLOCK_RE.sub(_compact_style_block, compacted)
+    compacted = _SCRIPT_BLOCK_RE.sub(_compact_script_block, compacted)
+    compacted = re.sub(r"[ \t]+\n", "\n", compacted)
+    compacted = re.sub(r"\n{2,}", "\n", compacted)
+    return compacted.strip()
+
+
+@app.middleware("http")
+async def compact_public_html_response(request: Request, call_next):
+    response = await call_next(request)
+    content_type = response.headers.get("content-type", "")
+    if request.method != "GET" or "text/html" not in content_type.lower():
+        return response
+
+    parts: list[bytes] = []
+    async for chunk in response.body_iterator:
+        parts.append(chunk.encode("utf-8") if isinstance(chunk, str) else chunk)
+
+    public_html = prepare_public_html(b"".join(parts).decode("utf-8"))
+    headers = {
+        key: value
+        for key, value in response.headers.items()
+        if key.lower() not in {"content-length", "content-type", "content-encoding", "etag"}
+    }
+    return Response(
+        content=public_html,
+        status_code=response.status_code,
+        headers=headers,
+        media_type="text/html",
+        background=response.background,
+    )
+
+
 if os.getenv("DEMO_MODE", "").lower() in {"1", "true", "yes"}:
     from app.routers.demo import router as _demo_router
     app.include_router(_demo_router)
@@ -1221,7 +1280,7 @@ async def analyze_file(
 ):
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
     if not api_key:
-        return {"result": "API 키가 설정되지 않았습니다. 관리자에게 문의해 주세요.", "status": "no_key"}
+        return {"result": "문서 분석 서비스가 준비 중입니다. 잠시 후 다시 시도해 주세요.", "status": "no_key"}
 
     # 파일 크기 제한 (2MB)
     content = await file.read()
