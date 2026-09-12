@@ -223,3 +223,17 @@ def test_mobile_menu_button_and_proposal_divider_are_clear():
         proposal_css = html.split(".proposal-section {", 1)[1].split("}", 1)[0]
         assert "padding: 8px 0 32px;" in proposal_css
         assert "border-bottom: 1px solid #d1d5db;" in proposal_css
+
+
+def test_team_directory_home_link_returns_to_source_municipality():
+    inje = TEMPLATES[0].read_text(encoding="utf-8")
+    wanju = TEMPLATES[1].read_text(encoding="utf-8")
+    assert 'href="/static/mulberry_lab_team_directory_v2.html?from=inje"' in inje
+    assert 'href="/static/mulberry_lab_team_directory_v2.html?from=wanju"' in wanju
+    assert "?from=wanju" not in inje
+    assert "?from=inje" not in wanju
+
+    directory = Path(__file__).parents[1] / "app" / "static" / "mulberry_lab_team_directory_v2.html"
+    html = directory.read_text(encoding="utf-8")
+    assert 'id="directoryHomeLink" href="/inje">메인 홈</a>' in html
+    assert "sourcePage === 'wanju' ? '/wanju' : '/inje'" in html
