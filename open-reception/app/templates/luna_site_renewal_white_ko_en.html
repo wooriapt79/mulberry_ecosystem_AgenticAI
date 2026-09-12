@@ -393,21 +393,69 @@ body {
 /* ══ PROPOSAL DOWNLOAD SECTION ══════════════════════════ */
 .proposal-section {
   margin: 32px 48px;
-  background: none;
-  border: none;
-  border-radius: 0; padding: 8px 0;
+  padding: 8px 0;
 }
-.proposal-card {
-  text-align: center;
-}
+.proposal-card { text-align: center; }
 .prop-icon { display: none; }
 .prop-content { flex: 1; }
 .prop-title { font-size: 16px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px; }
 .prop-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
 .prop-meta { font-size: 11px; color: var(--text-tertiary); }
-.prop-btn { display: none; }
-.download-btn { display: none; }
-.download-btn:hover {}
+.prop-btn { margin-top: 14px; }
+.download-btn {
+  border: 1px solid var(--purple); border-radius: 9px; padding: 10px 18px;
+  background: var(--purple); color: white; cursor: pointer; font-size: 12px; font-weight: 700;
+}
+.download-btn:hover { opacity: 0.9; }
+.proposal-library {
+  position: fixed; inset: 0; z-index: 1100; display: none;
+  align-items: center; justify-content: center; padding: 20px;
+  background: rgba(17, 24, 39, 0.48);
+}
+.proposal-library.active { display: flex; }
+.proposal-library-panel {
+  width: min(680px, 100%); max-height: min(720px, 88vh); overflow-y: auto;
+  background: var(--bg-primary); border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(17, 24, 39, 0.2);
+}
+.proposal-library-header {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+  padding: 20px 22px; border-bottom: 1px solid var(--border);
+}
+.proposal-library-header h3 { font-size: 18px; color: var(--text-primary); margin-bottom: 5px; }
+.proposal-library-header p { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+.proposal-library-close {
+  border: 0; background: transparent; color: var(--text-secondary);
+  font-size: 20px; line-height: 1; cursor: pointer; padding: 3px;
+}
+.proposal-library-list { padding: 10px 22px 22px; }
+.proposal-document {
+  padding: 18px 0; border-bottom: 1px solid var(--border);
+}
+.proposal-document:last-child { border-bottom: 0; }
+.proposal-document-label {
+  display: inline-block; margin-bottom: 7px; color: var(--purple);
+  font-size: 11px; font-weight: 800;
+}
+.proposal-document h4 { font-size: 15px; color: var(--text-primary); margin-bottom: 6px; }
+.proposal-document p { font-size: 12px; color: var(--text-secondary); line-height: 1.65; }
+.proposal-document-meta { margin-top: 8px; font-size: 11px; color: var(--text-tertiary); }
+.proposal-document-actions { display: flex; gap: 8px; margin-top: 13px; }
+.proposal-document-actions a {
+  display: inline-block; padding: 8px 13px; border-radius: 8px;
+  border: 1px solid var(--border); color: var(--text-primary);
+  background: var(--bg-secondary); text-decoration: none; font-size: 12px; font-weight: 700;
+}
+.proposal-document-actions a.primary { background: var(--purple); border-color: var(--purple); color: white; }
+@media (max-width: 768px) {
+  .proposal-section { margin: 24px 18px; }
+  .proposal-library { align-items: flex-end; padding: 0; }
+  .proposal-library-panel {
+    width: 100%; max-height: 84vh; border-radius: 18px 18px 0 0;
+  }
+  .proposal-library-header, .proposal-library-list { padding-left: 18px; padding-right: 18px; }
+  .proposal-document-actions a { flex: 1; text-align: center; }
+}
 
 /* ══ FILE UPLOAD SECTION ══════════════════════════════ */
 .upload-section {
@@ -1255,6 +1303,40 @@ body {
     <button class="topbar-settings" onclick="toggleSettings()" title="API 설정">⚙️</button>
   </div>
 
+  <!-- Proposal Library -->
+  <div class="proposal-library" id="proposalLibrary" role="dialog" aria-modal="true" aria-labelledby="proposalLibraryTitle">
+    <div class="proposal-library-panel">
+      <div class="proposal-library-header">
+        <div>
+          <h3 id="proposalLibraryTitle"><span class="lang-ko">AI 인제 이니셔티브 자료</span><span class="lang-en" style="display:none;">AI Inje Initiative Documents</span></h3>
+          <p><span class="lang-ko">요약 자료를 먼저 검토한 뒤 필요하면 기술·백서를 확인하세요.</span><span class="lang-en" style="display:none;">Start with the proposal brief, then review the technical white paper if needed.</span></p>
+        </div>
+        <button class="proposal-library-close" type="button" onclick="closeProposalLibrary()" aria-label="닫기">×</button>
+      </div>
+      <div class="proposal-library-list">
+        <article class="proposal-document">
+          <span class="proposal-document-label"><span class="lang-ko">먼저 읽기</span><span class="lang-en" style="display:none;">Start here</span></span>
+          <h4><span class="lang-ko">제안 설명 자료</span><span class="lang-en" style="display:none;">Proposal Brief</span></h4>
+          <p><span class="lang-ko">사업 배경, 목표와 운영 구조를 빠르게 검토하는 설명 자료입니다.</span><span class="lang-en" style="display:none;">A concise overview of the background, objectives and operating model.</span></p>
+          <div class="proposal-document-meta">PDF · 8.45 MB · Summary v15</div>
+          <div class="proposal-document-actions">
+            <a href="/static/AI_Inje_Initiative_Summary_v15.pdf" target="_blank" rel="noopener"><span class="lang-ko">미리보기</span><span class="lang-en" style="display:none;">Preview</span></a>
+            <a class="primary" href="/static/AI_Inje_Initiative_Summary_v15.pdf" download><span class="lang-ko">PDF 다운로드</span><span class="lang-en" style="display:none;">Download PDF</span></a>
+          </div>
+        </article>
+        <article class="proposal-document">
+          <h4><span class="lang-ko">기술·백서</span><span class="lang-en" style="display:none;">Technical White Paper</span></h4>
+          <p><span class="lang-ko">AI Agent 구조, 기술 체계와 운영 원칙을 담은 상세 문서입니다.</span><span class="lang-en" style="display:none;">Technical architecture, AI Agent framework and operating principles.</span></p>
+          <div class="proposal-document-meta">PDF · 1.02 MB</div>
+          <div class="proposal-document-actions">
+            <a href="/static/AI%20Inje%20Initiative.pdf" target="_blank" rel="noopener"><span class="lang-ko">미리보기</span><span class="lang-en" style="display:none;">Preview</span></a>
+            <a class="primary" href="/static/AI%20Inje%20Initiative.pdf" download="AI_Inje_Initiative_Whitepaper.pdf"><span class="lang-ko">PDF 다운로드</span><span class="lang-en" style="display:none;">Download PDF</span></a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+
   <!-- Settings Modal -->
   <div class="settings-modal" id="settingsModal">
     <div class="settings-panel">
@@ -1362,15 +1444,14 @@ body {
     <!-- Proposal Download -->
     <div class="proposal-section">
       <div class="proposal-card">
-        <div class="prop-icon">📄</div>
         <div class="prop-content">
-          <div class="prop-title"><span class="lang-ko">AI 인제 이니셔티브 제안서</span><span class="lang-en" style="display:none;">AI Inje Initiative Proposal</span></div>
-          <div class="prop-desc"><span class="lang-ko">전체 프로젝트 개요, 기술 명세, 예산 및 일정</span><span class="lang-en" style="display:none;">Complete project overview, technical specs, budget & timeline</span></div>
-          <div class="prop-meta"><span class="lang-ko">v3.2 · PDF · 26 pages</span><span class="lang-en" style="display:none;">v3.2 · PDF · 26 pages</span></div>
+          <div class="prop-title"><span class="lang-ko">AI 인제 이니셔티브 자료</span><span class="lang-en" style="display:none;">AI Inje Initiative Documents</span></div>
+          <div class="prop-desc"><span class="lang-ko">제안 설명 자료와 기술·백서를 확인할 수 있습니다.</span><span class="lang-en" style="display:none;">Review the proposal brief and technical white paper.</span></div>
+          <div class="prop-meta"><span class="lang-ko">공개 문서 · PDF 2종</span><span class="lang-en" style="display:none;">Public documents · 2 PDFs</span></div>
         </div>
         <div class="prop-btn">
-          <button class="download-btn" onclick="downloadProposal()">
-            <span class="lang-ko">📥 다운로드</span><span class="lang-en" style="display:none;">📥 Download</span>
+          <button class="download-btn" onclick="openProposalLibrary()" aria-haspopup="dialog">
+            <span class="lang-ko">자료 보기·다운로드</span><span class="lang-en" style="display:none;">View and download</span>
           </button>
         </div>
       </div>
@@ -1946,11 +2027,24 @@ function updateMobileNav(el) {
 }
 
 // ── Download Proposal ──────────────────────
+function openProposalLibrary() {
+  const modal = document.getElementById('proposalLibrary');
+  if (!modal) return;
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  const closeButton = modal.querySelector('.proposal-library-close');
+  if (closeButton) closeButton.focus();
+}
+
+function closeProposalLibrary() {
+  const modal = document.getElementById('proposalLibrary');
+  if (!modal) return;
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
 function downloadProposal() {
-  alert(currentLang === 'ko' ? '📥 제안서 다운로드 준비 중입니다.\n(Railway 연동 대기)' : '📥 Proposal download in preparation.\n(Awaiting Railway integration)');
-  // TODO: Railway API 연동 후 실제 PDF 다운로드 구현
-  // const url = '/api/download/proposal';
-  // window.open(url, '_blank');
+  openProposalLibrary();
 }
 
 // ── Settings Modal Toggle ──────────────────
@@ -1985,10 +2079,13 @@ function toggleSettings() {
 
 // 모달 외부 클릭시 닫기
 document.addEventListener('click', (e) => {
-  const modal = document.getElementById('settingsModal');
-  if (modal && e.target === modal) {
-    modal.classList.remove('active');
-  }
+  const settingsModal = document.getElementById('settingsModal');
+  if (settingsModal && e.target === settingsModal) settingsModal.classList.remove('active');
+  const proposalModal = document.getElementById('proposalLibrary');
+  if (proposalModal && e.target === proposalModal) closeProposalLibrary();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeProposalLibrary();
 });
 
 // ── Lang toggle (언어 전환) ────────────────────────────

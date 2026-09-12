@@ -391,15 +391,8 @@ body {
 .hi-body .hi-text { font-size: 13px; color: var(--text-secondary); line-height: 1.75; }
 
 /* ══ PROPOSAL DOWNLOAD SECTION ══════════════════════════ */
-.proposal-section {
-  margin: 32px 48px;
-  background: none;
-  border: none;
-  border-radius: 0; padding: 8px 0;
-}
-.proposal-card {
-  text-align: center;
-}
+.proposal-section { margin: 32px 48px; padding: 8px 0; }
+.proposal-card { text-align: center; }
 .prop-icon { display: none; }
 .prop-content { flex: 1; }
 .prop-title { font-size: 16px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px; }
@@ -408,6 +401,9 @@ body {
 .prop-btn { display: none; }
 .download-btn { display: none; }
 .download-btn:hover {}
+@media (max-width: 768px) {
+  .proposal-section { margin: 24px 18px; }
+}
 
 /* ══ FILE UPLOAD SECTION ══════════════════════════════ */
 .upload-section {
@@ -1365,8 +1361,8 @@ body {
         <div class="prop-icon">📄</div>
         <div class="prop-content">
           <div class="prop-title"><span class="lang-ko">AI 완주 이니셔티브 제안서</span><span class="lang-en" style="display:none;">AI Wanju Initiative Proposal</span></div>
-          <div class="prop-desc"><span class="lang-ko">전체 프로젝트 개요, 기술 명세, 예산 및 일정</span><span class="lang-en" style="display:none;">Complete project overview, technical specs, budget & timeline</span></div>
-          <div class="prop-meta"><span class="lang-ko">의견수렴 초안 · 최종본 미확정</span><span class="lang-en" style="display:none;">Consultation draft · Final pending</span></div>
+          <div class="prop-desc"><span class="lang-ko">Q&A와 지자체 요청사항을 반영해 제안서를 보완하고 있습니다.</span><span class="lang-en" style="display:none;">The proposal is being updated with Q&A and municipal requests.</span></div>
+          <div class="prop-meta"><span class="lang-ko">제안서 준비 중 · Q&A 반영 후 공개</span><span class="lang-en" style="display:none;">In preparation · Published after Q&A review</span></div>
         </div>
         <div class="prop-btn">
           <button class="download-btn" onclick="downloadProposal()">

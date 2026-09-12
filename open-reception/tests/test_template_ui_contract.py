@@ -111,3 +111,30 @@ def test_team_directory_uses_municipal_language_and_no_external_font():
     assert "외부 연구 파트너" not in html
     assert "공식 제휴 관계를 뜻하지 않습니다." in html
     assert "cdn.jsdelivr.net" not in html
+
+
+def test_inje_proposal_library_has_explicit_public_documents():
+    html = TEMPLATES[0].read_text(encoding="utf-8")
+    assert 'id="proposalLibrary"' in html
+    assert "function openProposalLibrary()" in html
+    assert 'href="/static/AI_Inje_Initiative_Summary_v15.pdf"' in html
+    assert 'href="/static/AI%20Inje%20Initiative.pdf"' in html
+    assert html.count("PDF 다운로드") == 2
+    assert "자료 보기·다운로드" in html
+
+
+def test_wanju_does_not_expose_inje_documents():
+    html = TEMPLATES[1].read_text(encoding="utf-8")
+    assert "제안서 준비 중 · Q&A 반영 후 공개" in html
+    assert "AI_Inje_Initiative_Summary_v15.pdf" not in html
+    assert "AI%20Inje%20Initiative.pdf" not in html
+    assert 'id="proposalLibrary"' not in html
+
+
+def test_summary_pages_do_not_repeat_global_footer_navigation():
+    static_dir = Path(__file__).parents[1] / "app" / "static"
+    for name in ("inje_proposal_summary_toc_v2.html", "wanju_proposal_summary_toc_v2.html"):
+        html = (static_dir / name).read_text(encoding="utf-8")
+        assert f'<p class="ver">{name}</p>' not in html
+        article_count = html.count("<article ")
+        assert html.count("onclick=\"openCh('toc')\"") == article_count
