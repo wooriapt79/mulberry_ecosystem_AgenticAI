@@ -890,11 +890,35 @@ body {
   }
 
   /* Report adjustments */
+  #sec-report {
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
   .report-form-panel {
     width: 100%;
+    flex: 0 0 auto;
     border-right: none;
     border-bottom: 1px solid var(--border);
-    max-height: 200px;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .report-output-panel {
+    flex: 0 0 auto !important;
+    min-height: 320px;
+    overflow: visible !important;
+  }
+
+  .report-preview {
+    flex: 0 0 auto;
+    overflow: visible;
+    padding: 16px;
+  }
+
+  .rdoc {
+    width: 100%;
   }
 
   /* Team grid */
@@ -1545,7 +1569,7 @@ body {
       </div>
       <button class="rf-gen-btn" onclick="genReport()"><span class="lang-ko">보고서 생성</span><span class="lang-en" style="display:none;">Generate Report</span></button>
     </div>
-    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+    <div class="report-output-panel" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
       <div class="report-preview" id="rPreview">
         <div class="rp-empty">
           <div class="rpe-icon">R</div>
@@ -2566,7 +2590,9 @@ function genReport() {
     const rPreview = document.getElementById('rPreview');
     rPreview.innerHTML = buildReport(selectedType, recipient, today);
     document.getElementById('rActions').style.display = 'flex';
-    rPreview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    requestAnimationFrame(() => {
+      rPreview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }, 1200);
 }
 
