@@ -191,3 +191,25 @@ def test_inje_proposal_library_panel_has_opaque_white_background():
     panel_css = html.split(".proposal-library-panel {", 1)[1].split("}", 1)[0]
     assert "background: #ffffff;" in panel_css
     assert "background: var(--bg-primary);" not in panel_css
+
+
+def test_luna_opens_capability_panel_with_current_scope():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        assert 'id="capabilityModal"' in html
+        assert html.count("openCapabilityPanel()") >= 3
+        assert "Open Reception 기능 보기" in html
+        assert "지자체 제안서 Q&amp;A 리셉션" in html
+        assert "설계된 확장 기능" in html
+        assert "나머지 기능은 지자체 협의와 운영 승인에 따라" in html
+        assert ".capability-panel {" in html
+        assert "background: #ffffff;" in html
+
+
+def test_capability_panel_remains_accessible_when_luna_card_is_hidden_on_mobile():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        assert ".luna-card { display: none !important; }" in html
+        assert 'class="nav-item mobile-capability-item"' in html
+        assert ".mobile-capability-item { display: none; }" in html
+        assert ".mobile-capability-item { display: flex; }" in html
