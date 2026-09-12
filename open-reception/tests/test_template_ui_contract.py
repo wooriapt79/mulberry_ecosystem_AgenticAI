@@ -138,3 +138,24 @@ def test_summary_pages_do_not_repeat_global_footer_navigation():
         assert f'<p class="ver">{name}</p>' not in html
         article_count = html.count("<article ")
         assert html.count("onclick=\"openCh('toc')\"") == article_count
+
+
+def test_kebin_economy_column_is_linked_per_municipality():
+    inje = TEMPLATES[0].read_text(encoding="utf-8")
+    wanju = TEMPLATES[1].read_text(encoding="utf-8")
+    path = "/static/agent_kebin_municipal_economy_v1.html"
+    assert path + "?from=inje" in inje
+    assert path + "?from=wanju" in wanju
+    assert path + "?from=wanju" not in inje
+    assert path + "?from=inje" not in wanju
+
+
+def test_kebin_economy_column_defines_new_terms_with_caveats():
+    column = Path(__file__).parents[1] / "app" / "static" / "agent_kebin_municipal_economy_v1.html"
+    html = column.read_text(encoding="utf-8")
+    for term in ("AI Agent 경제", "토큰경제", "지역 토크나이저", "Local AI Credit", "Human Approval"):
+        assert term in html
+    assert "공식 경제학 용어나 금융상품 명칭이 아니라" in html
+    assert "투자성·가격상승을 전제로 하지 않습니다" in html
+    assert "개인정보가 불필요한 제안 Q&amp;A" not in html
+    assert "개인정보가 불필요한 제안 Q&A" in html
