@@ -159,3 +159,13 @@ def test_kebin_economy_column_defines_new_terms_with_caveats():
     assert "투자성·가격상승을 전제로 하지 않습니다" in html
     assert "개인정보가 불필요한 제안 Q&amp;A" not in html
     assert "개인정보가 불필요한 제안 Q&A" in html
+
+
+def test_column_menu_lists_arka_and_kebin_once():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        assert html.count('class="sub-nav-item"') == 2
+        assert html.count("Arka Column <small") == 1
+        assert html.count("KeBin Column <small") == 1
+        assert "AI 경제와 Agent Venture" in html
+        assert "AI 시대의 지자체 경제용어" in html
