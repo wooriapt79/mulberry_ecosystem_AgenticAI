@@ -66,3 +66,13 @@ def test_region_specific_hero_copy_does_not_cross_regions():
     wanju = TEMPLATES[1].read_text(encoding="utf-8")
     assert "AI Wanju Initiative — 완주만의 AI와 AI Agent 경제 플랫폼." not in inje
     assert "AI Inje Initiative — 인제만의 AI와 AI Agent 경제 플랫폼." not in wanju
+
+
+def test_mobile_report_output_uses_vertical_visible_layout():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        assert 'class="report-output-panel"' in html
+        assert "#sec-report {\n    flex-direction: column;" in html
+        assert ".report-output-panel {\n    flex: 0 0 auto !important;" in html
+        assert ".report-preview {\n    flex: 0 0 auto;\n    overflow: visible;" in html
+        assert "requestAnimationFrame(() =>" in html
