@@ -129,3 +129,12 @@ def test_wanju_does_not_expose_inje_documents():
     assert "AI_Inje_Initiative_Summary_v15.pdf" not in html
     assert "AI%20Inje%20Initiative.pdf" not in html
     assert 'id="proposalLibrary"' not in html
+
+
+def test_summary_pages_do_not_repeat_global_footer_navigation():
+    static_dir = Path(__file__).parents[1] / "app" / "static"
+    for name in ("inje_proposal_summary_toc_v2.html", "wanju_proposal_summary_toc_v2.html"):
+        html = (static_dir / name).read_text(encoding="utf-8")
+        assert f'<p class="ver">{name}</p>' not in html
+        article_count = html.count("<article ")
+        assert html.count("onclick=\"openCh('toc')\"") == article_count
