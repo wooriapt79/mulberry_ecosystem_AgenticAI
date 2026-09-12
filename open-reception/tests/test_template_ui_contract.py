@@ -41,3 +41,28 @@ def test_chat_save_control_is_text_only_visible_and_session_backed():
         assert "💾 다시 저장" not in html
         assert "'luna_chat_session_' + _chatPage" in html
         assert "restoreChatSession();" in html
+
+
+def test_file_analysis_calls_backend_with_the_active_region():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        assert "fetch('/api/analyze-file'" in html
+        assert "formData.append('page', window.location.pathname.includes('wanju') ? 'wanju' : 'inje')" in html
+        assert "(백엔드 API 연동 후 구현)" not in html
+
+
+def test_summary_mobile_toc_does_not_clear_the_visible_chapter():
+    static_dir = Path(__file__).parents[1] / "app" / "static"
+    for name in ("inje_proposal_summary_toc_v2.html", "wanju_proposal_summary_toc_v2.html"):
+        html = (static_dir / name).read_text(encoding="utf-8")
+        toc_guard = "if (id === 'toc')"
+        assert toc_guard in html
+        assert html.index(toc_guard) < html.index("document.querySelectorAll('article')")
+        assert "link.classList.toggle('active'" in html
+
+
+def test_region_specific_hero_copy_does_not_cross_regions():
+    inje = TEMPLATES[0].read_text(encoding="utf-8")
+    wanju = TEMPLATES[1].read_text(encoding="utf-8")
+    assert "AI Wanju Initiative — 완주만의 AI와 AI Agent 경제 플랫폼." not in inje
+    assert "AI Inje Initiative — 인제만의 AI와 AI Agent 경제 플랫폼." not in wanju
