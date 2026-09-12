@@ -213,3 +213,13 @@ def test_capability_panel_remains_accessible_when_luna_card_is_hidden_on_mobile(
         assert 'class="nav-item mobile-capability-item"' in html
         assert ".mobile-capability-item { display: none; }" in html
         assert ".mobile-capability-item { display: flex; }" in html
+
+
+def test_mobile_menu_button_and_proposal_divider_are_clear():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        assert "width: 44px; height: 44px;" in html
+        assert "font-size: 28px; cursor: pointer;" in html
+        proposal_css = html.split(".proposal-section {", 1)[1].split("}", 1)[0]
+        assert "padding: 8px 0 32px;" in proposal_css
+        assert "border-bottom: 1px solid #d1d5db;" in proposal_css
