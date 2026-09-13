@@ -2880,9 +2880,14 @@ function buildReport(type, rec, today) {
     </div></div>
 
     <div class="rdoc-sec"><div class="rs-title">${isKo ? '예산 구조' : 'Budget Structure'}</div><div class="rs-body">
-    <p><strong>${isKo ? 'AI Inje 2030 전체 예산: 7.5억 원' : 'AI Inje 2030 Total: 7.5억 원'}</strong></p>
+    <p><strong>${isKo ? '초기 구축 예산: 7.5억 원 (선도실증 · 확대실증 · 지역 AI 기반)' : 'Initial Setup Budget: ~750M KRW (pilot · expansion · regional AI base)'}</strong></p>
     <table class="rdoc-table"><tr><th>${isKo ? '항목' : 'Item'}</th><th>${isKo ? '설명' : 'Details'}</th><th>${isKo ? '예산' : 'Budget'}</th></tr><tr><td>${isKo ? '제1단계 파일럿' : 'Phase 1 Pilot'}</td><td>${isKo ? '1개 면(10-20가구) WiFi Sensing + AI Inje 파인튜닝' : '1 village (10-20 homes) WiFi Sensing + AI Inje tuning'}</td><td>1.5억 원</td></tr><tr><td>${isKo ? '제2단계 확대' : 'Phase 2 Expansion'}</td><td>${isKo ? '농민·소상공인 AI 비서, 공동구매 (4-6개월)' : 'Farmer AI secretary, co-op marketplace (4-6mo)'}</td><td>2.5억 원</td></tr><tr><td>${isKo ? '제3단계 생태계' : 'Phase 3 Ecosystem'}</td><td>${isKo ? 'AI 베이스캠프, 청년 창업 허브 (7-24개월)' : 'AI basecamp, youth startup hub (7-24mo)'}</td><td>2.0억 원</td></tr><tr><td>${isKo ? '인프라 · 학습' : 'Infrastructure & Learning'}</td><td>${isKo ? '클라우드, 지원 인력, 교육, 데이터 자산화' : 'Cloud, support staff, training, data assets'}</td><td>1.5억 원</td></tr></table>
-    <p style="margin-top:12px;"><strong>${isKo ? '주의: Phase 1 (1.5B) 포함 1개 면 단위. 확대 시 면당 1.5B 추가.' : 'Note: Phase 1 (1.5B) covers 1 village unit. Expansion: +1.5B per additional village.'}</strong></p>
+    <div style="margin-top:12px;background:#e8f5e9;border-left:4px solid #4caf50;padding:10px;border-radius:4px;">
+      <strong>${isKo ? '예산 구조 (산출 기준 예)' : 'Budget Structure (Reference Estimate)'}</strong><br>
+      • ${isKo ? '초기 구축: 약 7.5억 원 (선도실증 · 확대실증 · 지역 AI 기반 포함)' : 'Initial Setup: ~750M KRW (incl. pilot, expansion, regional AI base)'}<br>
+      • ${isKo ? '연간 운영 유지 (2~5년차): 약 1.5억 원 × 4년 = 약 6억 원' : 'Annual Operations (Years 2–5): ~150M KRW × 4 yrs = ~600M KRW'}<br>
+      • ${isKo ? '마을 수에 따라 확정. 5년 총 참고: 약 13.5억 원' : 'Final amount subject to village count. 5-yr ref total: ~1.35B KRW'}
+    </div>
     </div></div>
 
     <div class="rdoc-sec"><div class="rs-title">${isKo ? '제1단계 → 제2단계 → 제3단계 연결: 지역 자산화 & 확산' : 'Phase 1→2→3 Progression: Regional Ownership & Scale'}</div><div class="rs-body">
