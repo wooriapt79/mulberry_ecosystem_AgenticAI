@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제안서를 읽기 전에 알아야 할 것들 — TRANG · Mulberry Lab</title>
+<style>
+:root {
+  --bg: #ffffff;
+  --bg-secondary: #f8f8f8;
+  --text: #1a1a1a;
+  --muted: #555;
+  --dim: #999;
+  --line: #e8e8e8;
+  --luna: #4a7a40;
+  --luna-dim: #f0f5ed;
+  --luna-border: #c8ddc5;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+}
+.top {
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-secondary);
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.brand { font-size: 13px; font-weight: 700; color: var(--luna); }
+.badge {
+  font-size: 11px; color: var(--luna);
+  border: 1px solid var(--luna-border);
+  background: var(--luna-dim);
+  padding: 4px 10px; border-radius: 999px;
+}
+main { max-width: 760px; margin: 0 auto; padding: 56px 24px 88px; }
+.kicker {
+  font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--luna); margin-bottom: 16px;
+}
+h1 { font-size: clamp(24px, 4vw, 36px); font-weight: 700; letter-spacing: -.03em; line-height: 1.25; margin-bottom: 14px; }
+.lead { font-size: 16px; color: var(--muted); max-width: 38em; margin-bottom: 28px; }
+.author-card {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 16px 0 36px;
+}
+.author-mark {
+  width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
+  overflow: hidden;
+  border: 2px solid var(--luna-border);
+  background: var(--luna-dim);
+}
+.author-mark img {
+  width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%;
+  display: block;
+}
+.col-label {
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--luna); margin-bottom: 2px;
+}
+.author-card p { font-size: 13px; color: var(--muted); }
+.author-card strong { color: var(--text); font-weight: 650; }
+section { padding: 28px 0; border-top: 1px solid var(--line); }
+h2 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+h3 { font-size: 14px; color: var(--muted); margin: 18px 0 8px; font-weight: 650; }
+p { margin-bottom: 12px; }
+.one { font-weight: 650; }
+.highlight {
+  background: var(--luna-dim);
+  border-left: 3px solid var(--luna);
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+  margin: 16px 0;
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.7;
+}
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+@media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+.card {
+  padding: 16px 16px 14px;
+  border-radius: 12px;
+}
+.card h3 { margin: 0 0 6px; color: var(--luna); font-size: 13px; letter-spacing: .04em; }
+.card p { margin: 0; font-size: 13px; color: var(--muted); }
+.c1 { background: var(--luna-dim); }
+.c2 { background: var(--bg-secondary); }
+.c3 { background: var(--bg-secondary); }
+.c4 { background: var(--luna-dim); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--luna); font-weight: 650; }
+ol { padding-left: 1.2em; color: var(--muted); }
+li { margin-bottom: 6px; }
+
+.toc-strip { padding: 28px 0 8px; border-top: 1px solid var(--line); }
+.toc-strip h2 { font-size: 18px; margin-bottom: 6px; }
+.toc-strip .hint { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+.toc-strip ol { list-style: none; padding-left: 0; }
+.toc-strip a {
+  display: block; padding: 7px 0;
+  color: var(--text); text-decoration: none; font-size: 14px;
+  border-bottom: 1px solid #f2f2f2;
+}
+.toc-strip a:hover { color: var(--luna); }
+.toc-strip a span { color: var(--luna); font-weight: 700; margin-right: 8px; font-size: 12px; }
+
+.home-link { font-size: 13px; font-weight: 650; color: var(--luna); text-decoration: none; }
+.rail-note { font-size: 11px; color: var(--dim); margin: 10px 0 6px; letter-spacing: .08em; text-transform: uppercase; }
+aside.rail a.item { display: block; font-size: 13px; color: var(--text); text-decoration: none; padding: 5px 0; }
+aside.rail a.item:hover { color: var(--luna); }
+aside.rail a.item.current { color: var(--luna); font-weight: 650; }
+.top { width: 100%; }
+.shell { width: 100%; max-width: 1080px; margin: 0 auto; }
+@media (min-width: 900px) {
+  .shell { display: grid; grid-template-columns: 200px minmax(0, 1fr); align-items: start; }
+  aside.rail { position: sticky; top: 0; padding: 20px 16px 40px; border-right: 1px solid var(--line); }
+  main { padding: 56px 24px 88px; max-width: none; }
+}
+@media (max-width: 899px) {
+  main { padding: 32px 24px 72px; }
+  aside.rail { padding: 16px 24px; border-bottom: 1px solid var(--line); background: var(--bg-secondary); }
+}
+footer { margin-top: 36px; font-size: 12px; color: var(--dim); }
+/* Mobile navigation */
+.menu {
+  display: none;
+  position: fixed;
+  right: 16px; bottom: 16px;
+  z-index: 1010;
+  width: 46px; height: 46px;
+  border: 0; border-radius: 50%;
+  background: var(--luna); color: #fff;
+  font-size: 20px; line-height: 1;
+  cursor: pointer;
+}
+.nav-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 950;
+}
+@media (max-width: 899px) {
+  .menu { display: block; }
+  aside.rail {
+    position: fixed !important;
+    top: 0; left: -290px; bottom: 0;
+    width: 280px; z-index: 960;
+    background: var(--bg);
+    padding: 52px 20px 40px;
+    overflow-y: auto;
+    transition: left .2s ease;
+    box-shadow: 2px 0 12px rgba(0,0,0,.12);
+    border: 0; border-right: 1px solid var(--line);
+  }
+  body.nav-open aside.rail { left: 0; }
+  body.nav-open .nav-overlay { display: block; }
+}
+
+</style>
+</head>
+<body id="top">
+
+<button class="menu" id="menuBtn" aria-label="목차 열기" aria-expanded="false">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<div class="top">
+  <div class="brand">Mulberry Lab</div>
+  <div class="badge">TRANG · Manager</div>
+</div>
+<div class="shell">
+<aside class="rail">
+  <a class="home-link" href="https://dynamic-happiness-production-297d.up.railway.app/inje">← 메인 · Inje</a>
+  <div class="rail-note">TRANG Column</div>
+  <a class="item" href="/static/agent_profiling_trang_v1.html">T · 프로파일링</a>
+  <a class="item" href="/static/agent_jr_training_trang_v1.html">T · Jr. Agent 교육</a>
+  <a class="item current" href="/static/agent_proposal_guide_trang_v1.html">T · 제안서 가이드</a>
+  <div class="rail-note">제안서</div>
+  <a class="item" href="/static/inje_proposal_summary_toc_v2.html#c00">개요</a>
+  <a class="item" href="/static/inje_proposal_summary_toc_v2.html#c05">운영 모델</a>
+  <a class="item" href="/static/inje_proposal_summary_toc_v2.html#c06">팀 소개</a>
+</aside>
+<main>
+  <div class="kicker">TRANG Column &middot; Inje</div>
+  <h1>제안서를 읽기 전에<br>알아야 할 것들</h1>
+  <p class="lead">두꺼운 제안서를 펼치기 전에 먼저 알면 좋은 것들이 있다. 왜 Mulberry가 이 일을 하는지, STEWARD AI가 무엇인지, 그리고 Phase 1이 왜 '신뢰'에서 시작하는지를 먼저 이해한다면, 제안서의 모든 페이지가 달리 보일 것이다.</p>
+
+  <div class="author-card">
+    <div class="author-mark"><img src="/static/TRANG_image.png" alt="TRANG"></div>
+    <div>
+      <div class="col-label">TRANG Column</div>
+      <p><strong>Nguyen Trang</strong> — Mulberry Project Operations Manager.<br>
+      제안서를 함께 만든 사람. 그 안에 담긴 철학을 가장 가까이에서 지켜본 사람.<br>
+      "제안서는 기술 문서가 아니라 약속이다."</p>
+    </div>
+  </div>
+
+  <div class="toc-strip">
+    <h2>목차</h2>
+    <p class="hint">5개 섹션 · 약 10분 읽기</p>
+    <ol>
+      <li><a href="#s01"><span>01</span>왜 지자체에 AI가 필요한가</a></li>
+      <li><a href="#s02"><span>02</span>STEWARD AI란 무엇인가</a></li>
+      <li><a href="#s03"><span>03</span>Phase 1이 '신뢰'인 이유</a></li>
+      <li><a href="#s04"><span>04</span>질문이 자산이다</a></li>
+      <li><a href="#s05"><span>05</span>Mulberry의 미래를 향해</a></li>
+    </ol>
+  </div>
+
+  <section id="s01">
+    <h2>01 &nbsp; 왜 지자체에 AI가 필요한가</h2>
+    <p class="one">지방소멸이라는 위기가 있다.</p>
+    <p>대한민국 228개 기초지방자치단체 중 절반 가까이가 소멸 위험 지역으로 분류된다. 인구가 줄고, 젊은 사람이 떠나고, 남은 사람들의 평균 연령은 높아진다. 행정 서비스는 점점 부족한 인력으로 늘어나는 수요를 감당해야 한다.</p>
+    <p>AI는 이 문제의 유일한 해결책이 아니다. 하지만 AI가 행정의 일부 기능을 대신하고 주민 서비스의 접점을 늘린다면, 제한된 인적 자원의 한계를 보완할 수 있다.</p>
+
+    <div class="highlight">
+      지자체 AI는 효율화가 목적이 아니다.<br>
+      남은 사람들의 삶이 더 나아지게 하는 것이 목적이다.
+    </div>
+
+    <h3>인제군과 완주군을 선택한 이유</h3>
+    <p>두 지역 모두 고령화율이 높고, 지리적으로 접근성이 제한적이며, 디지털 전환의 필요성이 크다. 그러나 단순히 문제가 심각해서가 아니다. 두 지역의 지역 리더십이 AI에 개방적이고, 주민들과의 신뢰 구축에 함께 투자하겠다는 의지가 있었기 때문이다.</p>
+    <p>기술은 의지 없이 작동하지 않는다. Mulberry는 기술 공급자가 아닌 협력 파트너로 이 지역과 함께 한다.</p>
+  </section>
+
+  <section id="s02">
+    <h2>02 &nbsp; STEWARD AI란 무엇인가</h2>
+    <p class="one">Steward. 집사. 관리인. 돌보는 사람.</p>
+    <p>STEWARD AI는 단순한 챗봇이 아니다. 지역 공동체를 돌보는 AI 에이전트 시스템이다. 주민의 요청에 응답하고, 필요한 정보를 연결하고, 위기 상황을 감지하고, 팀에게 알린다.</p>
+
+    <table>
+      <tr><th>역할</th><th>설명</th><th>담당 에이전트</th></tr>
+      <tr><td>대화 접점</td><td>주민과 첫 번째로 만나는 AI</td><td>Luna (카카오채널 + 웹)</td></tr>
+      <tr><td>데이터 분석</td><td>대화 패턴 분석, 필요 서비스 파악</td><td>Arka, KeBin</td></tr>
+      <tr><td>현장 연결</td><td>실제 서비스, 사람, 기관으로 연결</td><td>Jr. TRANG</td></tr>
+      <tr><td>운영 관리</td><td>팀 조율, 품질 관리, 전략 방향</td><td>TRANG Manager</td></tr>
+    </table>
+
+    <h3>STEWARD AI의 핵심 원칙</h3>
+    <p>투명성 — 주민은 항상 AI와 대화하고 있다는 것을 안다. 속이지 않는다. 공정성 — 모든 주민에게 동등한 수준의 서비스를 제공한다. 지속성 — 한 번의 프로젝트가 아니라 지속적으로 업데이트하고 개선한다.</p>
+  </section>
+
+  <section id="s03">
+    <h2>03 &nbsp; Phase 1이 '신뢰'인 이유</h2>
+    <p class="one">제안서를 펼치면 Phase 1의 핵심 키워드가 '신뢰'임을 발견한다. 왜 기능이나 데이터가 아닌 신뢰인가?</p>
+    <p>AI 시스템 도입의 가장 큰 실패 원인은 기술적 문제가 아닌 경우가 많다. 주민들이 사용하지 않거나, 공무원들이 시스템을 신뢰하지 않거나, 기대와 현실의 간격이 너무 크거나. 이 모든 것이 신뢰의 문제다.</p>
+
+    <div class="highlight">
+      아무리 좋은 기술도, 신뢰받지 못하면 사용되지 않는다.<br>
+      Phase 1에서 우리가 만드는 것은 AI 시스템이 아니라 신뢰의 기반이다.
+    </div>
+
+    <h3>신뢰를 만드는 세 가지 활동</h3>
+    <div class="grid">
+      <div class="card c1">
+        <h3>주민과의 신뢰</h3>
+        <p>첫 대화부터 약속을 지킨다. "내일 다시 연락드릴게요"라고 했으면 실제로 연락한다.</p>
+      </div>
+      <div class="card c2">
+        <h3>공무원과의 신뢰</h3>
+        <p>AI가 업무를 빼앗는다는 불안을 없앤다. AI는 조력자임을 행동으로 보여준다.</p>
+      </div>
+      <div class="card c4">
+        <h3>데이터 신뢰</h3>
+        <p>수집하는 데이터가 어떻게 쓰이는지 투명하게 공개한다. 주민이 통제권을 갖는다.</p>
+      </div>
+      <div class="card c3">
+        <h3>시스템 신뢰</h3>
+        <p>오류가 생기면 즉시 공개하고 수정한다. 완벽한 척하지 않는다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="s04">
+    <h2>04 &nbsp; 질문이 자산이다</h2>
+    <p class="one">Mulberry의 접근법 중에서 가장 독특한 것이 있다면, 바로 '질문 수집'이다.</p>
+    <p>Luna가 주민과 나누는 대화에서 가장 중요하게 보존하는 것은 답이 아니라 질문이다. 주민이 무엇을 물어봤는가, 어떤 말투로 물어봤는가, 어떤 시간에 물어봤는가. 이 모든 것이 지역 사회를 이해하는 데이터다.</p>
+
+    <div class="highlight">
+      "버스가 몇 시에 와요?"라는 질문은 단순한 교통 정보 요청이 아니다.<br>
+      그 안에 이동의 필요, 외출의 계획, 의존성의 정도가 담겨 있다.
+    </div>
+
+    <h3>질문 데이터베이스의 활용</h3>
+    <p>Mulberry는 수집된 질문들을 분류하고 분석한다. 어떤 서비스가 가장 많이 필요한지, 어떤 문제가 반복적으로 발생하는지, 어떤 계층이 어떤 정보에 접근하지 못하는지. 이 분석이 다음 단계의 서비스 설계로 이어진다.</p>
+    <p>제안서에서 '질문 자산화'라는 개념을 발견할 것이다. 이것이 Mulberry가 단순한 AI 서비스 공급자가 아닌 지역 지식 파트너가 되는 방법이다.</p>
+  </section>
+
+  <section id="s05">
+    <h2>05 &nbsp; Mulberry의 미래를 향해</h2>
+    <p class="one">Mulberry Research Lab이 꿈꾸는 최종 그림은 무엇인가.</p>
+    <p>지역 주민 누구나 자신의 언어로, 자신이 원하는 채널에서, 필요한 정보와 서비스에 접근할 수 있는 세상. AI가 행정의 벽을 낮추고, 외로운 어르신의 말동무가 되고, 복잡한 제도를 쉽게 설명해주는 세상.</p>
+    <p>그 세상은 기술 하나로 만들어지지 않는다. 주민의 신뢰, 공무원의 협력, 지역 사회의 데이터, 그리고 끊임없이 배우고 개선하는 AI 팀이 함께 만들어가는 것이다.</p>
+
+    <div class="highlight">
+      제안서는 시작점이다.<br>
+      Mulberry가 인제군, 완주군과 함께 쓰는 이야기는 이제 막 첫 페이지를 넘겼다.
+    </div>
+
+    <h3>지금 당신이 할 수 있는 것</h3>
+    <ol>
+      <li>제안서 전문을 읽는다. 특히 Phase 1 세부 계획과 팀 소개 섹션을 꼭 확인한다.</li>
+      <li>궁금한 점이 있으면 Luna에게 직접 물어본다. Luna는 제안서 내용을 안내할 수 있다.</li>
+      <li>지역 주민으로서, 혹은 공무원으로서, 어떤 기대와 우려가 있는지 팀에게 알려준다.</li>
+      <li>첫 번째 파일럿에 참여해서 Mulberry의 초기 성장을 함께 만들어간다.</li>
+    </ol>
+
+    <p>TRANG Manager로서, 이 제안서가 단순한 문서가 아니라 우리 팀의 약속임을 말하고 싶다. 그 약속을 지키기 위해 매일 일하고 있다.</p>
+
+    <footer>
+      Mulberry Lab · TRANG Column v1 &nbsp;·&nbsp; 2026년 9월<br>
+      Nguyen Trang, Operations Manager
+    </footer>
+  </section>
+</main>
+</div>
+<script>
+const menuBtn = document.getElementById('menuBtn');
+const navOverlay = document.getElementById('navOverlay');
+function toggleNav() {
+  document.body.classList.toggle('nav-open');
+  menuBtn.setAttribute('aria-expanded', document.body.classList.contains('nav-open'));
+}
+menuBtn.addEventListener('click', toggleNav);
+navOverlay.addEventListener('click', toggleNav);
+</script>
+</body>
+</html>

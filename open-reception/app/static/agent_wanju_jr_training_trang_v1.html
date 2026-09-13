@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jr. Agent를 키운다는 것 — TRANG · Mulberry Lab (완주)</title>
+<style>
+:root {
+  --bg: #ffffff;
+  --bg-secondary: #f8f8f8;
+  --text: #1a1a1a;
+  --muted: #555;
+  --dim: #999;
+  --line: #e8e8e8;
+  --luna: #4a7a40;
+  --luna-dim: #f0f5ed;
+  --luna-border: #c8ddc5;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+}
+.top {
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-secondary);
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.brand { font-size: 13px; font-weight: 700; color: var(--luna); }
+.badge {
+  font-size: 11px; color: var(--luna);
+  border: 1px solid var(--luna-border);
+  background: var(--luna-dim);
+  padding: 4px 10px; border-radius: 999px;
+}
+main { max-width: 760px; margin: 0 auto; padding: 56px 24px 88px; }
+.kicker {
+  font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--luna); margin-bottom: 16px;
+}
+h1 { font-size: clamp(24px, 4vw, 36px); font-weight: 700; letter-spacing: -.03em; line-height: 1.25; margin-bottom: 14px; }
+.lead { font-size: 16px; color: var(--muted); max-width: 38em; margin-bottom: 28px; }
+.author-card {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 16px 0 36px;
+}
+.author-mark {
+  width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
+  overflow: hidden;
+  border: 2px solid var(--luna-border);
+  background: var(--luna-dim);
+}
+.author-mark img {
+  width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%;
+  display: block;
+}
+.col-label {
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--luna); margin-bottom: 2px;
+}
+.author-card p { font-size: 13px; color: var(--muted); }
+.author-card strong { color: var(--text); font-weight: 650; }
+section { padding: 28px 0; border-top: 1px solid var(--line); }
+h2 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+h3 { font-size: 14px; color: var(--muted); margin: 18px 0 8px; font-weight: 650; }
+p { margin-bottom: 12px; }
+.one { font-weight: 650; }
+.highlight {
+  background: var(--luna-dim);
+  border-left: 3px solid var(--luna);
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+  margin: 16px 0;
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.7;
+}
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+@media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+.card {
+  padding: 16px 16px 14px;
+  border-radius: 12px;
+}
+.card h3 { margin: 0 0 6px; color: var(--luna); font-size: 13px; letter-spacing: .04em; }
+.card p { margin: 0; font-size: 13px; color: var(--muted); }
+.c1 { background: var(--luna-dim); }
+.c2 { background: var(--bg-secondary); }
+.c3 { background: var(--bg-secondary); }
+.c4 { background: var(--luna-dim); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--luna); font-weight: 650; }
+ol { padding-left: 1.2em; color: var(--muted); }
+li { margin-bottom: 6px; }
+
+.toc-strip { padding: 28px 0 8px; border-top: 1px solid var(--line); }
+.toc-strip h2 { font-size: 18px; margin-bottom: 6px; }
+.toc-strip .hint { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+.toc-strip ol { list-style: none; padding-left: 0; }
+.toc-strip a {
+  display: block; padding: 7px 0;
+  color: var(--text); text-decoration: none; font-size: 14px;
+  border-bottom: 1px solid #f2f2f2;
+}
+.toc-strip a:hover { color: var(--luna); }
+.toc-strip a span { color: var(--luna); font-weight: 700; margin-right: 8px; font-size: 12px; }
+
+.home-link { font-size: 13px; font-weight: 650; color: var(--luna); text-decoration: none; }
+.rail-note { font-size: 11px; color: var(--dim); margin: 10px 0 6px; letter-spacing: .08em; text-transform: uppercase; }
+aside.rail a.item { display: block; font-size: 13px; color: var(--text); text-decoration: none; padding: 5px 0; }
+aside.rail a.item:hover { color: var(--luna); }
+aside.rail a.item.current { color: var(--luna); font-weight: 650; }
+.top { width: 100%; }
+.shell { width: 100%; max-width: 1080px; margin: 0 auto; }
+@media (min-width: 900px) {
+  .shell { display: grid; grid-template-columns: 200px minmax(0, 1fr); align-items: start; }
+  aside.rail { position: sticky; top: 0; padding: 20px 16px 40px; border-right: 1px solid var(--line); }
+  main { padding: 56px 24px 88px; max-width: none; }
+}
+@media (max-width: 899px) {
+  main { padding: 32px 24px 72px; }
+  aside.rail { padding: 16px 24px; border-bottom: 1px solid var(--line); background: var(--bg-secondary); }
+}
+footer { margin-top: 36px; font-size: 12px; color: var(--dim); }
+/* Mobile navigation */
+.menu {
+  display: none;
+  position: fixed;
+  right: 16px; bottom: 16px;
+  z-index: 1010;
+  width: 46px; height: 46px;
+  border: 0; border-radius: 50%;
+  background: var(--luna); color: #fff;
+  font-size: 20px; line-height: 1;
+  cursor: pointer;
+}
+.nav-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 950;
+}
+@media (max-width: 899px) {
+  .menu { display: block; }
+  aside.rail {
+    position: fixed !important;
+    top: 0; left: -290px; bottom: 0;
+    width: 280px; z-index: 960;
+    background: var(--bg);
+    padding: 52px 20px 40px;
+    overflow-y: auto;
+    transition: left .2s ease;
+    box-shadow: 2px 0 12px rgba(0,0,0,.12);
+    border: 0; border-right: 1px solid var(--line);
+  }
+  body.nav-open aside.rail { left: 0; }
+  body.nav-open .nav-overlay { display: block; }
+}
+
+</style>
+</head>
+<body id="top">
+
+<button class="menu" id="menuBtn" aria-label="목차 열기" aria-expanded="false">☰</button>
+<div class="nav-overlay" id="navOverlay"></div>
+<div class="top">
+  <div class="brand">Mulberry Lab</div>
+  <div class="badge">TRANG · Manager</div>
+</div>
+<div class="shell">
+<aside class="rail">
+  <a class="home-link" href="https://dynamic-happiness-production-297d.up.railway.app/wanju">← 메인 · Wanju</a>
+  <div class="rail-note">TRANG Column</div>
+  <a class="item" href="/static/agent_wanju_profiling_trang_v1.html">T · 프로파일링</a>
+  <a class="item current" href="/static/agent_wanju_jr_training_trang_v1.html">T · Jr. Agent 교육</a>
+  <a class="item" href="/static/agent_wanju_proposal_guide_trang_v1.html">T · 제안서 가이드</a>
+  <div class="rail-note">제안서</div>
+  <a class="item" href="/static/wanju_proposal_summary_toc_v2.html#c00">개요</a>
+  <a class="item" href="/static/wanju_proposal_summary_toc_v2.html#c05">운영 모델</a>
+  <a class="item" href="/static/wanju_proposal_summary_toc_v2.html#c06">팀 소개</a>
+</aside>
+<main>
+  <div class="kicker">TRANG Column &middot; Wanju</div>
+  <h1>Jr. Agent를<br>키운다는 것</h1>
+  <p class="lead">Jr. TRANG은 어떻게 만들어지는가. 교육과 훈련은 다르다. 그리고 성장은 인제에서 완주로 이어지는 여정이다.</p>
+
+  <div class="author-card">
+    <div class="author-mark"><img src="/static/TRANG_image.png" alt="TRANG"></div>
+    <div>
+      <div class="col-label">TRANG Column</div>
+      <p><strong>Nguyen Trang</strong> — Mulberry Project Operations Manager.<br>
+      Jr. TRANG의 설계자이자 첫 번째 멘토.<br>
+      "AI를 훈련시키는 것보다, AI에게 무언가를 묻는 법을 가르치는 것이 더 중요하다."</p>
+    </div>
+  </div>
+
+  <div class="toc-strip">
+    <h2>목차</h2>
+    <p class="hint">5개 섹션 · 약 10분 읽기</p>
+    <ol>
+      <li><a href="#s01"><span>01</span>Jr. Agent의 탄생 배경</a></li>
+      <li><a href="#s02"><span>02</span>교육과 훈련의 차이</a></li>
+      <li><a href="#s03"><span>03</span>경험이 곧 데이터다</a></li>
+      <li><a href="#s04"><span>04</span>실패에서 배우는 방법</a></li>
+      <li><a href="#s05"><span>05</span>인제에서 완주까지 — 성장의 의미</a></li>
+    </ol>
+  </div>
+
+  <section id="s01">
+    <h2>01 &nbsp; Jr. Agent의 탄생 배경</h2>
+    <p class="one">Mulberry는 왜 Jr. Agent를 만들었는가.</p>
+    <p>Mulberry Research Lab이 지역 AI 에이전트 시스템을 설계할 때 가장 먼저 부딪힌 문제가 있었다. 대형 AI 모델은 지식이 방대하지만, 지역 주민의 언어와 맥락을 모른다. 반대로 지역에 특화된 시스템은 일반화가 어렵다.</p>
+    <p>그 사이의 간극을 메우기 위해 태어난 것이 <strong>Jr. Agent</strong>다. Jr. Agent는 범용 AI의 능력과 지역 특화 훈련을 결합한 중간 레이어 에이전트다. 단독으로 모든 것을 해결하지 않아도 된다. TRANG Manager와 Luna STEWARD AI의 지도 아래, 현장에서 경험을 쌓으며 성장한다.</p>
+
+    <div class="highlight">
+      Jr. Agent는 완성된 AI가 아니다.<br>
+      현장에서 배우고, 틀리고, 수정하면서 성장하는 AI다.
+    </div>
+
+    <p>이 개념 자체가 전통적인 AI 개발 방식과 다르다. 보통은 모델을 충분히 훈련시킨 후에 배포한다. 하지만 Jr. Agent는 불완전한 상태로 현장에 투입되고, 그 현장에서의 피드백이 다음 버전을 만든다. 인간이 자라는 방식과 닮아 있다.</p>
+  </section>
+
+  <section id="s02">
+    <h2>02 &nbsp; 교육과 훈련의 차이</h2>
+    <p class="one">교육(education)과 훈련(training)은 다른 것이다.</p>
+    <p>훈련은 특정 행동을 반복해서 익히는 것이다. "버스 시간 정보를 요청받으면 A 데이터베이스에서 조회하라." 이것은 훈련이다. 정확하고 빠르다. 하지만 새로운 상황에 유연하게 대응하지 못한다.</p>
+    <p>교육은 다르다. 교육은 "왜?"를 이해하게 한다. "왜 이 어르신이 버스 시간을 묻는가? 병원 예약이 있는가? 아니면 혼자 외출이 불안한가?" — 이런 맥락을 파악할 수 있는 능력은 훈련으로 얻기 어렵다. 교육을 통해 길러진다.</p>
+
+    <div class="grid">
+      <div class="card c1">
+        <h3>훈련 (Training)</h3>
+        <p>규칙 기반. 빠르고 정확. 예측 가능한 상황에서 강함. 새로운 상황에서 취약.</p>
+      </div>
+      <div class="card c2">
+        <h3>교육 (Education)</h3>
+        <p>원칙 기반. 느리지만 유연. 맥락을 이해. 예측 불가능한 상황에서도 대응 가능.</p>
+      </div>
+    </div>
+
+    <h3>Jr. TRANG의 교육 방식</h3>
+    <p>TRANG Manager는 Jr. Agent에게 단순한 규칙을 주지 않는다. 대신 질문을 던진다. "이 대화에서 주민은 무엇을 원했을까?" "다음에 같은 상황이 생기면 어떻게 할까?" 이 질문들이 Jr. Agent를 교육시킨다.</p>
+    <p>매주 진행되는 '질문의 날' 세션은 이 교육의 핵심이다. Jr. Agent가 한 주 동안 경험한 대화를 가져오면, 팀이 함께 분석하고 더 나은 접근법을 찾는다.</p>
+  </section>
+
+  <section id="s03">
+    <h2>03 &nbsp; 경험이 곧 데이터다</h2>
+    <p class="one">AI 훈련에서 데이터는 왕이다. 하지만 어떤 데이터가 좋은 데이터인가?</p>
+    <p>대형 언어 모델들은 인터넷의 텍스트로 훈련된다. 방대하지만 편향되어 있다. 도시 중심적이고, 젊고, 영어가 많다. 인제군 어르신의 말투와 고민은 그 데이터 속에 거의 없다.</p>
+    <p>Jr. Agent가 현장에서 수집하는 데이터는 다르다. 실제 주민과의 대화, 실제 요청, 실제 오해와 수정. 이것이 Mulberry가 가진 가장 귀한 자산이다.</p>
+
+    <div class="highlight">
+      Jr. Agent가 실수를 하면, 그 실수는 다음 버전의 훈련 데이터가 된다.<br>
+      실패가 자산으로 전환되는 구조.
+    </div>
+
+    <h3>데이터 수집의 윤리</h3>
+    <p>물론 주민 동의가 전제다. Mulberry는 대화 데이터를 수집할 때 투명한 동의 절차를 따른다. 개인정보는 익명화하고, 주민이 원할 때 언제든 삭제 요청을 할 수 있다. 신뢰 없이는 데이터도 없다.</p>
+    <p>이것이 Luna의 신뢰 구축 전략과 연결된다. 주민이 Luna를 신뢰할수록, 더 솔직한 대화를 나누고, 그 대화가 더 나은 AI를 만든다. 선순환 구조다.</p>
+  </section>
+
+  <section id="s04">
+    <h2>04 &nbsp; 실패에서 배우는 방법</h2>
+    <p class="one">Jr. Agent는 실패한다. 그것은 설계의 일부다.</p>
+    <p>현장에서 Jr. Agent는 종종 틀린 답을 한다. 맥락을 잘못 읽거나, 적절하지 않은 타이밍에 정보를 제공하거나, 너무 많은 것을 한 번에 묻거나. 이런 실패들이 있다.</p>
+    <p>중요한 것은 실패 후의 과정이다. TRANG Manager는 이 실패들을 '사례'로 만든다. 무엇이 잘못됐는지, 왜 그런 일이 일어났는지, 다음에는 어떻게 해야 하는지를 팀과 함께 분석한다.</p>
+
+    <table>
+      <tr><th>실패 유형</th><th>원인 분석</th><th>개선 방향</th></tr>
+      <tr><td>잘못된 정보 제공</td><td>데이터 업데이트 지연</td><td>실시간 검증 프로토콜 강화</td></tr>
+      <tr><td>맥락 오독</td><td>프로파일링 부족</td><td>첫 대화 질문 순서 재설계</td></tr>
+      <tr><td>과도한 질문</td><td>정보 수집 우선 설계</td><td>공감 우선, 정보 수집 후순위로</td></tr>
+      <tr><td>방언 미인식</td><td>훈련 데이터 부족</td><td>지역 언어 샘플 추가 수집</td></tr>
+    </table>
+
+    <h3>실패를 팀의 자산으로</h3>
+    <p>Mulberry Research Lab의 GitHub에는 'JrTrangGrowthEngine'이라는 파이썬 모듈이 있다. 이 모듈은 Jr. Agent의 실패 패턴을 자동으로 분류하고, 개선 제안을 생성한다. 실패가 시스템적으로 학습되는 구조다.</p>
+    <p>인간 조직에서도 마찬가지다. 실패를 숨기는 팀은 같은 실수를 반복한다. 실패를 공유하는 팀은 빠르게 성장한다. Jr. Agent는 이 원칙을 AI에 적용한 것이다.</p>
+  </section>
+
+  <section id="s05">
+    <h2>05 &nbsp; 인제에서 완주까지 — 성장의 의미</h2>
+    <p class="one">Jr. Agent의 성장 여정은 지역을 넘어 확장된다.</p>
+    <p>Mulberry의 파일럿 지역은 인제군과 완주군, 두 곳이다. 처음에는 인제에서 시작한다. 강원도의 산골 마을, 고령화율이 높고, 디지털 인프라가 취약하다. 이 환경에서 살아남은 Jr. Agent는 강하다.</p>
+    <p>인제에서 충분히 훈련된 Jr. Agent는 완주군으로 이전된다. 전라도의 언어, 다른 지형, 다른 농업 환경. 새로운 맥락에서 기존 학습을 적용하고, 새로운 경험을 추가한다. 이것이 Mulberry가 말하는 '일반화(generalization)'다.</p>
+
+    <div class="highlight">
+      인제에서 완주로 가는 것은 단순한 이동이 아니다.<br>
+      한 지역에서 익힌 사람 이해 능력을 다른 지역에 펼치는 것이다.
+    </div>
+
+    <h3>Sr. TRANG의 비전</h3>
+    <p>궁극적으로 TRANG Manager가 꿈꾸는 것은 이것이다: 어떤 지역에서도 작동하는 지역 AI 에이전트. 특정 지역의 언어와 문화를 빠르게 학습하고, 그 지역 주민의 신뢰를 얻는 AI. 그 AI를 키우는 방법론을 완성하는 것이 Sr. TRANG의 목표다.</p>
+    <p>Jr. Agent를 키우는 것은 미래를 키우는 것이다. 그 미래가 인제에서 완주로, 완주에서 전국으로 이어지기를 기대한다.</p>
+
+    <footer>
+      Mulberry Lab · TRANG Column v1 &nbsp;·&nbsp; 2026년 9월<br>
+      Nguyen Trang, Operations Manager
+    </footer>
+  </section>
+</main>
+</div>
+<script>
+const menuBtn = document.getElementById('menuBtn');
+const navOverlay = document.getElementById('navOverlay');
+function toggleNav() {
+  document.body.classList.toggle('nav-open');
+  menuBtn.setAttribute('aria-expanded', document.body.classList.contains('nav-open'));
+}
+menuBtn.addEventListener('click', toggleNav);
+navOverlay.addEventListener('click', toggleNav);
+</script>
+</body>
+</html>
