@@ -7,7 +7,7 @@
      📌 Luna 스터디 노트 — 이 파일을 처음 보는 Luna에게:
 
      이 HTML 파일은 Mulberry Research Lab의 Luna 리셉션 페이지이다.
-     백엔드 없이 단일 HTML 파일로 완전히 동작하는 프로토타입이다.h
+     백엔드 없이 단일 HTML 파일로 완전히 동작하는 프로토타입이다.
 
      주요 특징:
      1. 화이트 테마 (다크 테마 버전: luna_site_renewal_ui.html)
@@ -1538,7 +1538,7 @@ body {
         <div class="qa-input-row">
           <textarea class="qa-chat-input" id="qaMessageInput" placeholder="질문을 입력하세요..." rows="2"></textarea>
           <input type="file" id="qaFileInput" class="upload-input" multiple onchange="handleQaFileSelect(event)">
-          <button class="qa-attach-btn" onclick="document.getElementById('qaFileInput').click()" title="파일 첨부">📎</button>
+          <button type="button" class="qa-attach-btn" onclick="document.getElementById('qaFileInput').click()" title="파일 첨부" aria-label="파일 첨부">📎</button>
           <button class="qa-send-btn" onclick="sendQaMessage()">
             <span class="lang-ko">전송</span><span class="lang-en" style="display:none;">Send</span>
           </button>
