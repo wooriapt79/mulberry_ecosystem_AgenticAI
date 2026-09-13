@@ -941,13 +941,26 @@ body {
     border-right: none;
     border-bottom: none;
     overflow-y: auto;
+    min-height: 0;
+    padding: 12px 16px 16px;
+    gap: 10px;
   }
   .qa-file-panel.active {
-    flex: 1;
-    height: calc(100vh - 52px - 45px - 56px);
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
   }
   #fileDropZone {
     padding: 12px 16px !important;
+    flex-shrink: 0;
+  }
+  #fileInfoBar,
+  #analyzeBtn,
+  #analysisStatus {
+    flex-shrink: 0;
+  }
+  #analysisResultWrap {
+    min-height: 0;
   }
 
   .qa-info {
