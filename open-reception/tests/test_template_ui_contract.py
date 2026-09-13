@@ -237,3 +237,22 @@ def test_team_directory_home_link_returns_to_source_municipality():
     html = directory.read_text(encoding="utf-8")
     assert 'id="directoryHomeLink" href="/inje">메인 홈</a>' in html
     assert "sourcePage === 'wanju' ? '/wanju' : '/inje'" in html
+
+def test_file_picker_entry_points_use_explicit_buttons():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        assert html.count('id="qaFileInput"') == 1
+        assert html.count('id="fileInput"') == 1
+        assert html.count("document.getElementById('qaFileInput').click()") == 1
+        assert html.count("document.getElementById('fileInput').click()") == 1
+        assert 'type="button" class="qa-attach-btn"' in html
+        assert 'aria-label="파일 첨부"' in html
+        assert 'onchange="handleQaFileSelect(event)"' in html
+        assert 'onchange="handleFileSelect(event)"' in html
+        assert '<label for="qaFileInput"' not in html
+        assert "position:absolute;top:0;left:0;width:100%;height:100%;opacity:0" not in html
+
+
+def test_wanju_template_has_no_upload_rollback_typo():
+    wanju = TEMPLATES[1].read_text(encoding="utf-8")
+    assert "프로토타입이다.h" not in wanju
