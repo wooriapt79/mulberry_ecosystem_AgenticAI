@@ -238,21 +238,21 @@ def test_team_directory_home_link_returns_to_source_municipality():
     assert 'id="directoryHomeLink" href="/inje">메인 홈</a>' in html
     assert "sourcePage === 'wanju' ? '/wanju' : '/inje'" in html
 
-def test_file_picker_entry_points_use_native_labels():
+def test_file_picker_entry_points_use_explicit_labels_and_sibling_inputs():
     for template in TEMPLATES:
         html = template.read_text(encoding="utf-8")
         assert html.count('id="qaFileInput"') == 1
         assert html.count('id="fileInput"') == 1
-        assert '<label class="qa-attach-btn" title="파일 첨부" aria-label="파일 첨부">' in html
-        assert '<label style="border: 2px dashed var(--border);' in html
-        assert 'id="fileDropZone" aria-label="분석할 파일 업로드"' in html
+        assert '<label for="qaFileInput" class="qa-attach-btn"' in html
+        assert '<label for="fileInput" style="display:block; cursor:pointer;"' in html
+        assert 'aria-label="Q&A 첨부 파일 선택"' in html
+        assert 'aria-label="분석 파일 선택"' in html
         assert html.count('class="native-file-input"') == 2
         assert 'onchange="handleQaFileSelect(event)"' in html
         assert 'onchange="handleFileSelect(event)"' in html
         assert "document.getElementById('qaFileInput').click()" not in html
         assert "document.getElementById('fileInput').click()" not in html
         assert 'style="display:none"' not in html
-        assert "position:absolute;top:0;left:0;width:100%;height:100%;opacity:0" not in html
         assert ".native-file-input {" in html
         assert "clip-path: inset(50%);" in html
 
@@ -276,16 +276,17 @@ def test_mobile_file_analysis_uses_flexible_visible_layout():
         assert "#analyzeBtn," in mobile_css
         assert "#analysisResultWrap {" in mobile_css
 
-def test_mobile_file_inputs_are_directly_interactive():
+def test_mobile_file_inputs_are_unwrapped_and_directly_interactive():
     for template in TEMPLATES:
         html = template.read_text(encoding="utf-8")
         mobile_css = html.split("/* Q&A adjustments */", 1)[1].split("/* Report adjustments */", 1)[0]
-        qa_input_css = mobile_css.split(".qa-attach-btn .native-file-input {", 1)[1].split("}", 1)[0]
+        qa_label_css = mobile_css.split(".qa-attach-btn {", 1)[1].split("}", 1)[0]
+        qa_input_css = mobile_css.split("#qaFileInput.native-file-input {", 1)[1].split("}", 1)[0]
         analysis_input_css = mobile_css.split("#fileDropZone .native-file-input {", 1)[1].split("}", 1)[0]
-        assert "inset: 0;" in qa_input_css
-        assert "width: 100%;" in qa_input_css
-        assert "height: 100%;" in qa_input_css
-        assert "clip-path: none;" in qa_input_css
+        assert "display: none;" in qa_label_css
+        assert "position: static;" in qa_input_css
+        assert "height: 42px;" in qa_input_css
+        assert "opacity: 1;" in qa_input_css
         assert "pointer-events: auto;" in qa_input_css
         assert "position: static;" in analysis_input_css
         assert "height: auto;" in analysis_input_css
