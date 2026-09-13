@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 
 TEMPLATES = (
@@ -267,3 +268,14 @@ def test_mobile_file_inputs_have_no_overlay_css():
         assert '#fileDropZone .native-file-input {' not in html
         assert 'opacity: 0.001' not in html
         assert 'clip-path: inset(50%)' not in html
+
+
+def test_capability_styles_are_outside_mobile_media_query():
+    """Keep desktop capability modal styling outside the mobile-only media block."""
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        css = html.split("<style>", 1)[1].split("</style>", 1)[0]
+        mobile_start = css.index("/* ══ MOBILE OPTIMIZATION")
+        capability_start = css.index("/* Open Reception capability panel */")
+        mobile_css = re.sub(r"/\\*.*?\\*/", "", css[mobile_start:capability_start], flags=re.S)
+        assert mobile_css.count("{") == mobile_css.count("}")
