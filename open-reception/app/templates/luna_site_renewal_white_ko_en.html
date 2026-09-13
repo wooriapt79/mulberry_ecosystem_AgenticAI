@@ -975,6 +975,46 @@ body {
     min-height: 0;
   }
 
+  /* Mobile browsers interact with the native file controls directly. */
+  .qa-attach-btn {
+    position: relative;
+    overflow: hidden;
+  }
+  .qa-attach-btn .native-file-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    clip: auto;
+    clip-path: none;
+    opacity: 0.001;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  #fileDropZone {
+    display: block;
+  }
+  #fileDropZone .native-file-input {
+    position: static;
+    width: 100%;
+    height: auto;
+    margin: 12px 0 0;
+    padding: 8px;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 14px;
+    opacity: 1;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
   .qa-info {
     display: none;
   }
