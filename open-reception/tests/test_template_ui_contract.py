@@ -238,19 +238,23 @@ def test_team_directory_home_link_returns_to_source_municipality():
     assert 'id="directoryHomeLink" href="/inje">메인 홈</a>' in html
     assert "sourcePage === 'wanju' ? '/wanju' : '/inje'" in html
 
-def test_file_picker_entry_points_use_explicit_buttons():
+def test_file_picker_entry_points_use_native_labels():
     for template in TEMPLATES:
         html = template.read_text(encoding="utf-8")
         assert html.count('id="qaFileInput"') == 1
         assert html.count('id="fileInput"') == 1
-        assert html.count("document.getElementById('qaFileInput').click()") == 1
-        assert html.count("document.getElementById('fileInput').click()") == 1
-        assert 'type="button" class="qa-attach-btn"' in html
-        assert 'aria-label="파일 첨부"' in html
+        assert '<label class="qa-attach-btn" title="파일 첨부" aria-label="파일 첨부">' in html
+        assert '<label style="border: 2px dashed var(--border);' in html
+        assert 'id="fileDropZone" aria-label="분석할 파일 업로드"' in html
+        assert html.count('class="native-file-input"') == 2
         assert 'onchange="handleQaFileSelect(event)"' in html
         assert 'onchange="handleFileSelect(event)"' in html
-        assert '<label for="qaFileInput"' not in html
+        assert "document.getElementById('qaFileInput').click()" not in html
+        assert "document.getElementById('fileInput').click()" not in html
+        assert 'style="display:none"' not in html
         assert "position:absolute;top:0;left:0;width:100%;height:100%;opacity:0" not in html
+        assert ".native-file-input {" in html
+        assert "clip-path: inset(50%);" in html
 
 
 def test_wanju_template_has_no_upload_rollback_typo():

@@ -472,6 +472,18 @@ body {
 .upload-input {
   display: none;
 }
+.native-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
 .upload-btn {
   padding: 8px 16px; background: var(--blue); color: white;
   border: none; border-radius: 8px; cursor: pointer; font-size: 12px;
@@ -1632,8 +1644,10 @@ body {
         <!-- 입력 행 -->
         <div class="qa-input-row">
           <textarea class="qa-chat-input" id="qaMessageInput" placeholder="질문을 입력하세요..." rows="2"></textarea>
-          <input type="file" id="qaFileInput" class="upload-input" multiple onchange="handleQaFileSelect(event)">
-          <button type="button" class="qa-attach-btn" onclick="document.getElementById('qaFileInput').click()" title="파일 첨부" aria-label="파일 첨부">📎</button>
+          <label class="qa-attach-btn" title="파일 첨부" aria-label="파일 첨부">
+            <input type="file" id="qaFileInput" class="native-file-input" multiple onchange="handleQaFileSelect(event)">
+            <span aria-hidden="true">📎</span>
+          </label>
           <button class="qa-send-btn" onclick="sendQaMessage()">
             <span class="lang-ko">전송</span><span class="lang-en" style="display:none;">Send</span>
           </button>
@@ -1644,15 +1658,15 @@ body {
     <!-- File Analysis Mode -->
     <div class="qa-file-panel">
       <!-- 드롭존 -->
-      <div style="border: 2px dashed var(--border); border-radius: 12px; padding: 28px 16px; text-align: center; cursor: pointer; transition: all 0.2s;" id="fileDropZone" onclick="document.getElementById('fileInput').click()" ondrop="handleFileDrop(event)" ondragover="handleFileDragOver(event)" ondragleave="handleFileDragLeave()">
-        <input type="file" id="fileInput" style="display:none" accept=".txt,.md,.html,.csv,.pdf" onchange="handleFileSelect(event)">
+      <label style="border: 2px dashed var(--border); border-radius: 12px; padding: 28px 16px; text-align: center; cursor: pointer; transition: all 0.2s;" id="fileDropZone" aria-label="분석할 파일 업로드" ondrop="handleFileDrop(event)" ondragover="handleFileDragOver(event)" ondragleave="handleFileDragLeave()">
+        <input type="file" id="fileInput" class="native-file-input" accept=".txt,.md,.html,.csv,.pdf" onchange="handleFileSelect(event)">
         <div style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">
           <span class="lang-ko">📎 파일 업로드</span><span class="lang-en" style="display:none;">📎 Upload File</span>
         </div>
         <div style="font-size:11px; color:var(--text-tertiary);">
           <span class="lang-ko">클릭 또는 드래그 — .txt .md .html .csv</span><span class="lang-en" style="display:none;">Click or drag — .txt .md .html .csv</span>
         </div>
-      </div>
+      </label>
 
       <!-- 파일 정보 -->
       <div id="fileInfoBar" style="display:none; background:var(--bg-tertiary); border:1px solid var(--border); border-radius:8px; padding:9px 12px; align-items:center; gap:8px;">
