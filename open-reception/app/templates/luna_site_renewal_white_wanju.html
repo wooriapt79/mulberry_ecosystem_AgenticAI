@@ -1562,8 +1562,8 @@ body {
           <textarea class="qa-chat-input" id="qaMessageInput" placeholder="질문을 입력하세요..." rows="2"></textarea>
           <input type="file" id="qaFileInput" class="upload-input" multiple
             accept=".pdf,.txt,.doc,.docx,.hwp"
-            onchange="handleQaFileSelect(event)">
-          <button type="button" class="qa-attach-btn" onclick="document.getElementById('qaFileInput').click()" title="파일 첨부" aria-label="파일 첨부">📎</button>
+            onchange="handleQaFileSelect(event)" style="display:none">
+          <button type="button" class="qa-attach-btn" onclick="document.getElementById('qaFileInput').click()" title="파일 첨부" aria-label="파일 첨부" style="display:none">📎</button>
           <button class="qa-send-btn" onclick="sendQaMessage()">
             <span class="lang-ko">전송</span><span class="lang-en" style="display:none;">Send</span>
           </button>
