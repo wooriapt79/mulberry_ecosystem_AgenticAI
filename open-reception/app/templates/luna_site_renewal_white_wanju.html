@@ -917,6 +917,118 @@ body {
 
   /* Mobile browsers interact with the native file controls directly. */
 
+  .qa-info {
+    display: none;
+  }
+
+  /* Report adjustments */
+  #sec-report {
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .report-form-panel {
+    width: 100%;
+    flex: 0 0 auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: none;
+    overflow: visible;
+  }
+
+  .report-output-panel {
+    flex: 0 0 auto !important;
+    min-height: 320px;
+    overflow: visible !important;
+  }
+
+  .report-preview {
+    flex: 0 0 auto;
+    overflow: visible;
+    padding: 16px;
+  }
+
+  .rdoc {
+    width: 100%;
+  }
+
+  /* Team grid */
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Collaboration grid */
+  #sec-collab > div {
+    flex-direction: column !important;
+  }
+
+  #sec-collab > div > div {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+
+  #sec-collab > div > div:last-child {
+    border-bottom: none !important;
+  }
+
+  /* Adjust action cards */
+  .action-card {
+    padding: 16px;
+  }
+
+  .action-card .ac-title {
+    font-size: 13px;
+  }
+
+  .action-card .ac-desc {
+    font-size: 11px;
+  }
+
+  /* Adjust buttons — 모바일 터치 타겟 최소 44px */
+  .upload-btn,
+  .qa-send-btn,
+  .qa-attach-btn,
+  .rf-gen-btn,
+  .sug-btn {
+    min-height: 44px;
+  }
+
+  .qa-chat-input {
+    min-height: 40px;
+    font-size: 16px;
+  }
+
+  .chat-bubble {
+    max-width: 85%;
+  }
+
+  .qa-chat {
+    height: calc(100vh - 52px - 45px - 56px);
+  }
+
+  #sec-home,
+  #sec-team {
+    padding: 16px;
+  }
+
+  .team-header h2 {
+    font-size: 20px;
+  }
+
+  .team-header p {
+    font-size: 12px;
+  }
+
+  .msg {
+    max-width: 90%;
+  }
+
+  #sec-collab [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 @media (max-width: 480px) {
   .topbar-pills {
     display: none;
