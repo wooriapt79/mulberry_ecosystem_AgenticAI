@@ -275,3 +275,20 @@ def test_mobile_file_analysis_uses_flexible_visible_layout():
         assert "height: calc(100vh" not in active_css
         assert "#analyzeBtn," in mobile_css
         assert "#analysisResultWrap {" in mobile_css
+
+def test_mobile_file_inputs_are_directly_interactive():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        mobile_css = html.split("/* Q&A adjustments */", 1)[1].split("/* Report adjustments */", 1)[0]
+        qa_input_css = mobile_css.split(".qa-attach-btn .native-file-input {", 1)[1].split("}", 1)[0]
+        analysis_input_css = mobile_css.split("#fileDropZone .native-file-input {", 1)[1].split("}", 1)[0]
+        assert "inset: 0;" in qa_input_css
+        assert "width: 100%;" in qa_input_css
+        assert "height: 100%;" in qa_input_css
+        assert "clip-path: none;" in qa_input_css
+        assert "pointer-events: auto;" in qa_input_css
+        assert "position: static;" in analysis_input_css
+        assert "height: auto;" in analysis_input_css
+        assert "opacity: 1;" in analysis_input_css
+        assert "pointer-events: auto;" in analysis_input_css
+        assert "#fileDropZone {\n    display: block;" in mobile_css
