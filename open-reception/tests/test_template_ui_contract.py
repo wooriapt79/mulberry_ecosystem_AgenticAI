@@ -256,3 +256,18 @@ def test_file_picker_entry_points_use_explicit_buttons():
 def test_wanju_template_has_no_upload_rollback_typo():
     wanju = TEMPLATES[1].read_text(encoding="utf-8")
     assert "프로토타입이다.h" not in wanju
+
+def test_mobile_file_analysis_uses_flexible_visible_layout():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        mobile_css = html.split("/* Q&A adjustments */", 1)[1].split("/* Report adjustments */", 1)[0]
+        panel_css = mobile_css.split(".qa-file-panel {", 1)[1].split("}", 1)[0]
+        active_css = mobile_css.split(".qa-file-panel.active {", 1)[1].split("}", 1)[0]
+        assert "min-height: 0;" in panel_css
+        assert "padding: 12px 16px 16px;" in panel_css
+        assert "gap: 10px;" in panel_css
+        assert "flex: 1 1 auto;" in active_css
+        assert "height: auto;" in active_css
+        assert "height: calc(100vh" not in active_css
+        assert "#analyzeBtn," in mobile_css
+        assert "#analysisResultWrap {" in mobile_css
