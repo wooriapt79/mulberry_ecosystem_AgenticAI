@@ -939,9 +939,12 @@ body {
   .qa-file-panel {
     width: 100%;
     border-right: none;
-    border-bottom: 1px solid var(--border);
-    max-height: 240px;
+    border-bottom: none;
     overflow-y: auto;
+  }
+  .qa-file-panel.active {
+    flex: 1;
+    height: calc(100vh - 52px - 45px - 56px);
   }
   #fileDropZone {
     padding: 12px 16px !important;
