@@ -162,14 +162,42 @@ def test_kebin_economy_column_defines_new_terms_with_caveats():
     assert "개인정보가 불필요한 제안 Q&A" in html
 
 
-def test_column_menu_lists_arka_and_kebin_once():
+def test_column_menu_lists_arka_kebin_and_trang_columns():
     for template in TEMPLATES:
         html = template.read_text(encoding="utf-8")
-        assert html.count('class="sub-nav-item"') == 2
+        assert html.count('class="sub-nav-item"') == 5
         assert html.count("Arka Column <small") == 1
         assert html.count("KeBin Column <small") == 1
+        assert html.count("Nguyen TRANG Column <small") == 3
         assert "AI 경제와 Agent Venture" in html
         assert "AI 시대의 지자체 경제용어" in html
+        assert "사람을 읽는 것이 AI의 진짜 경쟁력이다" in html
+        assert "Jr. Agent를 키운다는 것" in html
+        assert "제안서를 읽기 전에 알아야 할 것들" in html
+
+
+def test_trang_column_links_are_region_specific_and_exist():
+    static_dir = Path(__file__).parents[1] / "app" / "static"
+    inje = TEMPLATES[0].read_text(encoding="utf-8")
+    wanju = TEMPLATES[1].read_text(encoding="utf-8")
+    inje_files = (
+        "agent_profiling_trang_v1.html",
+        "agent_jr_training_trang_v1.html",
+        "agent_proposal_guide_trang_v1.html",
+    )
+    wanju_files = (
+        "agent_wanju_profiling_trang_v1.html",
+        "agent_wanju_jr_training_trang_v1.html",
+        "agent_wanju_proposal_guide_trang_v1.html",
+    )
+    for name in inje_files:
+        assert f"/static/{name}" in inje
+        assert f"/static/{name}" not in wanju
+        assert (static_dir / name).is_file()
+    for name in wanju_files:
+        assert f"/static/{name}" in wanju
+        assert f"/static/{name}" not in inje
+        assert (static_dir / name).is_file()
 
 
 def test_arka_columns_use_standard_mobile_navigation():
