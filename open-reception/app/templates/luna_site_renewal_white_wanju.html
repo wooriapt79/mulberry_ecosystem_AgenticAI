@@ -1560,7 +1560,9 @@ body {
         <!-- 입력 행 -->
         <div class="qa-input-row">
           <textarea class="qa-chat-input" id="qaMessageInput" placeholder="질문을 입력하세요..." rows="2"></textarea>
-          <input type="file" id="qaFileInput" class="upload-input" multiple onchange="handleQaFileSelect(event)">
+          <input type="file" id="qaFileInput" class="upload-input" multiple
+            accept=".pdf,.txt,.doc,.docx,.hwp"
+            onchange="handleQaFileSelect(event)">
           <button type="button" class="qa-attach-btn" onclick="document.getElementById('qaFileInput').click()" title="파일 첨부" aria-label="파일 첨부">📎</button>
           <button class="qa-send-btn" onclick="sendQaMessage()">
             <span class="lang-ko">전송</span><span class="lang-en" style="display:none;">Send</span>
@@ -2483,9 +2485,19 @@ function sendQaMessage() {
 //   첨부된 파일 이름을 #qaAttachedFiles 영역에 표시한다.
 //   🔧 FIX: 이 함수가 없어서 파일 첨부 시 ReferenceError 발생했음
 let qaAttachedFilesList = [];
+const QA_IMAGE_EXTS = /\.(jpe?g|png|gif|webp|bmp|svg|heic|heif)$/i;
 function handleQaFileSelect(event) {
   const files = Array.from(event.target.files);
-  qaAttachedFilesList.push(...files);
+  const blocked = files.filter(f => QA_IMAGE_EXTS.test(f.name));
+  const allowed = files.filter(f => !QA_IMAGE_EXTS.test(f.name));
+  if (blocked.length > 0) {
+    const msg = currentLang === 'ko'
+      ? '이미지 파일은 \'파일 분석\' 메뉴를 이용해주세요.'
+      : 'For image files, please use the \'File Analysis\' menu.';
+    addMsg('luna', msg);
+  }
+  event.target.value = '';
+  qaAttachedFilesList.push(...allowed);
   const container = document.getElementById('qaAttachedFiles');
   if (container) {
     container.innerHTML = qaAttachedFilesList.map((f, i) =>
