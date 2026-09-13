@@ -892,13 +892,26 @@ body {
     border-right: none;
     border-bottom: none;
     overflow-y: auto;
+    min-height: 0;
+    padding: 12px 16px 16px;
+    gap: 10px;
   }
   .qa-file-panel.active {
-    flex: 1;
-    height: calc(100vh - 52px - 45px - 56px);
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
   }
   #fileDropZone {
     padding: 12px 16px !important;
+    flex-shrink: 0;
+  }
+  #fileInfoBar,
+  #analyzeBtn,
+  #analysisStatus {
+    flex-shrink: 0;
+  }
+  #analysisResultWrap {
+    min-height: 0;
   }
 
   .qa-info {
@@ -1538,7 +1551,7 @@ body {
         <div class="qa-input-row">
           <textarea class="qa-chat-input" id="qaMessageInput" placeholder="질문을 입력하세요..." rows="2"></textarea>
           <input type="file" id="qaFileInput" class="upload-input" multiple onchange="handleQaFileSelect(event)">
-          <label for="qaFileInput" class="qa-attach-btn" title="파일 첨부" style="display:flex;align-items:center;justify-content:center;cursor:pointer;">📎</label>
+          <button type="button" class="qa-attach-btn" onclick="document.getElementById('qaFileInput').click()" title="파일 첨부" aria-label="파일 첨부">📎</button>
           <button class="qa-send-btn" onclick="sendQaMessage()">
             <span class="lang-ko">전송</span><span class="lang-en" style="display:none;">Send</span>
           </button>
@@ -1549,8 +1562,8 @@ body {
     <!-- File Analysis Mode -->
     <div class="qa-file-panel">
       <!-- 드롭존 -->
-      <div style="border: 2px dashed var(--border); border-radius: 12px; padding: 28px 16px; text-align: center; cursor: pointer; transition: all 0.2s; position:relative;" id="fileDropZone" ondrop="handleFileDrop(event)" ondragover="handleFileDragOver(event)" ondragleave="handleFileDragLeave()">
-        <input type="file" id="fileInput" accept=".txt,.md,.html,.csv,.pdf" onchange="handleFileSelect(event)" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;">
+      <div style="border: 2px dashed var(--border); border-radius: 12px; padding: 28px 16px; text-align: center; cursor: pointer; transition: all 0.2s;" id="fileDropZone" onclick="document.getElementById('fileInput').click()" ondrop="handleFileDrop(event)" ondragover="handleFileDragOver(event)" ondragleave="handleFileDragLeave()">
+        <input type="file" id="fileInput" style="display:none" accept=".txt,.md,.html,.csv,.pdf" onchange="handleFileSelect(event)">
         <div style="font-size:15px; font-weight:700; color:var(--text-primary); margin-bottom:4px;">
           <span class="lang-ko">📎 파일 업로드</span><span class="lang-en" style="display:none;">📎 Upload File</span>
         </div>

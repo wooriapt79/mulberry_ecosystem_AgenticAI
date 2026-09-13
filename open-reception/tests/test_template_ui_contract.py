@@ -237,3 +237,37 @@ def test_team_directory_home_link_returns_to_source_municipality():
     html = directory.read_text(encoding="utf-8")
     assert 'id="directoryHomeLink" href="/inje">메인 홈</a>' in html
     assert "sourcePage === 'wanju' ? '/wanju' : '/inje'" in html
+
+def test_file_picker_entry_points_use_explicit_buttons():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        assert html.count('id="qaFileInput"') == 1
+        assert html.count('id="fileInput"') == 1
+        assert html.count("document.getElementById('qaFileInput').click()") == 1
+        assert html.count("document.getElementById('fileInput').click()") == 1
+        assert 'type="button" class="qa-attach-btn"' in html
+        assert 'aria-label="파일 첨부"' in html
+        assert 'onchange="handleQaFileSelect(event)"' in html
+        assert 'onchange="handleFileSelect(event)"' in html
+        assert '<label for="qaFileInput"' not in html
+        assert "position:absolute;top:0;left:0;width:100%;height:100%;opacity:0" not in html
+
+
+def test_wanju_template_has_no_upload_rollback_typo():
+    wanju = TEMPLATES[1].read_text(encoding="utf-8")
+    assert "프로토타입이다.h" not in wanju
+
+def test_mobile_file_analysis_uses_flexible_visible_layout():
+    for template in TEMPLATES:
+        html = template.read_text(encoding="utf-8")
+        mobile_css = html.split("/* Q&A adjustments */", 1)[1].split("/* Report adjustments */", 1)[0]
+        panel_css = mobile_css.split(".qa-file-panel {", 1)[1].split("}", 1)[0]
+        active_css = mobile_css.split(".qa-file-panel.active {", 1)[1].split("}", 1)[0]
+        assert "min-height: 0;" in panel_css
+        assert "padding: 12px 16px 16px;" in panel_css
+        assert "gap: 10px;" in panel_css
+        assert "flex: 1 1 auto;" in active_css
+        assert "height: auto;" in active_css
+        assert "height: calc(100vh" not in active_css
+        assert "#analyzeBtn," in mobile_css
+        assert "#analysisResultWrap {" in mobile_css
