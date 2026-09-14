@@ -617,6 +617,15 @@ def proposal_feedback_review_page(request: Request):
     return response
 
 
+@app.get("/admin/first-account-setup", response_class=HTMLResponse)
+def first_account_setup_page(request: Request):
+    response = _templates.TemplateResponse("first_account_setup.html", {"request": request})
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return response
+
+
 @app.post("/auth/bootstrap", status_code=201)
 def bootstrap_admin(payload: BootstrapInput, db: Session = Depends(db_session)):
     configured = os.getenv("ADMIN_BOOTSTRAP_TOKEN")
