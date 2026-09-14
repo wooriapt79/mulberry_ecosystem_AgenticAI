@@ -1000,7 +1000,14 @@ PROPOSAL_SUMMARIES = {
     "inje": {
         "region_name": "인제군",
         "status": "완료 제안서 서머리",
-        "filename": "inje_proposal_summary_toc_v2.html",
+        "files": [
+            "AI_Inje_Initiative_Summary_v16.html",
+            "inje_proposal_summary_toc_v2.html",
+            "agent_profiling_trang_v1.html",
+            "luna-faq-inje.html",
+            "inje-region-context.html",
+            "contact-guide-inje.html",
+        ],
         "guidance": (
             "서머리에 명시된 내용과 제안·예시·협의 필요 사항을 구분해서 답변하세요. "
             "새로운 요청이나 누락 지적은 완료 제안서의 개선 후보로 안내하세요."
@@ -1009,7 +1016,10 @@ PROPOSAL_SUMMARIES = {
     "wanju": {
         "region_name": "완주군",
         "status": "의견수렴 초안",
-        "filename": "wanju_proposal_summary_toc_v2.html",
+        "files": [
+            "wanju_proposal_summary_toc_v2.html",
+            "agent_wanju_profiling_trang_v1.html",
+        ],
         "guidance": (
             "이 자료는 최종 제안서가 아닙니다. 미확정 예산·대상 지역·KPI를 확정 사실처럼 "
             "답하지 말고, 관계자의 추가 요청과 누락 지적을 최종 제안서 반영 후보로 안내하세요."
@@ -1044,10 +1054,18 @@ class _VisibleTextParser(HTMLParser):
 @lru_cache(maxsize=2)
 def proposal_summary_text(page: Literal["inje", "wanju"]) -> str:
     config = PROPOSAL_SUMMARIES[page]
-    summary_path = Path(__file__).parent / "static" / config["filename"]
-    parser = _VisibleTextParser()
-    parser.feed(summary_path.read_text(encoding="utf-8"))
-    return "\n".join(parser.parts)
+    base = Path(__file__).parent / "static"
+    sections: list[str] = []
+    for filename in config["files"]:
+        path = base / filename
+        if not path.exists():
+            continue
+        parser = _VisibleTextParser()
+        parser.feed(path.read_text(encoding="utf-8"))
+        text = "\n".join(parser.parts)
+        if text.strip():
+            sections.append(f"=== {filename} ===\n{text}")
+    return "\n\n".join(sections)
 
 
 def build_luna_system_prompt(page: Literal["inje", "wanju"]) -> str:
