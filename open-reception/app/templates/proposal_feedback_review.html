@@ -201,7 +201,7 @@ function render(){
    button.dataset.escalation=next;button.disabled=record.escalation_status===next;
    button.addEventListener('click',async()=>{
     button.disabled=true;
-    try{await updateReview(record.id,{escalation_status:next})}
+    try{await updateReview(record.id,{escalation_status:next,reviewer_note:note.value})}
     catch(error){setError('Human 연결 상태가 저장되지 않았습니다. '+error.message);button.disabled=record.escalation_status===next}
    });
    noteActions.appendChild(button);
@@ -213,7 +213,7 @@ function render(){
    button.type='button';button.dataset.status=next;button.disabled=record.status===next;
    button.addEventListener('click',async()=>{
     button.disabled=true;
-    try{await updateReview(record.id,{status:next})}
+    try{await updateReview(record.id,{status:next,reviewer_note:note.value})}
     catch(error){setError('상태가 저장되지 않았습니다. '+error.message);button.disabled=record.status===next}
    });
    actions.appendChild(button);
