@@ -181,6 +181,11 @@ def test_workflow_changes_send_only_dirty_notes_and_preserve_filter_drafts():
     assert "if(draft&&draft.dirty)" in response.text
     assert "payload.review_revision=draft.baseRevision" in response.text
     assert "noteDrafts.delete(id)" in response.text
+    assert "noteDrafts.clear()" in response.text
+    assert "existingDraft.baseRevision=record.review_revision" in response.text
+    assert "currentDraft.value===submittedDraft.value" in response.text
+    assert "currentDraft.baseRevision=savedRecord.review_revision" in response.text
+    assert "다른 검토자의 최신 메모:" in response.text
     assert "{status:next,reviewer_note:note.value}" not in response.text
     assert "{escalation_status:next,reviewer_note:note.value}" not in response.text
     assert "작성 중인 메모는 보존됩니다." in response.text
