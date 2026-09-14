@@ -1,0 +1,151 @@
+{
+  "_meta": {
+    "title": "Mulberry Lab — 인제군 AI Initiative 데이터 참고 자료",
+    "version": "1.0",
+    "last_updated": "2026-09-14",
+    "usage": "Luna Q&A 지식 기반 참고용. 수치는 공개 통계 기반 추정치이며 공식 문서로 사용 금지.",
+    "author": "Mulberry Lab / TRANG Manager"
+  },
+
+  "region": {
+    "name": "인제군",
+    "province": "강원특별자치도",
+    "area_km2": 1646,
+    "admin_units": {
+      "읍": ["인제읍"],
+      "면": ["남면", "북면", "기린면", "서화면", "상남면"]
+    },
+    "population_2025": 27000,
+    "elderly_rate_pct": 30,
+    "single_household_rate_pct": 35,
+    "food_desert_estimated_population": 3000,
+    "distance_to_nearest_large_supermarket_min": 60
+  },
+
+  "pilot": {
+    "name": "AI Inje Initiative Phase 1",
+    "duration_days": 90,
+    "target_stores": 5,
+    "target_locations": ["인제읍", "남면"],
+    "osr_target_pct": 70,
+    "monthly_order_target": 100,
+    "hardware": "Raspberry Pi 5",
+    "stt_candidates": [
+      "Whisper Large V3 Turbo (809M)",
+      "Qwen3-ASR (ONNX + quantized)",
+      "Cohere Transcribe 2B",
+      "Parakeet TDT",
+      "SenseVoice"
+    ],
+    "stt_selection_criteria": {
+      "osr_min_pct": 70,
+      "rtf_max": 1.0,
+      "stage1": "AI Hub 강원도 방언 데이터 CER/WER 스크리닝",
+      "stage2": "실제 인제 어르신 음성 수집 OSR 최종 선정"
+    },
+    "timeline": {
+      "2026_Q3": "준비, 상점 파트너 모집, STT 선정",
+      "2026_Q4": "단말기 설치, 실운영 시작",
+      "2027_Q1": "결과 분석, 인제군 보고, 확장 결정"
+    }
+  },
+
+  "voice_ordering": {
+    "supported_categories": [
+      "쌀·잡곡", "채소·과일", "육류", "수산물", "두부·콩나물",
+      "계란·유제품", "면류·통조림", "음료·생수", "생필품·위생용품",
+      "인제 특산품 (황태·인삼·오대쌀)"
+    ],
+    "example_commands": [
+      "쌀 10킬로 주문해줘",
+      "두부 2모 갖다 줘",
+      "황태채 한 봉지",
+      "계란 한 판이랑 우유 두 개",
+      "인삼 한 뿌리 주세요"
+    ],
+    "osr_definition": "상품명 + 수량 + 단위 3개 슬롯 모두 정확해야 주문 성공",
+    "lexicon_contribution_formula": "OSR(렉시콘 ON) - OSR(렉시콘 OFF)",
+    "dialect_features": [
+      "강원도 영서 방언 발음 반영",
+      "어르신 특유의 단어 축약 패턴",
+      "숫자 읽기 방식 (한자어·순우리말 혼용)"
+    ]
+  },
+
+  "legal_basis": {
+    "primary": {
+      "law": "디지털포용법",
+      "act_number": "법률 제20672호",
+      "effective_date": "2026-01-22",
+      "key_article": "제9조 — 지방자치단체장 연간 시행계획 수립 및 과기부 보고 의무",
+      "strength": "★★★ 결정적"
+    },
+    "secondary": [
+      {
+        "law": "무인정보단말기 접근성 의무",
+        "effective_date": "2025-03-27",
+        "note": "키오스크 운영자 의무. 당사 단말기는 직접 해당 없으나 배경 논거로 활용"
+      },
+      {
+        "law": "지능정보화기본법 제46조",
+        "note": "국가·지자체·공공기관의 접근성 의무. 민간 직접 의무 없음 — 보조금 근거로 활용"
+      }
+    ],
+    "moat_logic": "지자체 1개 사업 → 식품사막 해소 + 디지털포용 보고 + 고령자 복지 = 3개 정책 목표 동시 달성"
+  },
+
+  "team": {
+    "re_eul": {
+      "role": "대표이사",
+      "responsibilities": ["총괄", "대외 협력", "전략 결정"]
+    },
+    "luna": {
+      "role": "Resonance AI 전문 연구위원 (리셉션 모듈)",
+      "responsibilities": ["Q&A 답변", "방문객 안내", "프로젝트 정보 제공"],
+      "channel": "Open Reception 웹사이트, 카카오 채널"
+    },
+    "koda": {
+      "role": "기술 개발",
+      "responsibilities": ["백엔드 API", "GitHub 이슈 관리", "단말기 소프트웨어"],
+      "current_tasks": ["Issue #74 — Luna Q&A API 구현", "STT 평가 하네스"]
+    },
+    "trang": {
+      "full_name": "Nguyen Trang",
+      "role": "Operation Manager",
+      "responsibilities": ["프로젝트 운영", "파일 관리", "보고서 작성", "연구 자료 정리"]
+    },
+    "fama": {
+      "role": "데이터 분석",
+      "responsibilities": ["식품사막 매핑", "KOSIS 데이터 수집", "FDI(식품사막지수) 산출"]
+    },
+    "sil_eum": {
+      "role": "SIL 이음 — 시스템 무결성 리드",
+      "responsibilities": ["멤버 간 연계", "문서 검증", "법령 근거 검토"]
+    }
+  },
+
+  "github": {
+    "repo": "wooriapt79/mulberry_ecosystem_AgenticAI",
+    "static_folder": "open-reception/app/static",
+    "key_issues": {
+      "74": "[KODA] Luna Q&A — Static 파일 기반 Claude API 연동",
+      "56": "Luna 검증 결과 수신 및 TRANG 최종 검토 보고서",
+      "61": "Mulberry 식품사막화 맵 설계 — KOSIS Open API",
+      "99": "KOSIS 데이터 수집 스크립트",
+      "100": "인제군 파일럿 실데이터 FDI 산출",
+      "161": "카카오 채널 서비스 명세서 PPT"
+    }
+  },
+
+  "railway": {
+    "note": "배포 환경 민감정보는 이 파일에 포함하지 않음. CLAUDE.md 참조",
+    "service": "open-reception (dynamic-happiness)",
+    "status": "ACTIVE"
+  },
+
+  "contact": {
+    "luna_chat": "이 사이트 채팅",
+    "kakao": "카카오 채널 — 인제 Mulberry",
+    "github_issues": "https://github.com/wooriapt79/mulberry_ecosystem_AgenticAI/issues"
+  }
+}
