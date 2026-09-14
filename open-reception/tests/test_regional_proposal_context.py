@@ -186,6 +186,13 @@ def test_workflow_changes_send_only_dirty_notes_and_preserve_filter_drafts():
     assert "if(!isActiveSession(requestToken))return;" in response.text
     assert "finally{if(isActiveSession(requestToken))showLogin" in response.text
     assert "authHeaders({},requestToken)" in response.text
+    assert "let loginRequestSequence=0;" in response.text
+    assert "if(requestSequence!==loginRequestSequence)return;" in response.text
+    blob_read = response.text.index("const blob=await response.blob();")
+    assert blob_read >= 0
+    assert response.text.index("if(!isActiveSession(requestToken))return;", blob_read) > blob_read
+    assert "catch(error){if(isActiveSession(requestToken))setError(error.message)}" in response.text
+    assert "finally{if(isActiveSession(requestToken))button.disabled=false}" in response.text
     assert "existingDraft.baseRevision=record.review_revision" in response.text
     assert "currentDraft.value===submittedDraft.value" in response.text
     assert "currentDraft.baseRevision=savedRecord.review_revision" in response.text
