@@ -170,3 +170,12 @@ def test_csv_export_neutralizes_spreadsheet_formulas():
 
     assert csv_safe_cell("일반 질의") == "일반 질의"
     assert csv_safe_cell(None) == ""
+
+
+def test_workflow_changes_preserve_the_current_review_note():
+    with TestClient(app) as client:
+        response = client.get("/admin/proposal-feedback-review")
+
+    assert response.status_code == 200
+    assert "{status:next,reviewer_note:note.value}" in response.text
+    assert "{escalation_status:next,reviewer_note:note.value}" in response.text
