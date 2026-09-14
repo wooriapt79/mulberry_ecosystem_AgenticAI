@@ -148,3 +148,16 @@ def test_feedback_review_discards_superseded_filters_and_reports_failed_updates(
     assert "feedbackRequestSequence" in response.text
     assert "controller.signal" in response.text
     assert "상태가 저장되지 않았습니다." in response.text
+
+
+def test_feedback_review_phase_two_controls_are_present_and_text_safe():
+    with TestClient(app) as client:
+        response = client.get("/admin/proposal-feedback-review")
+
+    assert response.status_code == 200
+    assert "담당자 검토 메모" in response.text
+    assert "Human 연결 요청" in response.text
+    assert "제안서 반영 후보만" in response.text
+    assert "/api/proposal-feedback/export" in response.text
+    assert "textContent" in response.text
+    assert "innerHTML" not in response.text
