@@ -24,7 +24,7 @@ h1{font-size:24px;margin:0 0 6px}
 .login h2{margin:0 0 8px;font-size:20px}
 .field{display:flex;flex-direction:column;gap:6px;margin-top:14px}
 .field label{font-size:12px;font-weight:700;color:var(--muted)}
-.field input,.filters select{width:100%;border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px 11px;color:var(--text)}
+.field input,.filters select,.review-note{width:100%;border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px 11px;color:var(--text)}
 .login .btn{width:100%;margin-top:18px;min-height:44px}
 .message{min-height:20px;margin-top:12px;font-size:12px;color:var(--red)}
 .hidden{display:none!important}
@@ -55,6 +55,10 @@ h1{font-size:24px;margin:0 0 6px}
 .actions button[data-status="reviewing"]{color:var(--amber)}
 .actions button[data-status="incorporated"]{color:var(--green)}
 .actions button[data-status="deferred"]{color:var(--red)}
+.actions button[data-escalation="requested"]{color:var(--red)}
+.review-note{width:100%;min-height:88px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;line-height:1.6;margin:0 0 8px}
+.review-tools{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.review-tools h3{margin-top:0}
 .error-banner{margin-bottom:12px;padding:11px 13px;border-radius:8px;background:#fef2f2;color:var(--red);font-size:12px}
 @media(max-width:820px){
  .shell{padding:16px 12px}.top{flex-direction:column}.filters{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}
@@ -78,7 +82,7 @@ h1{font-size:24px;margin:0 0 6px}
 <section id="reviewView" class="hidden">
 <div class="top">
 <div><h1>제안서 피드백 검토함</h1><p class="subtitle">인제·완주 Q&A와 파일 분석에서 접수된 검토자료입니다. 제안서 반영은 Human Approval 후 처리하세요.</p></div>
-<div class="top-actions"><button class="btn" id="refreshBtn" type="button">새로고침</button><button class="btn" id="logoutBtn" type="button">로그아웃</button></div>
+<div class="top-actions"><button class="btn" id="exportBtn" type="button">CSV 내보내기</button><button class="btn" id="refreshBtn" type="button">새로고침</button><button class="btn" id="logoutBtn" type="button">로그아웃</button></div>
 </div>
 <div id="errorBanner" class="error-banner hidden" role="alert"></div>
 <div class="filters">
@@ -86,6 +90,8 @@ h1{font-size:24px;margin:0 0 6px}
 <select id="statusFilter" aria-label="처리 상태"><option value="">전체 상태</option><option value="received">접수</option><option value="reviewing">검토 중</option><option value="incorporated">반영</option><option value="deferred">보류</option></select>
 <select id="categoryFilter" aria-label="분류"><option value="">전체 분류</option><option value="budget">예산</option><option value="schedule">일정</option><option value="kpi">KPI</option><option value="governance">거버넌스</option><option value="evidence">근거자료</option><option value="general">일반</option></select>
 <select id="typeFilter" aria-label="요청 유형"><option value="">전체 유형</option><option value="proposal_update">제안서 수정요청</option><option value="question">일반 질문</option></select>
+<select id="escalationFilter" aria-label="Human 연결"><option value="">전체 Human 연결</option><option value="none">연결 없음</option><option value="requested">연결 요청</option><option value="resolved">연결 완료</option></select>
+<label class="check"><input id="candidateOnly" type="checkbox"> 제안서 반영 후보만</label>
 <label class="check"><input id="todayOnly" type="checkbox" checked> 오늘 접수만 보기</label>
 </div>
 <div class="stats">
@@ -103,6 +109,7 @@ const TOKEN_KEY='proposal_review_token';
 const statusLabels={received:'접수',reviewing:'검토 중',incorporated:'반영',deferred:'보류'};
 const categoryLabels={budget:'예산',schedule:'일정',kpi:'KPI',governance:'거버넌스',evidence:'근거자료',general:'일반'};
 const sourceLabels={chat:'Q&A',file_analysis:'파일 분석'};
+const escalationLabels={none:'연결 없음',requested:'Human 연결 요청',resolved:'연결 완료'};
 const loginView=document.getElementById('loginView');
 const reviewView=document.getElementById('reviewView');
 const loginMessage=document.getElementById('loginMessage');
@@ -126,8 +133,9 @@ function authHeaders(extra={}){return Object.assign({'Authorization':'Bearer '+t
 function todayStartIso(){const d=new Date();d.setHours(0,0,0,0);return d.toISOString()}
 function queryString(){
  const params=new URLSearchParams();
- const fields=[['region','regionFilter'],['review_status','statusFilter'],['category','categoryFilter'],['request_type','typeFilter']];
+ const fields=[['region','regionFilter'],['review_status','statusFilter'],['category','categoryFilter'],['request_type','typeFilter'],['escalation_status','escalationFilter']];
  fields.forEach(([key,id])=>{const value=document.getElementById(id).value;if(value)params.set(key,value)});
+ if(document.getElementById('candidateOnly').checked)params.set('candidate_only','true');
  if(document.getElementById('todayOnly').checked)params.set('created_from',todayStartIso());
  return params.toString();
 }
@@ -174,13 +182,38 @@ function render(){
   detail.appendChild(el('p','content',record.question));
   detail.appendChild(el('h3','','Luna 답변·분석 결과'));
   detail.appendChild(el('p','content',record.response));
+  const reviewTools=el('div','review-tools');
+  reviewTools.appendChild(el('h3','','담당자 검토 메모'));
+  const note=document.createElement('textarea');
+  note.className='review-note';note.maxLength=2000;note.value=record.reviewer_note||'';
+  note.setAttribute('aria-label','담당자 검토 메모');
+  reviewTools.appendChild(note);
+  const noteActions=el('div','actions');
+  const saveNote=el('button','','메모 저장');saveNote.type='button';
+  saveNote.addEventListener('click',async()=>{
+   saveNote.disabled=true;
+   try{await updateReview(record.id,{reviewer_note:note.value})}
+   catch(error){setError('메모가 저장되지 않았습니다. '+error.message);saveNote.disabled=false}
+  });
+  noteActions.appendChild(saveNote);
+  ['requested','resolved','none'].forEach(next=>{
+   const button=el('button','',escalationLabels[next]);button.type='button';
+   button.dataset.escalation=next;button.disabled=record.escalation_status===next;
+   button.addEventListener('click',async()=>{
+    button.disabled=true;
+    try{await updateReview(record.id,{escalation_status:next})}
+    catch(error){setError('Human 연결 상태가 저장되지 않았습니다. '+error.message);button.disabled=record.escalation_status===next}
+   });
+   noteActions.appendChild(button);
+  });
+  reviewTools.appendChild(noteActions);detail.appendChild(reviewTools);
   const actions=el('div','actions');
   ['received','reviewing','incorporated','deferred'].forEach(next=>{
    const button=el('button','',statusLabels[next]);
    button.type='button';button.dataset.status=next;button.disabled=record.status===next;
    button.addEventListener('click',async()=>{
     button.disabled=true;
-    try{await updateStatus(record.id,next)}
+    try{await updateReview(record.id,{status:next})}
     catch(error){setError('상태가 저장되지 않았습니다. '+error.message);button.disabled=record.status===next}
    });
    actions.appendChild(button);
@@ -218,10 +251,10 @@ async function loadFeedback(){
   if(requestSequence===feedbackRequestSequence)activeFeedbackController=null;
  }
 }
-async function updateStatus(id,status){
+async function updateReview(id,payload){
  setError('');
  const response=await fetch('/api/proposal-feedback/'+encodeURIComponent(id),{
-  method:'PATCH',headers:authHeaders({'Content-Type':'application/json'}),body:JSON.stringify({status})
+  method:'PATCH',headers:authHeaders({'Content-Type':'application/json'}),body:JSON.stringify(payload)
  });
  if(response.status===401||response.status===403){showLogin('세션이 만료됐거나 검토 권한이 없습니다.');return}
  if(!response.ok)throw new Error('처리 상태를 변경하지 못했습니다.');
@@ -236,11 +269,23 @@ document.getElementById('loginForm').addEventListener('submit',async event=>{
   document.getElementById('password').value='';loginMessage.textContent='';await loadFeedback();
  }catch(error){loginMessage.textContent='로그인 요청을 처리하지 못했습니다.'}
 });
+document.getElementById('exportBtn').addEventListener('click',async()=>{
+ setError('');
+ const button=document.getElementById('exportBtn');button.disabled=true;
+ try{
+  const response=await fetch('/api/proposal-feedback/export?'+queryString(),{headers:authHeaders(),cache:'no-store'});
+  if(response.status===401||response.status===403){showLogin('세션이 만료됐거나 검토 권한이 없습니다.');return}
+  if(!response.ok)throw new Error('CSV 파일을 만들지 못했습니다.');
+  const blob=await response.blob();const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');link.href=url;link.download='proposal-feedback.csv';
+  document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+ }catch(error){setError(error.message)}finally{button.disabled=false}
+});
 document.getElementById('refreshBtn').addEventListener('click',()=>loadFeedback().catch(e=>setError(e.message)));
 document.getElementById('logoutBtn').addEventListener('click',async()=>{
  try{await fetch('/auth/logout',{method:'POST',headers:authHeaders()})}finally{showLogin('로그아웃했습니다.')}
 });
-['regionFilter','statusFilter','categoryFilter','typeFilter','todayOnly'].forEach(id=>document.getElementById(id).addEventListener('change',()=>loadFeedback().catch(e=>setError(e.message))));
+['regionFilter','statusFilter','categoryFilter','typeFilter','escalationFilter','candidateOnly','todayOnly'].forEach(id=>document.getElementById(id).addEventListener('change',()=>loadFeedback().catch(e=>setError(e.message))));
 if(token())loadFeedback().catch(e=>{showReview();setError(e.message)});else showLogin();
 </script>
 </body>
