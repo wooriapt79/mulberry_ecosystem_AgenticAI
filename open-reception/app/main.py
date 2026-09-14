@@ -1229,6 +1229,13 @@ def list_proposal_feedback(
     ]
 
 
+def csv_safe_cell(value) -> str:
+    text = "" if value is None else str(value)
+    if text.startswith(("\t", "\r")) or text.lstrip().startswith(("=", "+", "-", "@")):
+        return "'" + text
+    return text
+
+
 @app.get("/api/proposal-feedback/export")
 def export_proposal_feedback(
     region: Literal["inje", "wanju"] | None = None,
@@ -1273,9 +1280,12 @@ def export_proposal_feedback(
     ])
     for item in records:
         writer.writerow([
-            item.id, item.region, item.source, item.category, item.request_type,
-            item.question, item.response, item.status, item.reviewer_note,
-            item.escalation_status, item.reviewed_at, item.created_at,
+            csv_safe_cell(value)
+            for value in (
+                item.id, item.region, item.source, item.category, item.request_type,
+                item.question, item.response, item.status, item.reviewer_note,
+                item.escalation_status, item.reviewed_at, item.created_at,
+            )
         ])
     content = "\ufeff" + output.getvalue()
     audit(
@@ -1304,7 +1314,11 @@ def update_proposal_feedback_status(
     admin: User = Depends(require_permission("proposal:review")),
     db: Session = Depends(db_session),
 ):
-    feedback = db.get(ProposalFeedback, feedback_id)
+    feedback = db.scalar(
+        select(ProposalFeedback)
+        .where(ProposalFeedback.id == feedback_id)
+        .with_for_update()
+    )
     if feedback is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Proposal feedback not found")
     if payload.status is None and payload.reviewer_note is None and payload.escalation_status is None:
