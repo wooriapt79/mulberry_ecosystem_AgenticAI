@@ -188,4 +188,4 @@ def test_workflow_changes_send_only_dirty_notes_and_preserve_filter_drafts():
     assert "다른 검토자의 최신 메모:" in response.text
     assert "{status:next,reviewer_note:note.value}" not in response.text
     assert "{escalation_status:next,reviewer_note:note.value}" not in response.text
-    assert "작성 중인 메모는 보존됩니다." in response.text
+    assert "작성 중인 초안은 유지됐습니다." in response.text
