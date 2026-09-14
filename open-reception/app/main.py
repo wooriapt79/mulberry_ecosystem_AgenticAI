@@ -609,6 +609,14 @@ def wanju_page(request: Request):
     return _templates.TemplateResponse("luna_site_renewal_white_wanju.html", {"request": request})
 
 
+@app.get("/admin/proposal-feedback-review", response_class=HTMLResponse)
+def proposal_feedback_review_page(request: Request):
+    response = _templates.TemplateResponse("proposal_feedback_review.html", {"request": request})
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return response
+
+
 @app.post("/auth/bootstrap", status_code=201)
 def bootstrap_admin(payload: BootstrapInput, db: Session = Depends(db_session)):
     configured = os.getenv("ADMIN_BOOTSTRAP_TOKEN")
@@ -1154,6 +1162,9 @@ class ProposalFeedbackStatusInput(BaseModel):
 def list_proposal_feedback(
     region: Literal["inje", "wanju"] | None = None,
     review_status: Literal["received", "reviewing", "incorporated", "deferred"] | None = None,
+    category: Literal["budget", "schedule", "kpi", "governance", "evidence", "general"] | None = None,
+    request_type: Literal["question", "proposal_update"] | None = None,
+    created_from: datetime | None = None,
     admin: User = Depends(require_permission("proposal:review")),
     db: Session = Depends(db_session),
 ):
@@ -1162,6 +1173,12 @@ def list_proposal_feedback(
         query = query.where(ProposalFeedback.region == region)
     if review_status:
         query = query.where(ProposalFeedback.status == review_status)
+    if category:
+        query = query.where(ProposalFeedback.category == category)
+    if request_type:
+        query = query.where(ProposalFeedback.request_type == request_type)
+    if created_from:
+        query = query.where(ProposalFeedback.created_at >= aware(created_from))
     records = db.scalars(
         query.order_by(ProposalFeedback.created_at.desc()).limit(200)
     ).all()
