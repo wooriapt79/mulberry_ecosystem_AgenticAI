@@ -195,6 +195,10 @@ def test_workflow_changes_send_only_dirty_notes_and_preserve_filter_drafts():
     assert response.text.index("if(!isActiveSession(requestToken))return;", blob_read) > blob_read
     assert "catch(error){if(isActiveSession(requestToken))setError(error.message)}" in response.text
     assert "finally{if(isActiveSession(requestToken))button.disabled=false}" in response.text
+    assert "async function updateReview(id,payload,submittedDraft=null,requestToken=token())" in response.text
+    assert "},submittedDraft,requestToken);" in response.text
+    assert "if(error.name==='AbortError'||!isActiveSession(requestToken))return;" in response.text
+    assert response.text.count("if(!isActiveSession(requestToken))return;") >= 7
     assert "existingDraft.baseRevision=record.review_revision" in response.text
     assert "currentDraft.value===submittedDraft.value" in response.text
     assert "currentDraft.baseRevision=savedRecord.review_revision" in response.text
