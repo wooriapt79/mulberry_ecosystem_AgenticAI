@@ -9,6 +9,7 @@ from app.main import (
     app,
     build_luna_system_prompt,
     classify_proposal_feedback,
+    csv_safe_cell,
     list_proposal_feedback,
     proposal_summary_text,
     record_proposal_feedback,
@@ -148,3 +149,60 @@ def test_feedback_review_discards_superseded_filters_and_reports_failed_updates(
     assert "feedbackRequestSequence" in response.text
     assert "controller.signal" in response.text
     assert "상태가 저장되지 않았습니다." in response.text
+
+
+def test_feedback_review_phase_two_controls_are_present_and_text_safe():
+    with TestClient(app) as client:
+        response = client.get("/admin/proposal-feedback-review")
+
+    assert response.status_code == 200
+    assert "담당자 검토 메모" in response.text
+    assert "Human 연결 요청" in response.text
+    assert "제안서 반영 후보만" in response.text
+    assert "/api/proposal-feedback/export" in response.text
+    assert "textContent" in response.text
+    assert "innerHTML" not in response.text
+
+
+def test_csv_export_neutralizes_spreadsheet_formulas():
+    for value in ("=1+1", "+cmd", "-2+3", "@SUM(A1:A2)", "  =HYPERLINK('x')", "\t=1"):
+        assert csv_safe_cell(value).startswith("'")
+
+    assert csv_safe_cell("일반 질의") == "일반 질의"
+    assert csv_safe_cell(None) == ""
+
+
+def test_workflow_changes_send_only_dirty_notes_and_preserve_filter_drafts():
+    with TestClient(app) as client:
+        response = client.get("/admin/proposal-feedback-review")
+
+    assert response.status_code == 200
+    assert "const noteDrafts=new Map()" in response.text
+    assert "if(draft&&draft.dirty)" in response.text
+    assert "payload.review_revision=draft.baseRevision" in response.text
+    assert "noteDrafts.delete(id)" in response.text
+    assert "noteDrafts.clear()" in response.text
+    assert "function isActiveSession(requestToken)" in response.text
+    assert "if(!isActiveSession(requestToken))return;" in response.text
+    assert "finally{if(isActiveSession(requestToken))showLogin" in response.text
+    assert "authHeaders({},requestToken)" in response.text
+    assert "let loginRequestSequence=0;" in response.text
+    assert "loginRequestSequence++;" in response.text
+    assert "document.getElementById('exportBtn').disabled=false;" in response.text
+    assert "if(requestSequence!==loginRequestSequence)return;" in response.text
+    blob_read = response.text.index("const blob=await response.blob();")
+    assert blob_read >= 0
+    assert response.text.index("if(!isActiveSession(requestToken))return;", blob_read) > blob_read
+    assert "catch(error){if(isActiveSession(requestToken))setError(error.message)}" in response.text
+    assert "finally{if(isActiveSession(requestToken))button.disabled=false}" in response.text
+    assert "async function updateReview(id,payload,submittedDraft=null,requestToken=token())" in response.text
+    assert "},submittedDraft,requestToken);" in response.text
+    assert "if(error.name==='AbortError'||!isActiveSession(requestToken))return;" in response.text
+    assert response.text.count("if(!isActiveSession(requestToken))return;") >= 7
+    assert "existingDraft.baseRevision=record.review_revision" in response.text
+    assert "currentDraft.value===submittedDraft.value" in response.text
+    assert "currentDraft.baseRevision=savedRecord.review_revision" in response.text
+    assert "다른 검토자의 최신 메모:" in response.text
+    assert "{status:next,reviewer_note:note.value}" not in response.text
+    assert "{escalation_status:next,reviewer_note:note.value}" not in response.text
+    assert "작성 중인 초안은 유지됐습니다." in response.text

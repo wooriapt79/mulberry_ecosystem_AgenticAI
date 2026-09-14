@@ -74,6 +74,7 @@ def test_bootstrap_is_single_use():
 def test_proposal_feedback_review_requires_authentication():
     with TestClient(app) as client:
         assert client.get("/api/proposal-feedback").status_code == 401
+        assert client.get("/api/proposal-feedback/export").status_code == 401
 
 
 def test_bootstrap_consumption_survives_admin_role_change():

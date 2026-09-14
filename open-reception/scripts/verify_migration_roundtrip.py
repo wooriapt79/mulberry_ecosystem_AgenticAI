@@ -1,4 +1,4 @@
-"""Verify that the configured database can downgrade to base and return to v0.4."""
+"""Verify that the configured database can downgrade to base and return to the current schema."""
 import os
 from pathlib import Path
 
@@ -53,4 +53,5 @@ with engine.connect() as connection:
 assert missing_timestamp_count == 0
 assert backfill_count == passport_count
 assert "proposal_feedback" in inspect(engine).get_table_names()
-assert revision == "0003_feedback"
+assert {"reviewer_note", "escalation_status"} <= columns("proposal_feedback")
+assert revision == "0004_feedback_review"

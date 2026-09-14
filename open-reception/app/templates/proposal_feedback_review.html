@@ -24,7 +24,7 @@ h1{font-size:24px;margin:0 0 6px}
 .login h2{margin:0 0 8px;font-size:20px}
 .field{display:flex;flex-direction:column;gap:6px;margin-top:14px}
 .field label{font-size:12px;font-weight:700;color:var(--muted)}
-.field input,.filters select{width:100%;border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px 11px;color:var(--text)}
+.field input,.filters select,.review-note{width:100%;border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px 11px;color:var(--text)}
 .login .btn{width:100%;margin-top:18px;min-height:44px}
 .message{min-height:20px;margin-top:12px;font-size:12px;color:var(--red)}
 .hidden{display:none!important}
@@ -55,6 +55,11 @@ h1{font-size:24px;margin:0 0 6px}
 .actions button[data-status="reviewing"]{color:var(--amber)}
 .actions button[data-status="incorporated"]{color:var(--green)}
 .actions button[data-status="deferred"]{color:var(--red)}
+.actions button[data-escalation="requested"]{color:var(--red)}
+.review-note{width:100%;min-height:88px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;line-height:1.6;margin:0 0 8px}
+.review-tools{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.review-tools h3{margin-top:0}
+.note-conflict{margin:0 0 10px;padding:10px;border:1px solid #f59e0b;border-radius:8px;background:#fffbeb;color:var(--amber);font-size:12px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
 .error-banner{margin-bottom:12px;padding:11px 13px;border-radius:8px;background:#fef2f2;color:var(--red);font-size:12px}
 @media(max-width:820px){
  .shell{padding:16px 12px}.top{flex-direction:column}.filters{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}
@@ -78,7 +83,7 @@ h1{font-size:24px;margin:0 0 6px}
 <section id="reviewView" class="hidden">
 <div class="top">
 <div><h1>제안서 피드백 검토함</h1><p class="subtitle">인제·완주 Q&A와 파일 분석에서 접수된 검토자료입니다. 제안서 반영은 Human Approval 후 처리하세요.</p></div>
-<div class="top-actions"><button class="btn" id="refreshBtn" type="button">새로고침</button><button class="btn" id="logoutBtn" type="button">로그아웃</button></div>
+<div class="top-actions"><button class="btn" id="exportBtn" type="button">CSV 내보내기</button><button class="btn" id="refreshBtn" type="button">새로고침</button><button class="btn" id="logoutBtn" type="button">로그아웃</button></div>
 </div>
 <div id="errorBanner" class="error-banner hidden" role="alert"></div>
 <div class="filters">
@@ -86,6 +91,8 @@ h1{font-size:24px;margin:0 0 6px}
 <select id="statusFilter" aria-label="처리 상태"><option value="">전체 상태</option><option value="received">접수</option><option value="reviewing">검토 중</option><option value="incorporated">반영</option><option value="deferred">보류</option></select>
 <select id="categoryFilter" aria-label="분류"><option value="">전체 분류</option><option value="budget">예산</option><option value="schedule">일정</option><option value="kpi">KPI</option><option value="governance">거버넌스</option><option value="evidence">근거자료</option><option value="general">일반</option></select>
 <select id="typeFilter" aria-label="요청 유형"><option value="">전체 유형</option><option value="proposal_update">제안서 수정요청</option><option value="question">일반 질문</option></select>
+<select id="escalationFilter" aria-label="Human 연결"><option value="">전체 Human 연결</option><option value="none">연결 없음</option><option value="requested">연결 요청</option><option value="resolved">연결 완료</option></select>
+<label class="check"><input id="candidateOnly" type="checkbox"> 제안서 반영 후보만</label>
 <label class="check"><input id="todayOnly" type="checkbox" checked> 오늘 접수만 보기</label>
 </div>
 <div class="stats">
@@ -103,17 +110,26 @@ const TOKEN_KEY='proposal_review_token';
 const statusLabels={received:'접수',reviewing:'검토 중',incorporated:'반영',deferred:'보류'};
 const categoryLabels={budget:'예산',schedule:'일정',kpi:'KPI',governance:'거버넌스',evidence:'근거자료',general:'일반'};
 const sourceLabels={chat:'Q&A',file_analysis:'파일 분석'};
+const escalationLabels={none:'연결 없음',requested:'Human 연결 요청',resolved:'연결 완료'};
 const loginView=document.getElementById('loginView');
 const reviewView=document.getElementById('reviewView');
 const loginMessage=document.getElementById('loginMessage');
 const errorBanner=document.getElementById('errorBanner');
 let records=[];
+const noteDrafts=new Map();
 let activeFeedbackController=null;
 let feedbackRequestSequence=0;
+let loginRequestSequence=0;
 
 function token(){return sessionStorage.getItem(TOKEN_KEY)||''}
 function showLogin(message=''){
  sessionStorage.removeItem(TOKEN_KEY);
+ noteDrafts.clear();
+ feedbackRequestSequence++;
+ loginRequestSequence++;
+ if(activeFeedbackController)activeFeedbackController.abort();
+ activeFeedbackController=null;
+ document.getElementById('exportBtn').disabled=false;
  loginView.classList.remove('hidden');
  reviewView.classList.add('hidden');
  loginMessage.textContent=message;
@@ -122,12 +138,14 @@ function showReview(){
  loginView.classList.add('hidden');
  reviewView.classList.remove('hidden');
 }
-function authHeaders(extra={}){return Object.assign({'Authorization':'Bearer '+token()},extra)}
+function authHeaders(extra={},requestToken=token()){return Object.assign({'Authorization':'Bearer '+requestToken},extra)}
+function isActiveSession(requestToken){return Boolean(requestToken)&&token()===requestToken}
 function todayStartIso(){const d=new Date();d.setHours(0,0,0,0);return d.toISOString()}
 function queryString(){
  const params=new URLSearchParams();
- const fields=[['region','regionFilter'],['review_status','statusFilter'],['category','categoryFilter'],['request_type','typeFilter']];
+ const fields=[['region','regionFilter'],['review_status','statusFilter'],['category','categoryFilter'],['request_type','typeFilter'],['escalation_status','escalationFilter']];
  fields.forEach(([key,id])=>{const value=document.getElementById(id).value;if(value)params.set(key,value)});
+ if(document.getElementById('candidateOnly').checked)params.set('candidate_only','true');
  if(document.getElementById('todayOnly').checked)params.set('created_from',todayStartIso());
  return params.toString();
 }
@@ -174,14 +192,90 @@ function render(){
   detail.appendChild(el('p','content',record.question));
   detail.appendChild(el('h3','','Luna 답변·분석 결과'));
   detail.appendChild(el('p','content',record.response));
+  const reviewTools=el('div','review-tools');
+  reviewTools.appendChild(el('h3','','담당자 검토 메모'));
+  const note=document.createElement('textarea');
+  const existingDraft=noteDrafts.get(record.id);
+  if(existingDraft&&existingDraft.baseRevision!==record.review_revision){
+   existingDraft.baseRevision=record.review_revision;
+   existingDraft.conflicted=true;
+   existingDraft.serverValue=record.reviewer_note||'';
+  }
+  note.className='review-note';note.maxLength=2000;
+  note.value=existingDraft?existingDraft.value:(record.reviewer_note||'');
+  note.dataset.baseRevision=existingDraft?existingDraft.baseRevision:record.review_revision;
+  note.setAttribute('aria-label','담당자 검토 메모');
+  reviewTools.appendChild(note);
+  if(existingDraft&&existingDraft.conflicted){
+   reviewTools.appendChild(el('div','note-conflict','다른 검토자의 최신 메모:\n'+existingDraft.serverValue+'\n\n작성 중인 초안은 유지됐습니다. 내용을 비교한 뒤 메모 저장을 누르세요.'));
+  }
+  const noteActions=el('div','actions');
+  const saveNote=el('button','','메모 저장');saveNote.type='button';
+  saveNote.disabled=!(existingDraft&&existingDraft.dirty);
+  note.addEventListener('input',()=>{
+   const current=noteDrafts.get(record.id);
+   noteDrafts.set(record.id,{value:note.value,baseRevision:note.dataset.baseRevision,dirty:true,conflicted:current?.conflicted||false,serverValue:current?.serverValue||''});
+   saveNote.disabled=false;
+  });
+  saveNote.addEventListener('click',async()=>{
+   saveNote.disabled=true;
+   const requestToken=token();
+   try{
+    const submittedDraft={value:note.value,baseRevision:note.dataset.baseRevision};
+    await updateReview(record.id,{
+     reviewer_note:submittedDraft.value,
+     review_revision:submittedDraft.baseRevision
+    },submittedDraft,requestToken);
+   }
+   catch(error){
+    if(!isActiveSession(requestToken))return;
+    setError('메모가 저장되지 않았습니다. '+error.message);saveNote.disabled=false;
+   }
+  });
+  noteActions.appendChild(saveNote);
+  ['requested','resolved','none'].forEach(next=>{
+   const button=el('button','',escalationLabels[next]);button.type='button';
+   button.dataset.escalation=next;button.disabled=record.escalation_status===next;
+   button.addEventListener('click',async()=>{
+    button.disabled=true;
+    const requestToken=token();
+    try{
+    const draft=noteDrafts.get(record.id);
+    const payload={escalation_status:next};
+    if(draft&&draft.dirty){
+     payload.reviewer_note=draft.value;
+     payload.review_revision=draft.baseRevision;
+    }
+    await updateReview(record.id,payload,draft&&draft.dirty?{value:draft.value,baseRevision:draft.baseRevision}:null,requestToken);
+   }
+    catch(error){
+     if(!isActiveSession(requestToken))return;
+     setError('Human 연결 상태가 저장되지 않았습니다. '+error.message);button.disabled=record.escalation_status===next;
+    }
+   });
+   noteActions.appendChild(button);
+  });
+  reviewTools.appendChild(noteActions);detail.appendChild(reviewTools);
   const actions=el('div','actions');
   ['received','reviewing','incorporated','deferred'].forEach(next=>{
    const button=el('button','',statusLabels[next]);
    button.type='button';button.dataset.status=next;button.disabled=record.status===next;
    button.addEventListener('click',async()=>{
     button.disabled=true;
-    try{await updateStatus(record.id,next)}
-    catch(error){setError('상태가 저장되지 않았습니다. '+error.message);button.disabled=record.status===next}
+    const requestToken=token();
+    try{
+    const draft=noteDrafts.get(record.id);
+    const payload={status:next};
+    if(draft&&draft.dirty){
+     payload.reviewer_note=draft.value;
+     payload.review_revision=draft.baseRevision;
+    }
+    await updateReview(record.id,payload,draft&&draft.dirty?{value:draft.value,baseRevision:draft.baseRevision}:null,requestToken);
+   }
+    catch(error){
+     if(!isActiveSession(requestToken))return;
+     setError('상태가 저장되지 않았습니다. '+error.message);button.disabled=record.status===next;
+    }
    });
    actions.appendChild(button);
   });
@@ -199,48 +293,93 @@ async function loadFeedback(){
  const requestSequence=++feedbackRequestSequence;
  if(activeFeedbackController)activeFeedbackController.abort();
  const controller=new AbortController();
+ const requestToken=token();
  activeFeedbackController=controller;
  try{
-  const response=await fetch('/api/proposal-feedback?'+queryString(),{headers:authHeaders(),cache:'no-store',signal:controller.signal});
-  if(requestSequence!==feedbackRequestSequence)return;
+  const response=await fetch('/api/proposal-feedback?'+queryString(),{headers:authHeaders({},requestToken),cache:'no-store',signal:controller.signal});
+  if(requestSequence!==feedbackRequestSequence||!isActiveSession(requestToken))return;
   if(response.status===401||response.status===403){showLogin('세션이 만료됐거나 검토 권한이 없습니다.');return}
   if(!response.ok)throw new Error('접수자료를 불러오지 못했습니다.');
   const nextRecords=await response.json();
-  if(requestSequence!==feedbackRequestSequence)return;
+  if(requestSequence!==feedbackRequestSequence||!isActiveSession(requestToken))return;
   records=nextRecords;
   showReview();render();
   document.getElementById('scopeLabel').textContent=(document.getElementById('todayOnly').checked?'오늘 접수 · ':'')+'최근 200건 기준';
   document.getElementById('loadedAt').textContent='확인 '+formatTime(new Date().toISOString());
  }catch(error){
-  if(error.name==='AbortError')return;
+  if(error.name==='AbortError'||!isActiveSession(requestToken))return;
   throw error;
  }finally{
   if(requestSequence===feedbackRequestSequence)activeFeedbackController=null;
  }
 }
-async function updateStatus(id,status){
+async function updateReview(id,payload,submittedDraft=null,requestToken=token()){
+ if(!isActiveSession(requestToken))return;
  setError('');
  const response=await fetch('/api/proposal-feedback/'+encodeURIComponent(id),{
-  method:'PATCH',headers:authHeaders({'Content-Type':'application/json'}),body:JSON.stringify({status})
+  method:'PATCH',headers:authHeaders({'Content-Type':'application/json'},requestToken),body:JSON.stringify(payload)
  });
+ if(!isActiveSession(requestToken))return;
  if(response.status===401||response.status===403){showLogin('세션이 만료됐거나 검토 권한이 없습니다.');return}
+ if(response.status===409){
+  await loadFeedback();
+  if(!isActiveSession(requestToken))return;
+  throw new Error('다른 검토자가 메모를 변경했습니다. 서버 최신 메모와 작성 중인 초안을 비교해 주세요.');
+ }
  if(!response.ok)throw new Error('처리 상태를 변경하지 못했습니다.');
+ const savedRecord=await response.json();
+ if(!isActiveSession(requestToken))return;
+ if(submittedDraft){
+  const currentDraft=noteDrafts.get(id);
+  if(currentDraft&&currentDraft.value===submittedDraft.value&&currentDraft.baseRevision===submittedDraft.baseRevision){
+   noteDrafts.delete(id);
+  }else if(currentDraft&&currentDraft.baseRevision===submittedDraft.baseRevision){
+   currentDraft.baseRevision=savedRecord.review_revision;
+   currentDraft.conflicted=false;
+   currentDraft.serverValue=savedRecord.reviewer_note||'';
+  }
+ }
  await loadFeedback();
 }
 document.getElementById('loginForm').addEventListener('submit',async event=>{
  event.preventDefault();loginMessage.textContent='확인 중입니다.';
+ const requestSequence=++loginRequestSequence;
  try{
   const response=await fetch('/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('email').value,password:document.getElementById('password').value})});
+  if(requestSequence!==loginRequestSequence)return;
   if(!response.ok){loginMessage.textContent='로그인 정보 또는 권한을 확인해 주세요.';return}
-  const data=await response.json();sessionStorage.setItem(TOKEN_KEY,data.access_token);
+  const data=await response.json();
+  if(requestSequence!==loginRequestSequence)return;
+  noteDrafts.clear();sessionStorage.setItem(TOKEN_KEY,data.access_token);
   document.getElementById('password').value='';loginMessage.textContent='';await loadFeedback();
- }catch(error){loginMessage.textContent='로그인 요청을 처리하지 못했습니다.'}
+ }catch(error){if(requestSequence===loginRequestSequence)loginMessage.textContent='로그인 요청을 처리하지 못했습니다.'}
+});
+document.getElementById('exportBtn').addEventListener('click',async()=>{
+ setError('');
+ const button=document.getElementById('exportBtn');button.disabled=true;
+ const requestToken=token();
+ try{
+  const response=await fetch('/api/proposal-feedback/export?'+queryString(),{headers:authHeaders({},requestToken),cache:'no-store'});
+  if(!isActiveSession(requestToken))return;
+  if(response.status===401||response.status===403){showLogin('세션이 만료됐거나 검토 권한이 없습니다.');return}
+  if(!response.ok)throw new Error('CSV 파일을 만들지 못했습니다.');
+  const blob=await response.blob();
+  if(!isActiveSession(requestToken))return;
+  const url=URL.createObjectURL(blob);
+  try{
+   const link=document.createElement('a');link.href=url;link.download='proposal-feedback.csv';
+   document.body.appendChild(link);link.click();link.remove();
+  }finally{URL.revokeObjectURL(url)}
+ }catch(error){if(isActiveSession(requestToken))setError(error.message)}
+ finally{if(isActiveSession(requestToken))button.disabled=false}
 });
 document.getElementById('refreshBtn').addEventListener('click',()=>loadFeedback().catch(e=>setError(e.message)));
 document.getElementById('logoutBtn').addEventListener('click',async()=>{
- try{await fetch('/auth/logout',{method:'POST',headers:authHeaders()})}finally{showLogin('로그아웃했습니다.')}
+ const requestToken=token();
+ try{await fetch('/auth/logout',{method:'POST',headers:authHeaders({},requestToken)})}
+ finally{if(isActiveSession(requestToken))showLogin('로그아웃했습니다.')}
 });
-['regionFilter','statusFilter','categoryFilter','typeFilter','todayOnly'].forEach(id=>document.getElementById(id).addEventListener('change',()=>loadFeedback().catch(e=>setError(e.message))));
+['regionFilter','statusFilter','categoryFilter','typeFilter','escalationFilter','candidateOnly','todayOnly'].forEach(id=>document.getElementById(id).addEventListener('change',()=>loadFeedback().catch(e=>setError(e.message))));
 if(token())loadFeedback().catch(e=>{showReview();setError(e.message)});else showLogin();
 </script>
 </body>
