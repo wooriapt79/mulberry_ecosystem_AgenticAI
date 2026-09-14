@@ -126,8 +126,10 @@ function showLogin(message=''){
  sessionStorage.removeItem(TOKEN_KEY);
  noteDrafts.clear();
  feedbackRequestSequence++;
+ loginRequestSequence++;
  if(activeFeedbackController)activeFeedbackController.abort();
  activeFeedbackController=null;
+ document.getElementById('exportBtn').disabled=false;
  loginView.classList.remove('hidden');
  reviewView.classList.add('hidden');
  loginMessage.textContent=message;
