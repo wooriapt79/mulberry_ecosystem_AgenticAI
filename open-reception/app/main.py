@@ -1186,6 +1186,11 @@ class ProposalFeedbackStatusInput(BaseModel):
     status: Literal["received", "reviewing", "incorporated", "deferred"] | None = None
     reviewer_note: str | None = Field(default=None, max_length=2000)
     escalation_status: Literal["none", "requested", "resolved"] | None = None
+    review_revision: str | None = Field(default=None, max_length=64)
+
+
+def proposal_feedback_revision(feedback: ProposalFeedback) -> str:
+    return aware(feedback.reviewed_at).isoformat() if feedback.reviewed_at else "unreviewed"
 
 
 @app.get("/api/proposal-feedback")
@@ -1238,6 +1243,7 @@ def list_proposal_feedback(
             "escalation_status": item.escalation_status,
             "reviewed_by": item.reviewed_by,
             "reviewed_at": item.reviewed_at,
+            "review_revision": proposal_feedback_revision(item),
             "created_at": item.created_at,
         }
         for item in records
@@ -1334,6 +1340,14 @@ def update_proposal_feedback_status(
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Proposal feedback not found")
     if payload.status is None and payload.reviewer_note is None and payload.escalation_status is None:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "No review changes supplied")
+    if payload.reviewer_note is not None:
+        expected_revision = payload.review_revision or ""
+        current_revision = proposal_feedback_revision(feedback)
+        if not hmac.compare_digest(expected_revision, current_revision):
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                "Review note changed; reload before saving this draft",
+            )
     previous_status = feedback.status
     previous_escalation = feedback.escalation_status
     if payload.status is not None:
@@ -1366,6 +1380,7 @@ def update_proposal_feedback_status(
         "reviewer_note": feedback.reviewer_note,
         "escalation_status": feedback.escalation_status,
         "reviewed_at": feedback.reviewed_at,
+        "review_revision": proposal_feedback_revision(feedback),
     }
 
 
