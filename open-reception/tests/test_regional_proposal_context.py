@@ -187,6 +187,8 @@ def test_workflow_changes_send_only_dirty_notes_and_preserve_filter_drafts():
     assert "finally{if(isActiveSession(requestToken))showLogin" in response.text
     assert "authHeaders({},requestToken)" in response.text
     assert "let loginRequestSequence=0;" in response.text
+    assert "loginRequestSequence++;" in response.text
+    assert "document.getElementById('exportBtn').disabled=false;" in response.text
     assert "if(requestSequence!==loginRequestSequence)return;" in response.text
     blob_read = response.text.index("const blob=await response.blob();")
     assert blob_read >= 0
