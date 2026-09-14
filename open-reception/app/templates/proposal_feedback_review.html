@@ -115,6 +115,7 @@ const reviewView=document.getElementById('reviewView');
 const loginMessage=document.getElementById('loginMessage');
 const errorBanner=document.getElementById('errorBanner');
 let records=[];
+const noteDrafts=new Map();
 let activeFeedbackController=null;
 let feedbackRequestSequence=0;
 
@@ -185,14 +186,27 @@ function render(){
   const reviewTools=el('div','review-tools');
   reviewTools.appendChild(el('h3','','담당자 검토 메모'));
   const note=document.createElement('textarea');
-  note.className='review-note';note.maxLength=2000;note.value=record.reviewer_note||'';
+  const existingDraft=noteDrafts.get(record.id);
+  note.className='review-note';note.maxLength=2000;
+  note.value=existingDraft?existingDraft.value:(record.reviewer_note||'');
+  note.dataset.baseRevision=existingDraft?existingDraft.baseRevision:record.review_revision;
   note.setAttribute('aria-label','담당자 검토 메모');
   reviewTools.appendChild(note);
   const noteActions=el('div','actions');
   const saveNote=el('button','','메모 저장');saveNote.type='button';
+  saveNote.disabled=!(existingDraft&&existingDraft.dirty);
+  note.addEventListener('input',()=>{
+   noteDrafts.set(record.id,{value:note.value,baseRevision:note.dataset.baseRevision,dirty:true});
+   saveNote.disabled=false;
+  });
   saveNote.addEventListener('click',async()=>{
    saveNote.disabled=true;
-   try{await updateReview(record.id,{reviewer_note:note.value})}
+   try{
+    await updateReview(record.id,{
+     reviewer_note:note.value,
+     review_revision:note.dataset.baseRevision
+    },true);
+   }
    catch(error){setError('메모가 저장되지 않았습니다. '+error.message);saveNote.disabled=false}
   });
   noteActions.appendChild(saveNote);
@@ -201,7 +215,15 @@ function render(){
    button.dataset.escalation=next;button.disabled=record.escalation_status===next;
    button.addEventListener('click',async()=>{
     button.disabled=true;
-    try{await updateReview(record.id,{escalation_status:next,reviewer_note:note.value})}
+    try{
+    const draft=noteDrafts.get(record.id);
+    const payload={escalation_status:next};
+    if(draft&&draft.dirty){
+     payload.reviewer_note=draft.value;
+     payload.review_revision=draft.baseRevision;
+    }
+    await updateReview(record.id,payload,Boolean(draft&&draft.dirty));
+   }
     catch(error){setError('Human 연결 상태가 저장되지 않았습니다. '+error.message);button.disabled=record.escalation_status===next}
    });
    noteActions.appendChild(button);
@@ -213,7 +235,15 @@ function render(){
    button.type='button';button.dataset.status=next;button.disabled=record.status===next;
    button.addEventListener('click',async()=>{
     button.disabled=true;
-    try{await updateReview(record.id,{status:next,reviewer_note:note.value})}
+    try{
+    const draft=noteDrafts.get(record.id);
+    const payload={status:next};
+    if(draft&&draft.dirty){
+     payload.reviewer_note=draft.value;
+     payload.review_revision=draft.baseRevision;
+    }
+    await updateReview(record.id,payload,Boolean(draft&&draft.dirty));
+   }
     catch(error){setError('상태가 저장되지 않았습니다. '+error.message);button.disabled=record.status===next}
    });
    actions.appendChild(button);
@@ -251,13 +281,15 @@ async function loadFeedback(){
   if(requestSequence===feedbackRequestSequence)activeFeedbackController=null;
  }
 }
-async function updateReview(id,payload){
+async function updateReview(id,payload,clearDraft=false){
  setError('');
  const response=await fetch('/api/proposal-feedback/'+encodeURIComponent(id),{
   method:'PATCH',headers:authHeaders({'Content-Type':'application/json'}),body:JSON.stringify(payload)
  });
  if(response.status===401||response.status===403){showLogin('세션이 만료됐거나 검토 권한이 없습니다.');return}
+ if(response.status===409)throw new Error('다른 검토자가 메모를 변경했습니다. 작성 중인 메모는 보존됩니다. 새로고침 후 다시 확인해 주세요.');
  if(!response.ok)throw new Error('처리 상태를 변경하지 못했습니다.');
+ if(clearDraft)noteDrafts.delete(id);
  await loadFeedback();
 }
 document.getElementById('loginForm').addEventListener('submit',async event=>{
