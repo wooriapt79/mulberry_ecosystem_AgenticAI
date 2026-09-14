@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인제 식품접근성 전략 — 계층적 확대 모델</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding-bottom: 40px;
+            border-bottom: 3px solid #6366f1;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #6366f1;
+            font-weight: 600;
+        }
+
+        .phase-section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 5px solid #6366f1;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .phase-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #6366f1;
+            color: white;
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .phase-title {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .phase-subtitle {
+            font-size: 1em;
+            color: #6366f1;
+            margin-top: 5px;
+        }
+
+        .content-block {
+            margin-bottom: 30px;
+        }
+
+        .content-block h3 {
+            font-size: 1.2em;
+            color: #374151;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .content-block p {
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.8;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 15px 0;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #555;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #6366f1;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .flow-diagram {
+            background: #f3f4f6;
+            border: 2px dashed #6366f1;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #374151;
+            line-height: 2;
+        }
+
+        .metric {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 5px;
+        }
+
+        .integration-section {
+            background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+            border-radius: 12px;
+            padding: 40px;
+            margin-top: 60px;
+        }
+
+        .integration-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 25px;
+        }
+
+        .integration-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .integration-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .integration-card h4 {
+            color: #6366f1;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .integration-card p {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .philosophy {
+            background: white;
+            border-left: 5px solid #ec4899;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 40px;
+            font-style: italic;
+            color: #555;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .philosophy strong {
+            color: #ec4899;
+            font-style: normal;
+        }
+
+        .timeline {
+            margin: 25px 0;
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline-item {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .timeline-item:before {
+            content: "";
+            position: absolute;
+            left: -35px;
+            width: 12px;
+            height: 12px;
+            background: #6366f1;
+            border-radius: 50%;
+            top: 5px;
+        }
+
+        .timeline-item:after {
+            content: "";
+            position: absolute;
+            left: -29px;
+            top: 25px;
+            width: 2px;
+            height: 25px;
+            background: #c7d2fe;
+        }
+
+        .timeline-item:last-child:after {
+            display: none;
+        }
+
+        .timeline-label {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .timeline-desc {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .integration-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .phase-section {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header>
+            <h1>🌾 인제 식품접근성 전략</h1>
+            <p class="subtitle">계층적 확대 모델: 문제해결 → 인프라 구축 → AI 완성</p>
+        </header>
+
+        <!-- Phase 1 -->
+        <section class="phase-section">
+            <div class="phase-header">
+                <div class="phase-number">1</div>
+                <div>
+                    <div class="phase-title">식품사막 해소</div>
+                    <div class="phase-subtitle">음성 주문 단말기 배치 (90일)</div>
+                </div>
+            </div>
+
+            <div class="content-block">
+                <h3>🎯 목표</h3>
+                <p>신선식품 구매 접근성이 낮은 고령층(2,500~3,500명)을 대상으로 음성 기반 주문 시스템 구축</p>
+            </div>
+
+            <div class="content-block">
+                <h3>📍 배치 대상</h3>
+                <ul class="feature-list">
+                    <li>인제군 지역 소규모 식품점/마트</li>
+                    <li>고령층 밀집 지역 1~2개 마을</li>
+                    <li>대형마트 접근이 어려운 10~20가구</li>
+                </ul>
+            </div>
+
+            <div class="content-block">
+                <h3>🔧 기술 구성</h3>
+                <div class="flow-diagram">라즈베리 파이 + 마이크 + 스피커
+                    ↓
+음성 인식 (어르신 방언 인식)
+                    ↓
+주문 처리 및 배달 연결
+                    ↓
+신선식품 접근성 개선</div>
+            </div>
+
+            <div class="content-block">
+                <h3>💡 작동 방식</h3>
+                <p><strong>어르신:</strong> "쌀 10킬로, 계란 한판 주문해"</p>
+                <p><strong>시스템:</strong> 음성 → 인식 → 지역 식품점 → 배달 → 가정 배송</p>
+            </div>
+
+            <div class="content-block">
+                <h3>📊 기대 효과</h3>
+                <ul class="feature-list">
+                    <li>식품 접근성 개선 (신선식품 구매 가능)</li>
+                    <li>디지털 진입장벽 제거 (음성 기반)</li>
+                    <li>지역 상점 경제 활성화</li>
+                    <li>고령층 자립심 향상</li>
+                </ul>
+            </div>
+
+            <div class="content-block">
+                <h3>⏱️ 타임라인</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-label">1~2주: 착수협의 및 대상지 선정</div>
+                        <div class="timeline-desc">MOU 체결, 마을 선정, 주민 설명회</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-label">3~8주: 하드웨어 설치 및 모니터링</div>
+                        <div class="timeline-desc">라즈베리 파이 배치, 음성 모델 학습, 듀얼 테스트</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-label">9~11주: 피드백 수집 및 개선</div>
+                        <div class="timeline-desc">어르신 설문, 상점주 피드백, 시스템 최적화</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-label">12주: Phase 1 결과 보고 및 Human Approval</div>
+                        <div class="timeline-desc">성과 검증 → Phase 2 승인 여부 결정</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase 2 -->
+        <section class="phase-section">
+            <div class="phase-header">
+                <div class="phase-number">2</div>
+                <div>
+                    <div class="phase-title">노인돌봄 시스템 구축</div>
+                    <div class="phase-subtitle">가정 설치 확대 (2025~2026)</div>
+                </div>
+            </div>
+
+            <div class="content-block">
+                <h3>🎯 목표</h3>
+                <p>라즈베리 파이를 가정에 설치하여 고령층 생활 패턴을 모니터링하고 위험 상황에 자동 대응하는 재난 대응 시스템 구축</p>
+            </div>
+
+            <div class="content-block">
+                <h3>🛡️ 핵심 기술: WiFi CSI (Channel State Information) 센싱</h3>
+                <ul class="feature-list">
+                    <li><strong>비침투적 모니터링:</strong> 카메라/센서 없이 WiFi 신호로 행동 분석</li>
+                    <li><strong>생활 패턴 학습:</strong> 정상 활동(움직임, 이동 경로, 휴식) 기록</li>
+                    <li><strong>이상 탐지:</strong> 낙상, 움직임 소실, 장시간 정지 감지</li>
+                    <li><strong>자동 알림:</strong> 이상 발생 → 담당자 즉시 통보</li>
+                </ul>
+            </div>
+
+            <div class="content-block">
+                <h3>🔧 시스템 구성</h3>
+                <div class="flow-diagram">가정 내 라즈베리 파이 (WiFi 라우터 역할)
+                    ↓
+WiFi CSI 수집 (무선 신호 분석)
+                    ↓
+엣지 AI (로컬 패턴 분석)
+                    ↓
+이상 감지 → 담당자 알림
+                    ↓
+신속한 대응 (의료, 안전)</div>
+            </div>
+
+            <div class="content-block">
+                <h3>💡 작동 방식</h3>
+                <p><strong>정상 상황:</strong> "아침 7시에 일어남 → 화장실 → 식사 → 활동" (패턴 학습)</p>
+                <p><strong>이상 상황:</strong> "평상시 움직임이 없음" → 담당자 알림 → "안녕하세요?" (음성 확인) → 대응</p>
+            </div>
+
+            <div class="content-block">
+                <h3>📊 기대 효과</h3>
+                <ul class="feature-list">
+                    <li>낙상/질환 조기 발견</li>
+                    <li>24시간 무인 모니터링 (프라이버시 보호)</li>
+                    <li>대응 시간 단축 (황금시간 확보)</li>
+                    <li>독거노인 안전망 강화</li>
+                    <li>지역 의료·안전 기관과 연계</li>
+                </ul>
+            </div>
+
+            <div class="content-block">
+                <h3>🏘️ 확대 범위</h3>
+                <p>Phase 1 성공 후 인제군 전역 확대</p>
+                <div style="margin-top: 15px;">
+                    <span class="metric">독거노인</span>
+                    <span class="metric">만성질환자</span>
+                    <span class="metric">장애인</span>
+                    <span class="metric">취약층 가정</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase 3 -->
+        <section class="phase-section">
+            <div class="phase-header">
+                <div class="phase-number">3</div>
+                <div>
+                    <div class="phase-title">엣지 AI 생성형 데이터 센터 완성</div>
+                    <div class="phase-subtitle">분산 AI + 중앙 학습 + 재배포 (2026~2027)</div>
+                </div>
+            </div>
+
+            <div class="content-block">
+                <h3>🎯 개념</h3>
+                <p>각 가정의 라즈베리 파이가 <strong>독립적 AI 노드</strong>로 작동하면서 동시에 중앙에서 집계된 데이터로 글로벌 모델을 학습하고 지역화된 모델을 재배포하는 구조</p>
+            </div>
+
+            <div class="content-block">
+                <h3>🏗️ 아키텍처</h3>
+                <div class="flow-diagram">분산 엣지 노드 (각 가정의 라즈베리 파이)
+  ├─ 로컬 AI 실행
+  ├─ 생활 패턴 학습
+  ├─ 이상 탐지
+  └─ 저지연 대응
+                    ↓
+                    ↓ (집계 데이터 전송)
+중앙 클라우드 (인제 AI 데이터 센터)
+  ├─ 전체 데이터 통합
+  ├─ 글로벌 모델 학습
+  ├─ 인제 지역 특성 분석
+  └─ 신규 알고리즘 개발
+                    ↓
+                    ↓ (지역화 모델 배포)
+분산 엣지 노드 업데이트
+  ├─ 더 정확한 패턴 인식
+  ├─ 새로운 위험 유형 탐지
+  └─ 개선된 대응 (피드백 루프)</div>
+            </div>
+
+            <div class="content-block">
+                <h3>💾 데이터 흐름</h3>
+                <ul class="feature-list">
+                    <li><strong>수집:</strong> 각 가정 WiFi CSI 신호 (비식별화)</li>
+                    <li><strong>분석:</strong> 중앙에서 인제 지역 고령층 생활 패턴 메타분석</li>
+                    <li><strong>생성:</strong> 인제만의 고유 AI 모델 창출</li>
+                    <li><strong>배포:</strong> 개선된 모델을 다시 엣지로 전송</li>
+                    <li><strong>학습:</strong> 피드백 기반 지속적 개선</li>
+                </ul>
+            </div>
+
+            <div class="content-block">
+                <h3>🤖 "생성형" 의미</h3>
+                <p><strong>생성형 AI가 아닌, "생성형 데이터 센터":</strong></p>
+                <ul class="feature-list">
+                    <li>기존 모델 재활용이 아닌, <strong>지역 데이터</strong>에서 신규 모델 <strong>생성</strong></li>
+                    <li>인제 고령층 특성에 최적화된 <strong>맞춤형 AI</strong> 개발</li>
+                    <li>매년 더 정교한 모델로 업데이트 (지속적 생성)</li>
+                </ul>
+            </div>
+
+            <div class="content-block">
+                <h3>🌐 인제 AI 인프라 완성</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                    <div style="background: #f3f4f6; padding: 15px; border-radius: 8px;">
+                        <strong style="color: #6366f1;">기술 기반</strong>
+                        <p style="margin-top: 10px; color: #666; font-size: 0.95em;">
+                            분산 AI 노드 네트워크<br>
+                            WiFi CSI 센싱 플랫폼<br>
+                            엣지 컴퓨팅 인프라
+                        </p>
+                    </div>
+                    <div style="background: #f3f4f6; padding: 15px; border-radius: 8px;">
+                        <strong style="color: #ec4899;">경제 기반</strong>
+                        <p style="margin-top: 10px; color: #666; font-size: 0.95em;">
+                            Jr. Luna (지역 AI 에이전트)<br>
+                            AI 기반 서비스 사업화<br>
+                            지역 기술 산업 육성
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 통합 구조 -->
+        <section class="integration-section">
+            <h2 class="integration-title">🔄 3단계 통합 구조</h2>
+
+            <div class="integration-grid">
+                <div class="integration-card">
+                    <h4>Phase 1: 문제 해결</h4>
+                    <p>식품사막 → 음성 주문 단말기</p>
+                </div>
+                <div class="integration-card">
+                    <h4>Phase 2: 인프라 확대</h4>
+                    <p>가정 설치 → 노인돌봄 재난 시스템</p>
+                </div>
+                <div class="integration-card">
+                    <h4>Phase 3: AI 완성</h4>
+                    <p>데이터 센터 → 지역 AI 에이전트</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; font-size: 1.1em; color: #4b5563; margin-top: 30px;">
+                <strong>결과:</strong> 단순 기술이 아닌, 지역 자립형 AI 경제 모델 완성
+            </div>
+        </section>
+
+        <!-- 핵심 철학 -->
+        <div class="philosophy">
+            <strong>🎯 Mulberry의 핵심 철학</strong>
+            <br><br>
+            "단순 기술 도입이 아닌, <strong>지역 문제를 푸는 과정에서 AI 인프라가 자동 구축되는 구조</strong>"
+            <br><br>
+            • 문제 (식품사막) → 솔루션 (음성주문) → 인프라 (단말기 배치)<br>
+            • 필요 (돌봄) → 기술 (WiFi CSI) → 시스템 (24시간 모니터링)<br>
+            • 축적된 데이터 → 학습 (중앙) → 지역 모델 (재배포)<br>
+            <br>
+            인제가 대한민국 AI 경제의 첫 번째 거점이 되는 과정입니다.
+        </div>
+    </div>
+</body>
+</html>

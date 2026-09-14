@@ -1,203 +1,564 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>담당자 안내 가이드 — Mulberry Lab AI Inje Initiative</title>
-  <meta name="description" content="Mulberry Lab AI Inje Initiative 문의 경로 및 담당자 안내">
-  <meta name="last-updated" content="2026-09-14">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인제 AI Initiative — 문의 경로 & 담당자 안내</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #ec4899;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #ec4899;
+            font-weight: 600;
+        }
+
+        .contact-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 5px solid #ec4899;
+        }
+
+        .contact-card:hover {
+            box-shadow: 0 4px 16px rgba(236, 72, 153, 0.15);
+        }
+
+        .card-role {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-role:before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            background: #ec4899;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .card-subtitle {
+            font-size: 1em;
+            color: #ec4899;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .responsibility {
+            background: #fce7f3;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            color: #be123c;
+        }
+
+        .responsibility-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .contact-info {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .contact-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .contact-label {
+            font-weight: 600;
+            color: #374151;
+            min-width: 100px;
+            display: flex;
+            align-items: center;
+        }
+
+        .contact-label:before {
+            content: "→";
+            color: #ec4899;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .contact-value {
+            color: #555;
+            word-break: break-all;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 5px solid #ec4899;
+        }
+
+        .section-title {
+            font-size: 1.6em;
+            color: #1f2937;
+            margin-bottom: 25px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title:before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            background: #ec4899;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .quicklink-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .quicklink-card {
+            background: #fce7f3;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #ec4899;
+        }
+
+        .quicklink-title {
+            font-weight: 600;
+            color: #be123c;
+            margin-bottom: 5px;
+        }
+
+        .quicklink-desc {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ec4899;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex-grow: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .step-desc {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .highlight-note {
+            background: #fce7f3;
+            border-left: 4px solid #ec4899;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            color: #be123c;
+        }
+
+        .highlight-note strong {
+            color: #be123c;
+        }
+
+        .resource-list {
+            list-style: none;
+            margin: 15px 0;
+        }
+
+        .resource-list li {
+            padding: 10px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #555;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .resource-list li:last-child {
+            border-bottom: none;
+        }
+
+        .resource-list li:before {
+            content: "📄";
+            position: absolute;
+            left: 0;
+            font-size: 1em;
+        }
+
+        @media (max-width: 768px) {
+            .quicklink-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.6em;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>📞 인제 AI Initiative 문의 안내</h1>
+            <p class="subtitle">담당자 연락처 & 문의 경로</p>
+        </header>
 
-<h1>담당자 안내 가이드</h1>
-<p>작성: Mulberry Lab | 버전: 1.0 | 업데이트: 2026-09-14</p>
-<p>이 문서는 Luna Q&A 지식 기반으로 사용됩니다. 문의 유형별 담당자와 연락 방법을 안내합니다.</p>
+        <!-- Mulberry Lab 팀 -->
+        <section class="section">
+            <h2 class="section-title">Mulberry Lab 팀</h2>
 
-<hr>
+            <!-- Luna -->
+            <div class="contact-card">
+                <div class="card-role">🤖 Luna</div>
+                <div class="card-subtitle">AI 리셉션 · 연구 리드</div>
 
-<h2>1. Luna Q&A — 첫 번째 창구</h2>
-<p>대부분의 일반 문의는 Luna가 직접 답변합니다. 아래 채널로 바로 질문하세요.</p>
+                <div class="responsibility">
+                    <div class="responsibility-title">책임 영역</div>
+                    <div>
+                        • Q&A 대응 (AI Inje Initiative 질문 답변)<br>
+                        • 기술 정보 제공<br>
+                        • 가이드 문서 작성<br>
+                        • 지역민 상담
+                    </div>
+                </div>
 
-<h3>Luna 채팅 채널</h3>
-<ul>
-  <li><strong>Open Reception 웹사이트</strong>: 이 사이트의 Luna 채팅 박스</li>
-  <li><strong>카카오 채널</strong>: 카카오톡에서 '인제 Mulberry' 검색 → 채팅</li>
-  <li>운영 시간: 24시간 (AI 자동 응답) / 복잡한 문의는 영업일 내 담당자 연결</li>
-</ul>
+                <div class="contact-info">
+                    <div class="contact-row">
+                        <div class="contact-label">채널</div>
+                        <div class="contact-value">Q&A 리셉션 (웹사이트)</div>
+                    </div>
+                    <div class="contact-row">
+                        <div class="contact-label">응답</div>
+                        <div class="contact-value">24시간 실시간 (AI 기반)</div>
+                    </div>
+                    <div class="contact-row">
+                        <div class="contact-label">특징</div>
+                        <div class="contact-value">기술 정보, FAQ, 기본 안내</div>
+                    </div>
+                </div>
+            </div>
 
-<h3>Luna가 직접 답변 가능한 항목</h3>
-<ul>
-  <li>Mulberry Lab 및 AI Inje Initiative 소개</li>
-  <li>음성 주문 단말기 사용 방법</li>
-  <li>파일럿 참여 방법 안내</li>
-  <li>서비스 현황 및 일반 FAQ</li>
-  <li>디지털포용법 등 관련 법령 일반 설명</li>
-</ul>
+            <!-- Trang -->
+            <div class="contact-card">
+                <div class="card-role">👤 Nguyen Trang</div>
+                <div class="card-subtitle">운영 관리자</div>
 
-<h3>Luna가 담당자에게 연결하는 항목</h3>
-<ul>
-  <li>공식 협약 또는 계약 관련</li>
-  <li>기술적 오류 신고</li>
-  <li>언론·취재 문의</li>
-  <li>연구 협력·투자 제안</li>
-  <li>법률·행정 관련 공식 답변 요청</li>
-</ul>
+                <div class="responsibility">
+                    <div class="responsibility-title">책임 영역</div>
+                    <div>
+                        • 프로젝트 운영 및 조율<br>
+                        • 지역 협의 및 파트너십<br>
+                        • 일정 및 예산 관리<br>
+                        • 행정 업무
+                    </div>
+                </div>
 
-<hr>
+                <div class="contact-info">
+                    <div class="contact-row">
+                        <div class="contact-label">이메일</div>
+                        <div class="contact-value">trang@mulberrylab.io</div>
+                    </div>
+                    <div class="contact-row">
+                        <div class="contact-label">전화</div>
+                        <div class="contact-value">(상담 가능)</div>
+                    </div>
+                    <div class="contact-row">
+                        <div class="contact-label">문의</div>
+                        <div class="contact-value">프로젝트 운영, 지역 협력, 일정 문의</div>
+                    </div>
+                </div>
+            </div>
 
-<h2>2. Mulberry Lab 팀 담당자</h2>
+            <!-- KODA -->
+            <div class="contact-card">
+                <div class="card-role">⚙️ KODA</div>
+                <div class="card-subtitle">CTO · AI 엔지니어</div>
 
-<h3>re.eul — 대표이사</h3>
-<ul>
-  <li>담당: 전략 결정, 공식 협력 제안, 대외 커뮤니케이션 총괄</li>
-  <li>이메일: chongchongsaigon@gmail.com</li>
-  <li>연락 방법: 공식 협약·파트너십·투자 제안은 이메일로 먼저 문의</li>
-  <li>응답 기간: 영업일 기준 2~3일 이내</li>
-</ul>
+                <div class="responsibility">
+                    <div class="responsibility-title">책임 영역</div>
+                    <div>
+                        • 기술 개발 및 시스템 설계<br>
+                        • 하드웨어 설치 (라즈베리 파이)<br>
+                        • WiFi CSI 센싱 시스템<br>
+                        • AI 모델 학습 및 최적화
+                    </div>
+                </div>
 
-<h3>KODA — 기술 담당</h3>
-<ul>
-  <li>담당: 백엔드 API, 단말기 소프트웨어, GitHub 이슈 관리</li>
-  <li>연락 방법: GitHub Issues (공개 기술 이슈) 또는 Luna를 통한 연결 요청</li>
-  <li>문의 가능 항목: 단말기 기술 오류, API 연동, 기술 제안</li>
-  <li>GitHub: https://github.com/wooriapt79/mulberry_ecosystem_AgenticAI/issues</li>
-</ul>
+                <div class="contact-info">
+                    <div class="contact-row">
+                        <div class="contact-label">이메일</div>
+                        <div class="contact-value">koda@mulberrylab.io</div>
+                    </div>
+                    <div class="contact-row">
+                        <div class="contact-label">전문</div>
+                        <div class="contact-value">기술 스펙, 시스템 설계, 하드웨어</div>
+                    </div>
+                    <div class="contact-row">
+                        <div class="contact-label">문의</div>
+                        <div class="contact-value">기술 협력, 하드웨어 문의, 시스템 질문</div>
+                    </div>
+                </div>
+            </div>
 
-<h3>TRANG (Nguyen Trang) — 운영 매니저</h3>
-<ul>
-  <li>담당: 프로젝트 운영, 자료 관리, 보고서 작성, 파일럿 일정 조율</li>
-  <li>연락 방법: Luna를 통한 연결 요청 (직접 연락처 비공개)</li>
-  <li>문의 가능 항목: 파일럿 일정, 운영 현황, 자료 요청</li>
-</ul>
+            <!-- re.eul -->
+            <div class="contact-card">
+                <div class="card-role">👨‍💼 re.eul (최재욱)</div>
+                <div class="card-subtitle">대표이사 · 리더십</div>
 
-<h3>FAMA — 데이터 분석 담당</h3>
-<ul>
-  <li>담당: 식품사막 지도(맵핑), KOSIS 데이터 분석, FDI(식품사막지수) 산출</li>
-  <li>연락 방법: Luna를 통한 연결 요청</li>
-  <li>문의 가능 항목: 데이터 공유 요청, 분석 결과 문의</li>
-</ul>
+                <div class="responsibility">
+                    <div class="responsibility-title">책임 영역</div>
+                    <div>
+                        • 전략 수립 및 방향 결정<br>
+                        • 대외 협력 및 정책 연계<br>
+                        • 자금 조성 및 사업 개발<br>
+                        • 비전 전달
+                    </div>
+                </div>
 
-<h3>Luna — AI 리셉션 (Resonance AI 전문 연구위원)</h3>
-<ul>
-  <li>담당: 일반 Q&A, 방문객 안내, 프로젝트 소개</li>
-  <li>연락 방법: 이 사이트 채팅, 카카오 채널</li>
-  <li>참고: Luna는 AI입니다. 법적 구속력 있는 답변, 개인 의료·법률 상담은 제공하지 않습니다.</li>
-</ul>
+                <div class="contact-info">
+                    <div class="contact-row">
+                        <div class="contact-label">이메일</div>
+                        <div class="contact-value">chongchongsaigon@gmail.com</div>
+                    </div>
+                    <div class="contact-row">
+                        <div class="contact-label">역할</div>
+                        <div class="contact-value">최종 의사결정, 전략 협의</div>
+                    </div>
+                    <div class="contact-row">
+                        <div class="contact-label">문의</div>
+                        <div class="contact-value">전략적 협력, 투자, 정책 제안</div>
+                    </div>
+                </div>
+            </div>
 
-<hr>
+            <!-- FAMA -->
+            <div class="contact-card">
+                <div class="card-role">🎤 FAMA</div>
+                <div class="card-subtitle">전도자 · 커뮤니티 전문가</div>
 
-<h2>3. 유형별 문의 경로</h2>
+                <div class="responsibility">
+                    <div class="responsibility-title">책임 영역</div>
+                    <div>
+                        • 지역 커뮤니티 연결<br>
+                        • 미디어 & 홍보<br>
+                        • 파트너 네트워킹<br>
+                        • 주민 참여 독려
+                    </div>
+                </div>
 
-<h3>인제군 주민 — 서비스 이용 문의</h3>
-<ul>
-  <li>음성 주문 단말기 사용법 → Luna 채팅</li>
-  <li>파일럿 참여 대기 신청 → Luna 채팅</li>
-  <li>단말기 오류 신고 → Luna 채팅 → KODA 연결</li>
-</ul>
+                <div class="contact-info">
+                    <div class="contact-row">
+                        <div class="contact-label">채널</div>
+                        <div class="contact-value">커뮤니티 네트워크</div>
+                    </div>
+                    <div class="contact-row">
+                        <div class="contact-label">문의</div>
+                        <div class="contact-value">커뮤니티 참여, 파트너십, 홍보</div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-<h3>지역 상인 — 파트너십 문의</h3>
-<ul>
-  <li>단말기 설치 신청 → Luna 채팅 (TRANG 연결)</li>
-  <li>수수료·계약 조건 협의 → re.eul 이메일</li>
-  <li>기술 지원 → KODA GitHub Issues</li>
-</ul>
+        <!-- 문의 경로 -->
+        <section class="section">
+            <h2 class="section-title">문의 경로별 안내</h2>
 
-<h3>인제군청 / 지자체 — 공식 협력</h3>
-<ul>
-  <li>디지털포용 시행계획 편입 협의 → re.eul 이메일</li>
-  <li>사업 설명 자료 요청 → Luna 채팅 → re.eul 연결</li>
-  <li>담당 부서 추천: 정보화팀 (시행계획), 경제팀 (사업 추진), 복지팀 (어르신 복지)</li>
-</ul>
+            <div class="quicklink-grid">
+                <div class="quicklink-card">
+                    <div class="quicklink-title">🤖 빠른 답변 필요</div>
+                    <div class="quicklink-desc">Luna Q&A 리셉션 (24시간)</div>
+                </div>
+                <div class="quicklink-card">
+                    <div class="quicklink-title">👥 운영 협의</div>
+                    <div class="quicklink-desc">Trang (trang@mulberrylab.io)</div>
+                </div>
+                <div class="quicklink-card">
+                    <div class="quicklink-title">⚙️ 기술 문의</div>
+                    <div class="quicklink-desc">KODA (koda@mulberrylab.io)</div>
+                </div>
+                <div class="quicklink-card">
+                    <div class="quicklink-title">🤝 전략/투자</div>
+                    <div class="quicklink-desc">re.eul (chongchongsaigon@gmail.com)</div>
+                </div>
+            </div>
 
-<h3>연구기관 / 대학 — 학술 협력</h3>
-<ul>
-  <li>데이터 공유 협의 → re.eul 이메일</li>
-  <li>공동 논문 제안 → re.eul 이메일 (arXiv 논문 준비 중)</li>
-  <li>STT·방언 연구 협력 → Luna 채팅 → TRANG/KODA 연결</li>
-</ul>
+            <h3 style="margin-top: 30px; font-size: 1.2em; color: #1f2937; margin-bottom: 15px; font-weight: 600;">문의 흐름</h3>
 
-<h3>언론 / 취재</h3>
-<ul>
-  <li>보도 자료 요청 → re.eul 이메일</li>
-  <li>인터뷰 요청 → re.eul 이메일</li>
-  <li>시연 요청 → re.eul 이메일 (사전 일정 조율 필수)</li>
-</ul>
+            <div class="flow-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">기본 정보 확인</div>
+                    <div class="step-desc">Luna Q&A에서 기본 정보, FAQ, 기술 개요 확인</div>
+                </div>
+            </div>
 
-<h3>투자자 / 파트너사</h3>
-<ul>
-  <li>사업 제안 → re.eul 이메일</li>
-  <li>프레젠테이션 요청 → re.eul 이메일</li>
-</ul>
+            <div class="flow-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">구체적 문의</div>
+                    <div class="step-desc">필요에 따라 담당자 직접 연락<br>
+                    • 기술: KODA<br>
+                    • 운영: Trang<br>
+                    • 전략: re.eul
+                    </div>
+                </div>
+            </div>
 
-<hr>
+            <div class="flow-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">회의 일정</div>
+                    <div class="step-desc">필요 시 대면/온라인 회의 일정 조율</div>
+                </div>
+            </div>
 
-<h2>4. GitHub Issues 활용 안내</h2>
-<p>기술 관련 공개 이슈는 GitHub에서 직접 확인하고 참여할 수 있습니다.</p>
-<p>URL: https://github.com/wooriapt79/mulberry_ecosystem_AgenticAI/issues</p>
+            <div class="flow-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <div class="step-title">의사결정</div>
+                    <div class="step-desc">re.eul 대표와 최종 협의 및 승인</div>
+                </div>
+            </div>
+        </section>
 
-<h3>현재 주요 이슈</h3>
-<ul>
-  <li>#74 — Luna Q&A API 구현 (KODA 담당)</li>
-  <li>#61 — 식품사막 맵 설계 (FAMA 담당)</li>
-  <li>#161 — 카카오 채널 서비스 명세서 (운영팀)</li>
-</ul>
+        <!-- 자료 다운로드 -->
+        <section class="section">
+            <h2 class="section-title">공식 자료 & 다운로드</h2>
 
-<h3>주의 사항</h3>
-<ul>
-  <li>민감 정보(토큰, 비밀번호, 개인정보)는 GitHub Issues에 기록하지 마세요.</li>
-  <li>포렌식·보안 관련 기술 아이디어는 공개 이슈 등록 금지입니다.</li>
-  <li>배포 환경(Railway URL, 서비스 ID 등)은 사전 승인 없이 공개하지 마세요.</li>
-</ul>
+            <ul class="resource-list">
+                <li><strong>제안 설명 자료 (요약본)</strong><br>
+                    사업 배경, 목표, 운영 구조를 빠르게 검토 (8.45 MB, PDF)</li>
 
-<hr>
+                <li><strong>기술·백서 (상세본)</strong><br>
+                    AI Agent 구조, 기술 체계, 운영 원칙 (1.02 MB, PDF)</li>
 
-<h2>5. 응답 기준 시간</h2>
-<table border="1" cellpadding="6" cellspacing="0">
-  <thead>
-    <tr>
-      <th>문의 유형</th>
-      <th>채널</th>
-      <th>예상 응답</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>일반 Q&A</td>
-      <td>Luna 채팅</td>
-      <td>즉시 (AI 자동)</td>
-    </tr>
-    <tr>
-      <td>기술 오류 신고</td>
-      <td>GitHub Issues / Luna</td>
-      <td>영업일 1~2일</td>
-    </tr>
-    <tr>
-      <td>파트너십 제안</td>
-      <td>re.eul 이메일</td>
-      <td>영업일 2~3일</td>
-    </tr>
-    <tr>
-      <td>공식 협약 협의</td>
-      <td>re.eul 이메일</td>
-      <td>영업일 3~5일</td>
-    </tr>
-    <tr>
-      <td>언론 취재</td>
-      <td>re.eul 이메일</td>
-      <td>영업일 2~3일</td>
-    </tr>
-  </tbody>
-</table>
+                <li><strong>식품접근성 전략 (전문)</strong><br>
+                    Phase 1, 2, 3 계층적 확대 모델 상세 설명 (HTML)</li>
 
-<hr>
+                <li><strong>지역 현황 분석</strong><br>
+                    인제군 고령화, 식품사막, 경제 현황 데이터 (HTML)</li>
 
-<h2>6. 찾아오시는 길 / 사무소 안내</h2>
-<p>Mulberry Lab은 현재 원격 분산 운영 체계입니다. 물리적 사무소 방문보다 온라인 채널을 통한 문의를 권장합니다.</p>
-<p>공식 방문 미팅이 필요한 경우 re.eul 이메일로 사전 조율 후 진행합니다.</p>
+                <li><strong>FAQ 모음</strong><br>
+                    자주 묻는 20가지 질문과 답변 (HTML)</li>
+            </ul>
 
-<hr>
-<p><em>이 안내 문서는 Mulberry Lab이 작성하며 정기적으로 업데이트됩니다.</em></p>
-<p><em>최신 담당자 정보는 Luna에게 직접 문의하세요.</em></p>
-<p><em>Mulberry Lab · AI Inje Initiative · 2026</em></p>
+            <div class="highlight-note">
+                <strong>📥 다운로드 방법:</strong> Luna Q&A 리셉션 또는 위 담당자 이메일로 요청하시면 즉시 발송됩니다.
+            </div>
+        </section>
 
+        <!-- 긴급 연락처 -->
+        <section class="section">
+            <h2 class="section-title">긴급 상황 대응</h2>
+
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; border-radius: 6px; margin-top: 15px;">
+                <strong style="color: #d97706; font-size: 1.1em;">⚠️ 긴급 상황 (노인 낙상, 재난 등)</strong>
+                <div style="color: #92400e; margin-top: 10px; line-height: 1.8;">
+                    • <strong>119 신고</strong> (응급 상황은 가장 우선)<br>
+                    • Trang 담당자 병행 통보 (운영 조율)<br>
+                    • 지역 동장/복지사 연락 (행정 지원)
+                </div>
+            </div>
+
+            <div class="highlight-note" style="margin-top: 20px;">
+                <strong>💬 일반 질문:</strong> Luna Q&A 또는 이메일 문의 (24시간 이내 회신)
+            </div>
+        </section>
+
+        <!-- 운영 시간 -->
+        <section class="section">
+            <h2 class="section-title">운영 시간</h2>
+
+            <div style="margin-top: 20px;">
+                <div style="background: #f0fdf4; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <strong style="color: #10b981;">Luna Q&A 리셉션</strong>
+                    <div style="color: #555; margin-top: 8px;">24시간 운영 (AI 기반)</div>
+                </div>
+
+                <div style="background: #eff6ff; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <strong style="color: #3b82f6;">이메일 문의</strong>
+                    <div style="color: #555; margin-top: 8px;">평일 9:00 ~ 18:00 (휴일 제외)<br>
+                    회신: 24시간 이내</div>
+                </div>
+
+                <div style="background: #fce7f3; padding: 15px; border-radius: 6px;">
+                    <strong style="color: #ec4899;">대면 회의</strong>
+                    <div style="color: #555; margin-top: 8px;">사전 예약 필수<br>
+                    평일 10:00 ~ 17:00</div>
+                </div>
+            </div>
+        </section>
+    </div>
 </body>
 </html>
