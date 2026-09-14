@@ -1,12 +1,15 @@
 import pytest
+from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from app.main import (
     ChatInput,
     ProposalFeedback,
     SessionLocal,
+    app,
     build_luna_system_prompt,
     classify_proposal_feedback,
+    list_proposal_feedback,
     proposal_summary_text,
     record_proposal_feedback,
 )
@@ -66,4 +69,55 @@ def test_feedback_record_keeps_region_and_review_state():
         assert feedback.request_type == "proposal_update"
         assert feedback.status == "received"
         db.delete(db.get(ProposalFeedback, feedback.id))
+        db.commit()
+
+
+def test_feedback_review_page_is_noindex_and_uses_session_only_token_storage():
+    with TestClient(app) as client:
+        response = client.get("/admin/proposal-feedback-review")
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["x-robots-tag"] == "noindex, nofollow"
+    assert 'sessionStorage.getItem("proposal_review_token")' in response.text
+    assert "localStorage" not in response.text
+    assert "/api/proposal-feedback" in response.text
+    assert "textContent" in response.text
+
+
+def test_feedback_review_filters_keep_regions_and_update_requests_separate():
+    created_ids = []
+    with SessionLocal() as db:
+        inje = record_proposal_feedback(
+            db,
+            page="inje",
+            source="chat",
+            question="예산 근거가 무엇인가요?",
+            response="인제 답변",
+        )
+        wanju = record_proposal_feedback(
+            db,
+            page="wanju",
+            source="file_analysis",
+            question="KPI 항목을 추가해 주세요",
+            response="완주 검토 후보",
+        )
+        created_ids.extend([inje.id, wanju.id])
+
+        records = list_proposal_feedback(
+            region="wanju",
+            review_status="received",
+            category="kpi",
+            request_type="proposal_update",
+            created_from=None,
+            admin=None,
+            db=db,
+        )
+
+        assert [item["id"] for item in records] == [wanju.id]
+        assert records[0]["region"] == "wanju"
+        assert records[0]["request_type"] == "proposal_update"
+
+        for feedback_id in created_ids:
+            db.delete(db.get(ProposalFeedback, feedback_id))
         db.commit()
