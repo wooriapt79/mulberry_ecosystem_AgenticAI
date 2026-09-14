@@ -108,6 +108,8 @@ const reviewView=document.getElementById('reviewView');
 const loginMessage=document.getElementById('loginMessage');
 const errorBanner=document.getElementById('errorBanner');
 let records=[];
+let activeFeedbackController=null;
+let feedbackRequestSequence=0;
 
 function token(){return sessionStorage.getItem(TOKEN_KEY)||''}
 function showLogin(message=''){
@@ -176,7 +178,11 @@ function render(){
   ['received','reviewing','incorporated','deferred'].forEach(next=>{
    const button=el('button','',statusLabels[next]);
    button.type='button';button.dataset.status=next;button.disabled=record.status===next;
-   button.addEventListener('click',()=>updateStatus(record.id,next));
+   button.addEventListener('click',async()=>{
+    button.disabled=true;
+    try{await updateStatus(record.id,next)}
+    catch(error){setError('상태가 저장되지 않았습니다. '+error.message);button.disabled=record.status===next}
+   });
    actions.appendChild(button);
   });
   detail.appendChild(actions);
@@ -190,13 +196,27 @@ function render(){
 }
 async function loadFeedback(){
  setError('');
- const response=await fetch('/api/proposal-feedback?'+queryString(),{headers:authHeaders(),cache:'no-store'});
- if(response.status===401||response.status===403){showLogin('세션이 만료됐거나 검토 권한이 없습니다.');return}
- if(!response.ok)throw new Error('접수자료를 불러오지 못했습니다.');
- records=await response.json();
- showReview();render();
- document.getElementById('scopeLabel').textContent=(document.getElementById('todayOnly').checked?'오늘 접수 · ':'')+'최근 200건 기준';
- document.getElementById('loadedAt').textContent='확인 '+formatTime(new Date().toISOString());
+ const requestSequence=++feedbackRequestSequence;
+ if(activeFeedbackController)activeFeedbackController.abort();
+ const controller=new AbortController();
+ activeFeedbackController=controller;
+ try{
+  const response=await fetch('/api/proposal-feedback?'+queryString(),{headers:authHeaders(),cache:'no-store',signal:controller.signal});
+  if(requestSequence!==feedbackRequestSequence)return;
+  if(response.status===401||response.status===403){showLogin('세션이 만료됐거나 검토 권한이 없습니다.');return}
+  if(!response.ok)throw new Error('접수자료를 불러오지 못했습니다.');
+  const nextRecords=await response.json();
+  if(requestSequence!==feedbackRequestSequence)return;
+  records=nextRecords;
+  showReview();render();
+  document.getElementById('scopeLabel').textContent=(document.getElementById('todayOnly').checked?'오늘 접수 · ':'')+'최근 200건 기준';
+  document.getElementById('loadedAt').textContent='확인 '+formatTime(new Date().toISOString());
+ }catch(error){
+  if(error.name==='AbortError')return;
+  throw error;
+ }finally{
+  if(requestSequence===feedbackRequestSequence)activeFeedbackController=null;
+ }
 }
 async function updateStatus(id,status){
  setError('');

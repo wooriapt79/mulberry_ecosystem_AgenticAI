@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>최초 관리자 등록 · Mulberry Lab</title>
+<style>
+:root{--purple:#7c3aed;--line:#e5e7eb;--text:#18181b;--muted:#6b7280;--bg:#f8fafc;--white:#fff;--red:#991b1b;--green:#166534}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic",sans-serif}
+.shell{max-width:480px;margin:8vh auto;padding:16px}.panel{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:0 8px 28px rgba(15,23,42,.06)}
+h1{margin:0 0 8px;font-size:22px}.note{color:var(--muted);font-size:13px;line-height:1.65;margin:0 0 18px}.field{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+label{font-size:12px;font-weight:700}.field input{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px;font:inherit}
+button{width:100%;min-height:46px;margin-top:20px;border:0;border-radius:8px;background:var(--purple);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+button:disabled{opacity:.55;cursor:default}.message{min-height:22px;margin-top:14px;font-size:13px;line-height:1.6;color:var(--red)}
+.message.success{color:var(--green)}.link{display:none;margin-top:14px;color:var(--purple);font-weight:700;text-decoration:none}.link.show{display:inline-block}
+@media(max-width:520px){.shell{margin:0 auto;padding:12px}.panel{padding:20px;border-radius:10px}}
+</style>
+</head>
+<body>
+<main class="shell">
+<section class="panel">
+<h1>최초 관리자 등록</h1>
+<p class="note">관리자 계정이 아직 없을 때 한 번만 사용할 수 있습니다. Railway에 설정된 ADMIN_BOOTSTRAP_TOKEN을 입력하세요. 입력값은 브라우저에 저장하지 않습니다.</p>
+<form id="setupForm" autocomplete="off">
+<div class="field"><label for="email">관리자 이메일</label><input id="email" type="email" autocomplete="username" required></div>
+<div class="field"><label for="password">비밀번호</label><input id="password" type="password" autocomplete="new-password" minlength="12" required></div>
+<div class="field"><label for="passwordConfirm">비밀번호 확인</label><input id="passwordConfirm" type="password" autocomplete="new-password" minlength="12" required></div>
+<div class="field"><label for="bootstrapToken">1회용 Bootstrap Token</label><input id="bootstrapToken" type="password" autocomplete="off" minlength="24" required></div>
+<button id="submitBtn" type="submit">관리자 계정 생성</button>
+<div id="message" class="message" role="alert"></div>
+<a id="reviewLink" class="link" href="/admin/proposal-feedback-review">피드백 검토함으로 이동</a>
+</form>
+</section>
+</main>
+<script>
+const form=document.getElementById('setupForm');
+const message=document.getElementById('message');
+const submitBtn=document.getElementById('submitBtn');
+const reviewLink=document.getElementById('reviewLink');
+form.addEventListener('submit',async event=>{
+ event.preventDefault();message.className='message';message.textContent='';
+ const email=document.getElementById('email').value.trim();
+ const password=document.getElementById('password').value;
+ const confirm=document.getElementById('passwordConfirm').value;
+ const bootstrapToken=document.getElementById('bootstrapToken').value;
+ if(password!==confirm){message.textContent='비밀번호 확인값이 일치하지 않습니다.';return}
+ submitBtn.disabled=true;submitBtn.textContent='생성 중입니다.';
+ try{
+  const response=await fetch('/auth/bootstrap',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify({email,password,bootstrap_token:bootstrapToken})});
+  if(response.status===201){
+   form.reset();Array.from(form.querySelectorAll('input')).forEach(input=>input.disabled=true);
+   message.className='message success';message.textContent='최초 관리자 계정이 생성되었습니다. 이 화면은 다시 사용할 수 없습니다.';
+   reviewLink.classList.add('show');submitBtn.textContent='생성 완료';return
+  }
+  if(response.status===409){message.textContent='최초 관리자 등록이 이미 완료되었습니다.'}
+  else if(response.status===403){message.textContent='Bootstrap Token이 올바르지 않습니다.'}
+  else{message.textContent='관리자 계정을 생성하지 못했습니다. 입력값과 서버 설정을 확인해 주세요.'}
+ }catch(error){message.textContent='요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.'}
+ finally{if(!reviewLink.classList.contains('show')){submitBtn.disabled=false;submitBtn.textContent='관리자 계정 생성'}
+  document.getElementById('password').value='';document.getElementById('passwordConfirm').value='';document.getElementById('bootstrapToken').value='';
+ }
+});
+</script>
+</body>
+</html>
