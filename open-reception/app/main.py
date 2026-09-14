@@ -1004,6 +1004,9 @@ PROPOSAL_SUMMARIES = {
             "AI_Inje_Initiative_Summary_v16.html",
             "inje_proposal_summary_toc_v2.html",
             "agent_profiling_trang_v1.html",
+            "luna-faq-inje.html",
+            "inje-region-context.html",
+            "contact-guide-inje.html",
         ],
         "guidance": (
             "서머리에 명시된 내용과 제안·예시·협의 필요 사항을 구분해서 답변하세요. "
