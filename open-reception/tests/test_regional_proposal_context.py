@@ -172,10 +172,15 @@ def test_csv_export_neutralizes_spreadsheet_formulas():
     assert csv_safe_cell(None) == ""
 
 
-def test_workflow_changes_preserve_the_current_review_note():
+def test_workflow_changes_send_only_dirty_notes_and_preserve_filter_drafts():
     with TestClient(app) as client:
         response = client.get("/admin/proposal-feedback-review")
 
     assert response.status_code == 200
-    assert "{status:next,reviewer_note:note.value}" in response.text
-    assert "{escalation_status:next,reviewer_note:note.value}" in response.text
+    assert "const noteDrafts=new Map()" in response.text
+    assert "if(draft&&draft.dirty)" in response.text
+    assert "payload.review_revision=draft.baseRevision" in response.text
+    assert "noteDrafts.delete(id)" in response.text
+    assert "{status:next,reviewer_note:note.value}" not in response.text
+    assert "{escalation_status:next,reviewer_note:note.value}" not in response.text
+    assert "작성 중인 메모는 보존됩니다." in response.text
