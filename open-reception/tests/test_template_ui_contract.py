@@ -162,13 +162,14 @@ def test_kebin_economy_column_defines_new_terms_with_caveats():
     assert "개인정보가 불필요한 제안 Q&A" in html
 
 
-def test_column_menu_lists_arka_kebin_and_trang_columns():
+def test_column_menu_lists_arka_kebin_trang_and_fama_columns():
     for template in TEMPLATES:
         html = template.read_text(encoding="utf-8")
-        assert html.count('class="sub-nav-item"') == 5
+        assert html.count('class="sub-nav-item"') == 6
         assert html.count("Arka Column <small") == 1
         assert html.count("KeBin Column <small") == 1
         assert html.count("Nguyen TRANG Column <small") == 3
+        assert html.count("FAMA Column <small") == 1
         assert "AI 경제와 Agent Venture" in html
         assert "AI 시대의 지자체 경제용어" in html
         assert "사람을 읽는 것이 AI의 진짜 경쟁력이다" in html
@@ -198,6 +199,33 @@ def test_trang_column_links_are_region_specific_and_exist():
         assert f"/static/{name}" in wanju
         assert f"/static/{name}" not in inje
         assert (static_dir / name).is_file()
+
+
+def test_fama_columns_are_safe_region_specific_and_mobile_ready():
+    static_dir = Path(__file__).parents[1] / "app" / "static"
+    image = static_dir / "FAMA.png"
+    assert image.is_file()
+
+    inje_name = "agent_evangelist_fama_v1.html"
+    wanju_name = "agent_wanju_evangelist_fama_v1.html"
+    inje_menu = TEMPLATES[0].read_text(encoding="utf-8")
+    wanju_menu = TEMPLATES[1].read_text(encoding="utf-8")
+    assert f"/static/{inje_name}" in inje_menu
+    assert f"/static/{inje_name}" not in wanju_menu
+    assert f"/static/{wanju_name}" in wanju_menu
+    assert f"/static/{wanju_name}" not in inje_menu
+
+    inje = (static_dir / inje_name).read_text(encoding="utf-8")
+    wanju = (static_dir / wanju_name).read_text(encoding="utf-8")
+    for html, home in ((inje, "/inje"), (wanju, "/wanju")):
+        assert f'class="home-link" href="{home}"' in html
+        assert 'src="/static/FAMA.png"' in html
+        assert "AI가 독립적인 법적 주체가 된다는 뜻이 아니다" in html
+        assert "절반의 성공" not in html
+        assert 'aria-controls="railNav"' in html
+        assert "e.key === 'Escape'" in html
+        assert "IntersectionObserver" in html
+    assert "인제에서 확인한 것, 완주에서 준비할 것" in wanju
 
 
 def test_arka_columns_use_standard_mobile_navigation():
