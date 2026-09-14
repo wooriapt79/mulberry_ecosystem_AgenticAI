@@ -105,6 +105,11 @@ def test_v04_matching_migration_round_trip(tmp_path, monkeypatch):
         "proposal_feedback",
     } <= set(inspect(engine).get_table_names())
 
+    feedback_columns = {
+        column["name"] for column in inspect(engine).get_columns("proposal_feedback")
+    }
+    assert {"reviewer_note", "escalation_status"} <= feedback_columns
+
     command.downgrade(config, "0001_v03")
     assert not {
         "matching_recommendations",
