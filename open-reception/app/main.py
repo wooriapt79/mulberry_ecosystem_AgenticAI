@@ -4,6 +4,8 @@ import hashlib
 import hmac
 from functools import lru_cache
 from html.parser import HTMLParser
+import csv
+import io
 import json
 import os
 import re
@@ -218,6 +220,8 @@ class ProposalFeedback(Base):
     question: Mapped[str] = mapped_column(String)
     response: Mapped[str] = mapped_column(String)
     status: Mapped[str] = mapped_column(String, default="received", index=True)
+    reviewer_note: Mapped[str] = mapped_column(String, default="")
+    escalation_status: Mapped[str] = mapped_column(String, default="none", index=True)
     reviewed_by: Mapped[str | None] = mapped_column(String, nullable=True)
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
@@ -1164,7 +1168,9 @@ def try_record_proposal_feedback(db: Session, **kwargs) -> ProposalFeedback | No
 
 
 class ProposalFeedbackStatusInput(BaseModel):
-    status: Literal["received", "reviewing", "incorporated", "deferred"]
+    status: Literal["received", "reviewing", "incorporated", "deferred"] | None = None
+    reviewer_note: str | None = Field(default=None, max_length=2000)
+    escalation_status: Literal["none", "requested", "resolved"] | None = None
 
 
 @app.get("/api/proposal-feedback")
@@ -1173,7 +1179,10 @@ def list_proposal_feedback(
     review_status: Literal["received", "reviewing", "incorporated", "deferred"] | None = None,
     category: Literal["budget", "schedule", "kpi", "governance", "evidence", "general"] | None = None,
     request_type: Literal["question", "proposal_update"] | None = None,
+    escalation_status: Literal["none", "requested", "resolved"] | None = None,
+    candidate_only: bool = False,
     created_from: datetime | None = None,
+    created_to: datetime | None = None,
     admin: User = Depends(require_permission("proposal:review")),
     db: Session = Depends(db_session),
 ):
@@ -1186,8 +1195,17 @@ def list_proposal_feedback(
         query = query.where(ProposalFeedback.category == category)
     if request_type:
         query = query.where(ProposalFeedback.request_type == request_type)
+    if escalation_status:
+        query = query.where(ProposalFeedback.escalation_status == escalation_status)
+    if candidate_only:
+        query = query.where(
+            ProposalFeedback.request_type == "proposal_update",
+            ProposalFeedback.status.in_(("reviewing", "incorporated")),
+        )
     if created_from:
         query = query.where(ProposalFeedback.created_at >= aware(created_from))
+    if created_to:
+        query = query.where(ProposalFeedback.created_at <= aware(created_to))
     records = db.scalars(
         query.order_by(ProposalFeedback.created_at.desc()).limit(200)
     ).all()
@@ -1201,12 +1219,82 @@ def list_proposal_feedback(
             "question": item.question,
             "response": item.response,
             "status": item.status,
+            "reviewer_note": item.reviewer_note,
+            "escalation_status": item.escalation_status,
             "reviewed_by": item.reviewed_by,
             "reviewed_at": item.reviewed_at,
             "created_at": item.created_at,
         }
         for item in records
     ]
+
+
+@app.get("/api/proposal-feedback/export")
+def export_proposal_feedback(
+    region: Literal["inje", "wanju"] | None = None,
+    review_status: Literal["received", "reviewing", "incorporated", "deferred"] | None = None,
+    category: Literal["budget", "schedule", "kpi", "governance", "evidence", "general"] | None = None,
+    request_type: Literal["question", "proposal_update"] | None = None,
+    escalation_status: Literal["none", "requested", "resolved"] | None = None,
+    candidate_only: bool = False,
+    created_from: datetime | None = None,
+    created_to: datetime | None = None,
+    admin: User = Depends(require_permission("proposal:review")),
+    db: Session = Depends(db_session),
+):
+    query = select(ProposalFeedback)
+    if region:
+        query = query.where(ProposalFeedback.region == region)
+    if review_status:
+        query = query.where(ProposalFeedback.status == review_status)
+    if category:
+        query = query.where(ProposalFeedback.category == category)
+    if request_type:
+        query = query.where(ProposalFeedback.request_type == request_type)
+    if escalation_status:
+        query = query.where(ProposalFeedback.escalation_status == escalation_status)
+    if candidate_only:
+        query = query.where(
+            ProposalFeedback.request_type == "proposal_update",
+            ProposalFeedback.status.in_(("reviewing", "incorporated")),
+        )
+    if created_from:
+        query = query.where(ProposalFeedback.created_at >= aware(created_from))
+    if created_to:
+        query = query.where(ProposalFeedback.created_at <= aware(created_to))
+    records = db.scalars(query.order_by(ProposalFeedback.created_at.desc()).limit(1000)).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "id", "municipality", "source", "category", "request_type", "question",
+        "response", "status", "reviewer_note", "escalation_status",
+        "reviewed_at", "created_at",
+    ])
+    for item in records:
+        writer.writerow([
+            item.id, item.region, item.source, item.category, item.request_type,
+            item.question, item.response, item.status, item.reviewer_note,
+            item.escalation_status, item.reviewed_at, item.created_at,
+        ])
+    content = "\ufeff" + output.getvalue()
+    audit(
+        db,
+        admin.id,
+        "proposal_feedback.exported",
+        "proposal_feedback",
+        region or "all",
+        {"region": region or "all", "record_count": len(records)},
+    )
+    db.commit()
+    return Response(
+        content=content,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": "attachment; filename=proposal-feedback.csv",
+            "Cache-Control": "no-store",
+        },
+    )
 
 
 @app.patch("/api/proposal-feedback/{feedback_id}")
@@ -1219,19 +1307,30 @@ def update_proposal_feedback_status(
     feedback = db.get(ProposalFeedback, feedback_id)
     if feedback is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Proposal feedback not found")
+    if payload.status is None and payload.reviewer_note is None and payload.escalation_status is None:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "No review changes supplied")
     previous_status = feedback.status
-    feedback.status = payload.status
+    previous_escalation = feedback.escalation_status
+    if payload.status is not None:
+        feedback.status = payload.status
+    if payload.reviewer_note is not None:
+        feedback.reviewer_note = payload.reviewer_note.strip()
+    if payload.escalation_status is not None:
+        feedback.escalation_status = payload.escalation_status
     feedback.reviewed_by = admin.id
     feedback.reviewed_at = now()
     audit(
         db,
         admin.id,
-        "proposal_feedback.status_changed",
+        "proposal_feedback.review_updated",
         "proposal_feedback",
         feedback.id,
         {
             "from_status": previous_status,
-            "to_status": payload.status,
+            "to_status": feedback.status,
+            "from_escalation": previous_escalation,
+            "to_escalation": feedback.escalation_status,
+            "note_changed": payload.reviewer_note is not None,
             "region": feedback.region,
         },
     )
@@ -1239,6 +1338,8 @@ def update_proposal_feedback_status(
     return {
         "id": feedback.id,
         "status": feedback.status,
+        "reviewer_note": feedback.reviewer_note,
+        "escalation_status": feedback.escalation_status,
         "reviewed_at": feedback.reviewed_at,
     }
 
