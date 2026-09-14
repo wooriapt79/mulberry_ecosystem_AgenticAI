@@ -9,6 +9,7 @@ from app.main import (
     app,
     build_luna_system_prompt,
     classify_proposal_feedback,
+    csv_safe_cell,
     list_proposal_feedback,
     proposal_summary_text,
     record_proposal_feedback,
@@ -161,3 +162,11 @@ def test_feedback_review_phase_two_controls_are_present_and_text_safe():
     assert "/api/proposal-feedback/export" in response.text
     assert "textContent" in response.text
     assert "innerHTML" not in response.text
+
+
+def test_csv_export_neutralizes_spreadsheet_formulas():
+    for value in ("=1+1", "+cmd", "-2+3", "@SUM(A1:A2)", "  =HYPERLINK('x')", "\t=1"):
+        assert csv_safe_cell(value).startswith("'")
+
+    assert csv_safe_cell("일반 질의") == "일반 질의"
+    assert csv_safe_cell(None) == ""
