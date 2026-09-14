@@ -304,10 +304,15 @@ async function updateReview(id,payload,submittedDraft=null){
   throw new Error('다른 검토자가 메모를 변경했습니다. 서버 최신 메모와 작성 중인 초안을 비교해 주세요.');
  }
  if(!response.ok)throw new Error('처리 상태를 변경하지 못했습니다.');
+ const savedRecord=await response.json();
  if(submittedDraft){
   const currentDraft=noteDrafts.get(id);
   if(currentDraft&&currentDraft.value===submittedDraft.value&&currentDraft.baseRevision===submittedDraft.baseRevision){
    noteDrafts.delete(id);
+  }else if(currentDraft&&currentDraft.baseRevision===submittedDraft.baseRevision){
+   currentDraft.baseRevision=savedRecord.review_revision;
+   currentDraft.conflicted=false;
+   currentDraft.serverValue=savedRecord.reviewer_note||'';
   }
  }
  await loadFeedback();
