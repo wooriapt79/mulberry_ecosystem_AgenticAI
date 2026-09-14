@@ -404,6 +404,21 @@ def locked_recommendation(db: Session, recommendation_id: str) -> MatchingRecomm
     )
 
 
+def locked_proposal_feedback(db: Session, feedback_id: str) -> ProposalFeedback | None:
+    if db.bind.dialect.name == "sqlite":
+        db.execute(
+            update(ProposalFeedback)
+            .where(ProposalFeedback.id == feedback_id)
+            .values(status=ProposalFeedback.status)
+        )
+        return db.get(ProposalFeedback, feedback_id)
+    return db.scalar(
+        select(ProposalFeedback)
+        .where(ProposalFeedback.id == feedback_id)
+        .with_for_update()
+    )
+
+
 def audit(db: Session, actor: str, action: str, target_type: str, target_id: str, detail: dict | None = None):
     head = locked_audit_head(db)
     if head is None:
@@ -1269,7 +1284,7 @@ def export_proposal_feedback(
         query = query.where(ProposalFeedback.created_at >= aware(created_from))
     if created_to:
         query = query.where(ProposalFeedback.created_at <= aware(created_to))
-    records = db.scalars(query.order_by(ProposalFeedback.created_at.desc()).limit(1000)).all()
+    records = db.scalars(query.order_by(ProposalFeedback.created_at.desc())).all()
 
     output = io.StringIO()
     writer = csv.writer(output)
@@ -1314,11 +1329,7 @@ def update_proposal_feedback_status(
     admin: User = Depends(require_permission("proposal:review")),
     db: Session = Depends(db_session),
 ):
-    feedback = db.scalar(
-        select(ProposalFeedback)
-        .where(ProposalFeedback.id == feedback_id)
-        .with_for_update()
-    )
+    feedback = locked_proposal_feedback(db, feedback_id)
     if feedback is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Proposal feedback not found")
     if payload.status is None and payload.reviewer_note is None and payload.escalation_status is None:
