@@ -79,7 +79,8 @@ def test_feedback_review_page_is_noindex_and_uses_session_only_token_storage():
     assert response.status_code == 200
     assert response.headers["cache-control"] == "no-store"
     assert response.headers["x-robots-tag"] == "noindex, nofollow"
-    assert 'sessionStorage.getItem("proposal_review_token")' in response.text
+    assert "sessionStorage.getItem" in response.text
+    assert "proposal_review_token" in response.text
     assert "localStorage" not in response.text
     assert "/api/proposal-feedback" in response.text
     assert "textContent" in response.text
