@@ -182,6 +182,10 @@ def test_workflow_changes_send_only_dirty_notes_and_preserve_filter_drafts():
     assert "payload.review_revision=draft.baseRevision" in response.text
     assert "noteDrafts.delete(id)" in response.text
     assert "noteDrafts.clear()" in response.text
+    assert "function isActiveSession(requestToken)" in response.text
+    assert "if(!isActiveSession(requestToken))return;" in response.text
+    assert "finally{if(isActiveSession(requestToken))showLogin" in response.text
+    assert "authHeaders({},requestToken)" in response.text
     assert "existingDraft.baseRevision=record.review_revision" in response.text
     assert "currentDraft.value===submittedDraft.value" in response.text
     assert "currentDraft.baseRevision=savedRecord.review_revision" in response.text
