@@ -219,14 +219,18 @@ function render(){
   });
   saveNote.addEventListener('click',async()=>{
    saveNote.disabled=true;
+   const requestToken=token();
    try{
     const submittedDraft={value:note.value,baseRevision:note.dataset.baseRevision};
     await updateReview(record.id,{
      reviewer_note:submittedDraft.value,
      review_revision:submittedDraft.baseRevision
-    },submittedDraft);
+    },submittedDraft,requestToken);
    }
-   catch(error){setError('메모가 저장되지 않았습니다. '+error.message);saveNote.disabled=false}
+   catch(error){
+    if(!isActiveSession(requestToken))return;
+    setError('메모가 저장되지 않았습니다. '+error.message);saveNote.disabled=false;
+   }
   });
   noteActions.appendChild(saveNote);
   ['requested','resolved','none'].forEach(next=>{
@@ -234,6 +238,7 @@ function render(){
    button.dataset.escalation=next;button.disabled=record.escalation_status===next;
    button.addEventListener('click',async()=>{
     button.disabled=true;
+    const requestToken=token();
     try{
     const draft=noteDrafts.get(record.id);
     const payload={escalation_status:next};
@@ -241,9 +246,12 @@ function render(){
      payload.reviewer_note=draft.value;
      payload.review_revision=draft.baseRevision;
     }
-    await updateReview(record.id,payload,draft&&draft.dirty?{value:draft.value,baseRevision:draft.baseRevision}:null);
+    await updateReview(record.id,payload,draft&&draft.dirty?{value:draft.value,baseRevision:draft.baseRevision}:null,requestToken);
    }
-    catch(error){setError('Human 연결 상태가 저장되지 않았습니다. '+error.message);button.disabled=record.escalation_status===next}
+    catch(error){
+     if(!isActiveSession(requestToken))return;
+     setError('Human 연결 상태가 저장되지 않았습니다. '+error.message);button.disabled=record.escalation_status===next;
+    }
    });
    noteActions.appendChild(button);
   });
@@ -254,6 +262,7 @@ function render(){
    button.type='button';button.dataset.status=next;button.disabled=record.status===next;
    button.addEventListener('click',async()=>{
     button.disabled=true;
+    const requestToken=token();
     try{
     const draft=noteDrafts.get(record.id);
     const payload={status:next};
@@ -261,9 +270,12 @@ function render(){
      payload.reviewer_note=draft.value;
      payload.review_revision=draft.baseRevision;
     }
-    await updateReview(record.id,payload,draft&&draft.dirty?{value:draft.value,baseRevision:draft.baseRevision}:null);
+    await updateReview(record.id,payload,draft&&draft.dirty?{value:draft.value,baseRevision:draft.baseRevision}:null,requestToken);
    }
-    catch(error){setError('상태가 저장되지 않았습니다. '+error.message);button.disabled=record.status===next}
+    catch(error){
+     if(!isActiveSession(requestToken))return;
+     setError('상태가 저장되지 않았습니다. '+error.message);button.disabled=record.status===next;
+    }
    });
    actions.appendChild(button);
   });
@@ -295,15 +307,15 @@ async function loadFeedback(){
   document.getElementById('scopeLabel').textContent=(document.getElementById('todayOnly').checked?'오늘 접수 · ':'')+'최근 200건 기준';
   document.getElementById('loadedAt').textContent='확인 '+formatTime(new Date().toISOString());
  }catch(error){
-  if(error.name==='AbortError')return;
+  if(error.name==='AbortError'||!isActiveSession(requestToken))return;
   throw error;
  }finally{
   if(requestSequence===feedbackRequestSequence)activeFeedbackController=null;
  }
 }
-async function updateReview(id,payload,submittedDraft=null){
+async function updateReview(id,payload,submittedDraft=null,requestToken=token()){
+ if(!isActiveSession(requestToken))return;
  setError('');
- const requestToken=token();
  const response=await fetch('/api/proposal-feedback/'+encodeURIComponent(id),{
   method:'PATCH',headers:authHeaders({'Content-Type':'application/json'},requestToken),body:JSON.stringify(payload)
  });
