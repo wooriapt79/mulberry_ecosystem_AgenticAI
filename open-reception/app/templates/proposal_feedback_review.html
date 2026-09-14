@@ -132,7 +132,8 @@ function showReview(){
  loginView.classList.add('hidden');
  reviewView.classList.remove('hidden');
 }
-function authHeaders(extra={}){return Object.assign({'Authorization':'Bearer '+token()},extra)}
+function authHeaders(extra={},requestToken=token()){return Object.assign({'Authorization':'Bearer '+requestToken},extra)}
+function isActiveSession(requestToken){return Boolean(requestToken)&&token()===requestToken}
 function todayStartIso(){const d=new Date();d.setHours(0,0,0,0);return d.toISOString()}
 function queryString(){
  const params=new URLSearchParams();
@@ -274,10 +275,11 @@ async function loadFeedback(){
  const requestSequence=++feedbackRequestSequence;
  if(activeFeedbackController)activeFeedbackController.abort();
  const controller=new AbortController();
+ const requestToken=token();
  activeFeedbackController=controller;
  try{
-  const response=await fetch('/api/proposal-feedback?'+queryString(),{headers:authHeaders(),cache:'no-store',signal:controller.signal});
-  if(requestSequence!==feedbackRequestSequence)return;
+  const response=await fetch('/api/proposal-feedback?'+queryString(),{headers:authHeaders({},requestToken),cache:'no-store',signal:controller.signal});
+  if(requestSequence!==feedbackRequestSequence||!isActiveSession(requestToken))return;
   if(response.status===401||response.status===403){showLogin('세션이 만료됐거나 검토 권한이 없습니다.');return}
   if(!response.ok)throw new Error('접수자료를 불러오지 못했습니다.');
   const nextRecords=await response.json();
@@ -295,9 +297,11 @@ async function loadFeedback(){
 }
 async function updateReview(id,payload,submittedDraft=null){
  setError('');
+ const requestToken=token();
  const response=await fetch('/api/proposal-feedback/'+encodeURIComponent(id),{
-  method:'PATCH',headers:authHeaders({'Content-Type':'application/json'}),body:JSON.stringify(payload)
+  method:'PATCH',headers:authHeaders({'Content-Type':'application/json'},requestToken),body:JSON.stringify(payload)
  });
+ if(!isActiveSession(requestToken))return;
  if(response.status===401||response.status===403){showLogin('세션이 만료됐거나 검토 권한이 없습니다.');return}
  if(response.status===409){
   await loadFeedback();
@@ -329,8 +333,10 @@ document.getElementById('loginForm').addEventListener('submit',async event=>{
 document.getElementById('exportBtn').addEventListener('click',async()=>{
  setError('');
  const button=document.getElementById('exportBtn');button.disabled=true;
+ const requestToken=token();
  try{
-  const response=await fetch('/api/proposal-feedback/export?'+queryString(),{headers:authHeaders(),cache:'no-store'});
+  const response=await fetch('/api/proposal-feedback/export?'+queryString(),{headers:authHeaders({},requestToken),cache:'no-store'});
+  if(!isActiveSession(requestToken))return;
   if(response.status===401||response.status===403){showLogin('세션이 만료됐거나 검토 권한이 없습니다.');return}
   if(!response.ok)throw new Error('CSV 파일을 만들지 못했습니다.');
   const blob=await response.blob();const url=URL.createObjectURL(blob);
@@ -340,7 +346,9 @@ document.getElementById('exportBtn').addEventListener('click',async()=>{
 });
 document.getElementById('refreshBtn').addEventListener('click',()=>loadFeedback().catch(e=>setError(e.message)));
 document.getElementById('logoutBtn').addEventListener('click',async()=>{
- try{await fetch('/auth/logout',{method:'POST',headers:authHeaders()})}finally{showLogin('로그아웃했습니다.')}
+ const requestToken=token();
+ try{await fetch('/auth/logout',{method:'POST',headers:authHeaders({},requestToken)})}
+ finally{if(isActiveSession(requestToken))showLogin('로그아웃했습니다.')}
 });
 ['regionFilter','statusFilter','categoryFilter','typeFilter','escalationFilter','candidateOnly','todayOnly'].forEach(id=>document.getElementById(id).addEventListener('change',()=>loadFeedback().catch(e=>setError(e.message))));
 if(token())loadFeedback().catch(e=>{showReview();setError(e.message)});else showLogin();
