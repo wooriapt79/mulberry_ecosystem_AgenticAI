@@ -137,3 +137,14 @@ def test_first_account_setup_page_keeps_credentials_out_of_source_and_storage():
     assert "localStorage" not in response.text
     assert "sessionStorage" not in response.text
     assert "chongchongsaigon" not in response.text
+
+
+def test_feedback_review_discards_superseded_filters_and_reports_failed_updates():
+    with TestClient(app) as client:
+        response = client.get("/admin/proposal-feedback-review")
+
+    assert response.status_code == 200
+    assert "AbortController" in response.text
+    assert "feedbackRequestSequence" in response.text
+    assert "controller.signal" in response.text
+    assert "상태가 저장되지 않았습니다." in response.text
