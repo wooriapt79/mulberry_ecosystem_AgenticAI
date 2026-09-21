@@ -354,6 +354,14 @@ body {
 .hero-stat .hs-val { font-size: 14px; font-weight: 800; color: var(--purple); line-height: 1.35; }
 .hero-stat .hs-lbl { margin-top: 2px; font-size: 11px; color: var(--text-tertiary); line-height: 1.45; }
 
+.home-actions-title {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--text-primary);
+}
 .home-actions {
   padding: 32px 48px;
   display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
@@ -1547,6 +1555,7 @@ body {
     </div>
 
     <div class="home-actions">
+      <h2 class="home-actions-title"><span class="lang-ko">AI Inje Initiative — 인제만의 AI와 AI Agent 경제 플랫폼</span><span class="lang-en" style="display:none;">AI Inje Initiative — Inje's own AI and AI Agent economy platform</span></h2>
       <div class="action-card" onclick="showSection('qa', document.querySelectorAll('.nav-item')[1])">
         <div class="ac-icon">Q</div>
         <div class="ac-title"><span class="lang-ko">Q&A 대화</span><span class="lang-en" style="display:none;">Q&A Chat</span></div>
