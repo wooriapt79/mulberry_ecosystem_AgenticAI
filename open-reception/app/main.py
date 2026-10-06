@@ -623,6 +623,11 @@ def inje_page(request: Request):
     return _templates.TemplateResponse("luna_site_renewal_white_ko_en.html", {"request": request})
 
 
+@app.get("/press", response_class=HTMLResponse)
+def press_page(request: Request):
+    return _templates.TemplateResponse("press_conference_inje_20261015.html", {"request": request})
+
+
 @app.get("/wanju", response_class=HTMLResponse)
 def wanju_page(request: Request):
     return _templates.TemplateResponse("luna_site_renewal_white_wanju.html", {"request": request})
