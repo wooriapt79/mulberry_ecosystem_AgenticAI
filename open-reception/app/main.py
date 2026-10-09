@@ -1,7 +1,6 @@
-from __future__ import annotations
-
 import hashlib
 import hmac
+from collections import defaultdict
 from functools import lru_cache
 from html.parser import HTMLParser
 import csv
@@ -11,11 +10,14 @@ import os
 import re
 import secrets
 from datetime import datetime, timedelta, timezone
+from time import time
 from typing import Annotated, Literal
 from uuid import uuid4
 
 from fastapi.staticfiles import StaticFiles
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile, status
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, EmailStr, Field
@@ -243,7 +245,60 @@ SessionLocal = sessionmaker(engine, expire_on_commit=False)
 
 from pathlib import Path
 
+_TESTING = os.getenv("TESTING", "").lower() in ("1", "true")
+
+
+def _client_ip(request: Request) -> str:
+    # TODO(security): Railway가 X-Forwarded-For를 재작성하는지 공식 확인 후 활성화.
+    # 확인 전까지는 조작 불가능한 TCP 연결 IP를 사용한다.
+    return request.client.host if request.client else "unknown"
+
+
+class _AnalyzeFileRateLimiter:
+    """POST /api/analyze-file 전용 in-process rate limiter.
+
+    slowapi + UploadFile + from __future__ import annotations 조합에서
+    ForwardRef 충돌로 @limiter.limit() 데코레이터 사용 불가.
+    FastAPI Depends()로 대체한다.
+
+    단일 인스턴스 파일럿 한정 — Railway 인스턴스 재시작 시 카운터 초기화됨.
+    다중 인스턴스 확대 시 Redis 저장소로 전환 필요.
+    """
+
+    def __init__(self, calls: int, period: int) -> None:
+        self._calls = calls
+        self._period = period
+        self._buckets: dict[str, list[float]] = defaultdict(list)
+
+    async def __call__(self, request: Request) -> None:
+        if os.getenv("TESTING", "").lower() in ("1", "true"):
+            return
+        ip = _client_ip(request)
+        now = time()
+        self._buckets[ip] = [t for t in self._buckets[ip] if now - t < self._period]
+        if len(self._buckets[ip]) >= self._calls:
+            raise HTTPException(
+                status_code=429,
+                detail="요청 횟수 제한을 초과했습니다. 잠시 후 다시 시도해 주세요.",
+            )
+        self._buckets[ip].append(now)
+
+
+_analyze_file_limiter = _AnalyzeFileRateLimiter(calls=10, period=60)
+
+
+async def check_analyze_file_rate_limit(request: Request) -> None:
+    """모듈 수준 래퍼 — callable instance를 직접 Depends에 넘기면
+    from __future__ import annotations 제거 후에도 __globals__ 문제가 남으므로
+    일반 함수로 위임한다."""
+    await _analyze_file_limiter(request)
+
+
+limiter = Limiter(key_func=_client_ip, enabled=not _TESTING)
+
 app = FastAPI(title="Luna Open Reception", version="0.4.0")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 _TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -651,7 +706,8 @@ def first_account_setup_page(request: Request):
 
 
 @app.post("/auth/bootstrap", status_code=201)
-def bootstrap_admin(payload: BootstrapInput, db: Session = Depends(db_session)):
+@limiter.limit("3/hour")
+def bootstrap_admin(request: Request, payload: BootstrapInput, db: Session = Depends(db_session)):
     configured = os.getenv("ADMIN_BOOTSTRAP_TOKEN")
     if not configured or not hmac.compare_digest(payload.bootstrap_token, configured):
         audit(db, "anonymous", "bootstrap.denied", "user", payload.email.lower())
@@ -676,7 +732,8 @@ def bootstrap_admin(payload: BootstrapInput, db: Session = Depends(db_session)):
 
 
 @app.post("/auth/register", status_code=201)
-def register(payload: Credentials, db: Session = Depends(db_session)):
+@limiter.limit("3/minute")
+def register(request: Request, payload: Credentials, db: Session = Depends(db_session)):
     email = payload.email.lower()
     if db.scalar(select(User).where(User.email == email)):
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
@@ -689,7 +746,8 @@ def register(payload: Credentials, db: Session = Depends(db_session)):
 
 
 @app.post("/auth/login")
-def login(payload: Credentials, db: Session = Depends(db_session)):
+@limiter.limit("5/minute")
+def login(request: Request, payload: Credentials, db: Session = Depends(db_session)):
     user = db.scalar(select(User).where(User.email == payload.email.lower()))
     candidate_hash = user.password_hash if user else DUMMY_PASSWORD_HASH
     password_matches = password_valid(payload.password, candidate_hash)
@@ -1394,7 +1452,8 @@ def chat_status():
     return {"available": bool(os.getenv("ANTHROPIC_API_KEY", ""))}
 
 @app.post("/api/chat")
-async def luna_chat(payload: ChatInput, db: Session = Depends(db_session)):
+@limiter.limit("20/minute")
+async def luna_chat(request: Request, payload: ChatInput, db: Session = Depends(db_session)):
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
     if not api_key:
         return {"reply": "주 AI 연결이 준비 중입니다. 잠시 후 다시 시도해 주세요.", "status": "no_key"}
@@ -1464,9 +1523,11 @@ ANALYZE_SYSTEM_PROMPT = """당신은 Luna입니다. Mulberry Research Lab의 AI 
 
 @app.post("/api/analyze-file")
 async def analyze_file(
+    request: Request,
     file: UploadFile = File(...),
     page: Annotated[Literal["inje", "wanju"], Form()] = "inje",
     db: Session = Depends(db_session),
+    _rl: Annotated[None, Depends(check_analyze_file_rate_limit)] = None,
 ):
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
     if not api_key:

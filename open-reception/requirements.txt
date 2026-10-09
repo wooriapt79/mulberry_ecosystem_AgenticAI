@@ -7,3 +7,4 @@ pydantic[email]==2.11.7
 jinja2==3.1.6
 anthropic==0.40.0
 python-multipart==0.0.20
+slowapi==0.1.9
