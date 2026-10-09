@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+from collections import defaultdict
 from functools import lru_cache
 from html.parser import HTMLParser
 import csv
@@ -11,6 +12,7 @@ import os
 import re
 import secrets
 from datetime import datetime, timedelta, timezone
+from time import time
 from typing import Annotated, Literal
 from uuid import uuid4
 
@@ -249,17 +251,44 @@ _TESTING = os.getenv("TESTING", "").lower() in ("1", "true")
 
 
 def _client_ip(request: Request) -> str:
-    # 테스트 환경: 요청마다 고유 키를 반환하여 레이트리밋 비활성화
-    if _TESTING:
-        return str(id(request))
-    # Railway는 리버스 프록시 뒤에서 실행 — X-Forwarded-For 첫 번째 값이 실제 클라이언트 IP
-    forwarded = request.headers.get("X-Forwarded-For")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
+    # TODO(security): Railway가 X-Forwarded-For를 재작성하는지 공식 확인 후 활성화.
+    # 확인 전까지는 조작 불가능한 TCP 연결 IP를 사용한다.
     return request.client.host if request.client else "unknown"
 
 
-limiter = Limiter(key_func=_client_ip)
+class _AnalyzeFileRateLimiter:
+    """POST /api/analyze-file 전용 in-process rate limiter.
+
+    slowapi + UploadFile + from __future__ import annotations 조합에서
+    ForwardRef 충돌로 @limiter.limit() 데코레이터 사용 불가.
+    FastAPI Depends()로 대체한다.
+
+    단일 인스턴스 파일럿 한정 — Railway 인스턴스 재시작 시 카운터 초기화됨.
+    다중 인스턴스 확대 시 Redis 저장소로 전환 필요.
+    """
+
+    def __init__(self, calls: int, period: int) -> None:
+        self._calls = calls
+        self._period = period
+        self._buckets: dict[str, list[float]] = defaultdict(list)
+
+    async def __call__(self, request: Request) -> None:
+        if os.getenv("TESTING", "").lower() in ("1", "true"):
+            return
+        ip = _client_ip(request)
+        now = time()
+        self._buckets[ip] = [t for t in self._buckets[ip] if now - t < self._period]
+        if len(self._buckets[ip]) >= self._calls:
+            raise HTTPException(
+                status_code=429,
+                detail="요청 횟수 제한을 초과했습니다. 잠시 후 다시 시도해 주세요.",
+            )
+        self._buckets[ip].append(now)
+
+
+_analyze_file_limiter = _AnalyzeFileRateLimiter(calls=10, period=60)
+
+limiter = Limiter(key_func=_client_ip, enabled=not _TESTING)
 
 app = FastAPI(title="Luna Open Reception", version="0.4.0")
 app.state.limiter = limiter
@@ -1487,6 +1516,7 @@ async def analyze_file(
     file: UploadFile = File(...),
     page: Annotated[Literal["inje", "wanju"], Form()] = "inje",
     db: Session = Depends(db_session),
+    _rl: None = Depends(_analyze_file_limiter),
 ):
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
     if not api_key:

@@ -10,8 +10,9 @@ test_db = Path(__file__).parent / "test.sqlite3"
 os.environ.setdefault("DATABASE_URL", f"sqlite:///{test_db}")
 os.environ.setdefault("ADMIN_BOOTSTRAP_TOKEN", "bootstrap-token-for-tests-only-000000")
 os.environ.setdefault("LOGIN_MAX_FAILURES", "3")
-# 테스트 환경에서 레이트리밋 비활성화 — main.py 로드 전에 반드시 설정
-os.environ.setdefault("TESTING", "true")
+# app.main import 전에 설정해야 _TESTING 플래그가 올바르게 평가된다.
+# setdefault 대신 강제 설정 — CI 환경에서 다른 값이 들어오는 경우 방지.
+os.environ["TESTING"] = "true"
 
 if os.environ["DATABASE_URL"].startswith("sqlite") and test_db.exists():
     test_db.unlink()
@@ -22,20 +23,3 @@ def migrated_database():
     config = Config(str(Path(__file__).parents[1] / "alembic.ini"))
     command.upgrade(config, "head")
     yield
-
-
-@pytest.fixture(autouse=True)
-def reset_rate_limiter():
-    """각 테스트 후 slowapi in-memory 레이트리밋 카운터를 초기화한다.
-
-    모듈 전역 limiter가 TestClient 간에 상태를 공유하므로,
-    레이트리밋과 무관한 테스트가 429를 받아 실패하는 것을 방지한다.
-    """
-    yield
-    try:
-        from app.main import limiter
-        storage = limiter._limiter.storage
-        if hasattr(storage, "storage"):
-            storage.storage.clear()
-    except Exception:
-        pass
