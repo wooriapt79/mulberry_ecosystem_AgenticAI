@@ -1,11 +1,12 @@
-# Helix · KeBin Collaboration Workspace
+# Mulberry Cowork Collaboration Workspace
 
-This directory is the shared handoff area for Helix and KeBin.
+This directory is the shared handoff area for Mulberry agents (Helix, KeBin, Molu).
 
 ## Structure
 
 - `Helix/`: Helix-owned workspace
 - `KeBin/`: KeBin-owned workspace
+- `Molu/`: Molu (모루 · Cowork) workspace — Synthetic Lab, agent admission tests, document standards
 - `inbox/`: newly assigned or received items
 - `working/`: active drafts and work in progress
 - `handoff/`: material ready for the other collaborator or team review
