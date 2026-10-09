@@ -1,8 +1,7 @@
 """레이트리밋 전용 테스트.
 
 conftest.py 가 TESTING=true 로 설정하므로 일반 회귀 테스트에서는 limiter 가 꺼진다.
-이 모듈의 각 테스트는 rate_limit_active fixture 로 limiter 를 켜고
-테스트 종료 후 되돌린다.
+각 테스트는 rate_limit_active fixture 로 limiter 를 켜고 테스트 후 되돌린다.
 
 NOTE: TestClient.request.client.host 는 항상 "testclient" 이므로
       IP 분리 테스트(KeBin §5-6)는 X-Forwarded-For 신뢰 설정 구현 후 추가한다.
@@ -14,6 +13,12 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import _analyze_file_limiter, limiter
+
+# API 검증 규칙에 맞는 페이로드 상수
+VALID_PASSWORD = "correct-horse-battery"
+VALID_ADMIN_PASSWORD = "correct-horse-battery-123"
+INVALID_BOOTSTRAP_TOKEN = "x" * 32
+INVALID_LOGIN_PASSWORD = "wrong-password-value"
 
 
 @pytest.fixture()
@@ -44,31 +49,49 @@ def client(rate_limit_active):
 
 
 def test_bootstrap_rate_limit_429(client):
+    payload = {
+        "bootstrap_token": INVALID_BOOTSTRAP_TOKEN,
+        "email": "a@b.com",
+        "password": VALID_ADMIN_PASSWORD,
+    }
     for _ in range(3):
-        client.post("/auth/bootstrap", json={"bootstrap_token": "wrong", "email": "a@b.com", "password": "x"})
-    resp = client.post("/auth/bootstrap", json={"bootstrap_token": "wrong", "email": "a@b.com", "password": "x"})
+        client.post("/auth/bootstrap", json=payload)
+    resp = client.post("/auth/bootstrap", json=payload)
     assert resp.status_code == 429
 
 
 def test_register_rate_limit_429(client):
     for i in range(3):
-        client.post("/auth/register", json={"email": f"rl{i}@example.com", "password": "correct-horse-battery"})
-    resp = client.post("/auth/register", json={"email": "rl_over@example.com", "password": "correct-horse-battery"})
+        client.post(
+            "/auth/register",
+            json={"email": f"rl{i}@example.com", "password": VALID_PASSWORD},
+        )
+    resp = client.post(
+        "/auth/register",
+        json={"email": "rl_over@example.com", "password": VALID_PASSWORD},
+    )
     assert resp.status_code == 429
 
 
 def test_login_rate_limit_429(client):
+    payload = {"email": "no@no.com", "password": INVALID_LOGIN_PASSWORD}
     for _ in range(5):
-        client.post("/auth/login", json={"email": "no@no.com", "password": "wrong"})
-    resp = client.post("/auth/login", json={"email": "no@no.com", "password": "wrong"})
+        client.post("/auth/login", json=payload)
+    resp = client.post("/auth/login", json=payload)
     assert resp.status_code == 429
 
 
 def test_429_no_sensitive_info(client):
     """429 응답에 내부 정보·공급자명이 노출되지 않는다."""
     for _ in range(3):
-        client.post("/auth/register", json={"email": "info@example.com", "password": "pw"})
-    resp = client.post("/auth/register", json={"email": "info@example.com", "password": "pw"})
+        client.post(
+            "/auth/register",
+            json={"email": "info@example.com", "password": VALID_PASSWORD},
+        )
+    resp = client.post(
+        "/auth/register",
+        json={"email": "info@example.com", "password": VALID_PASSWORD},
+    )
     assert resp.status_code == 429
     body = resp.text.lower()
     for forbidden in ("traceback", "anthropic", "railway", "sqlalchemy", "secret"):

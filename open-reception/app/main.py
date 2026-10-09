@@ -1516,7 +1516,7 @@ async def analyze_file(
     file: UploadFile = File(...),
     page: Annotated[Literal["inje", "wanju"], Form()] = "inje",
     db: Session = Depends(db_session),
-    _rl: None = Depends(_analyze_file_limiter),
+    _rl: Annotated[None, Depends(_analyze_file_limiter)] = None,
 ):
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
     if not api_key:
