@@ -245,7 +245,13 @@ SessionLocal = sessionmaker(engine, expire_on_commit=False)
 
 from pathlib import Path
 
+_TESTING = os.getenv("TESTING", "").lower() in ("1", "true")
+
+
 def _client_ip(request: Request) -> str:
+    # 테스트 환경: 요청마다 고유 키를 반환하여 레이트리밋 비활성화
+    if _TESTING:
+        return str(id(request))
     # Railway는 리버스 프록시 뒤에서 실행 — X-Forwarded-For 첫 번째 값이 실제 클라이언트 IP
     forwarded = request.headers.get("X-Forwarded-For")
     if forwarded:

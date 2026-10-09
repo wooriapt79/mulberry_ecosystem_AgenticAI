@@ -10,6 +10,8 @@ test_db = Path(__file__).parent / "test.sqlite3"
 os.environ.setdefault("DATABASE_URL", f"sqlite:///{test_db}")
 os.environ.setdefault("ADMIN_BOOTSTRAP_TOKEN", "bootstrap-token-for-tests-only-000000")
 os.environ.setdefault("LOGIN_MAX_FAILURES", "3")
+# 테스트 환경에서 레이트리밋 비활성화 — main.py 로드 전에 반드시 설정
+os.environ.setdefault("TESTING", "true")
 
 if os.environ["DATABASE_URL"].startswith("sqlite") and test_db.exists():
     test_db.unlink()
