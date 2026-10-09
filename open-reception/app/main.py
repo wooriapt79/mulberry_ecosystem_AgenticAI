@@ -16,6 +16,8 @@ from uuid import uuid4
 
 from fastapi.staticfiles import StaticFiles
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile, status
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, EmailStr, Field
@@ -243,7 +245,19 @@ SessionLocal = sessionmaker(engine, expire_on_commit=False)
 
 from pathlib import Path
 
+def _client_ip(request: Request) -> str:
+    # Railway는 리버스 프록시 뒤에서 실행 — X-Forwarded-For 첫 번째 값이 실제 클라이언트 IP
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+limiter = Limiter(key_func=_client_ip)
+
 app = FastAPI(title="Luna Open Reception", version="0.4.0")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 _TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -646,7 +660,8 @@ def first_account_setup_page(request: Request):
 
 
 @app.post("/auth/bootstrap", status_code=201)
-def bootstrap_admin(payload: BootstrapInput, db: Session = Depends(db_session)):
+@limiter.limit("3/hour")
+def bootstrap_admin(request: Request, payload: BootstrapInput, db: Session = Depends(db_session)):
     configured = os.getenv("ADMIN_BOOTSTRAP_TOKEN")
     if not configured or not hmac.compare_digest(payload.bootstrap_token, configured):
         audit(db, "anonymous", "bootstrap.denied", "user", payload.email.lower())
@@ -671,7 +686,8 @@ def bootstrap_admin(payload: BootstrapInput, db: Session = Depends(db_session)):
 
 
 @app.post("/auth/register", status_code=201)
-def register(payload: Credentials, db: Session = Depends(db_session)):
+@limiter.limit("3/minute")
+def register(request: Request, payload: Credentials, db: Session = Depends(db_session)):
     email = payload.email.lower()
     if db.scalar(select(User).where(User.email == email)):
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
@@ -684,7 +700,8 @@ def register(payload: Credentials, db: Session = Depends(db_session)):
 
 
 @app.post("/auth/login")
-def login(payload: Credentials, db: Session = Depends(db_session)):
+@limiter.limit("5/minute")
+def login(request: Request, payload: Credentials, db: Session = Depends(db_session)):
     user = db.scalar(select(User).where(User.email == payload.email.lower()))
     candidate_hash = user.password_hash if user else DUMMY_PASSWORD_HASH
     password_matches = password_valid(payload.password, candidate_hash)
@@ -1389,7 +1406,8 @@ def chat_status():
     return {"available": bool(os.getenv("ANTHROPIC_API_KEY", ""))}
 
 @app.post("/api/chat")
-async def luna_chat(payload: ChatInput, db: Session = Depends(db_session)):
+@limiter.limit("20/minute")
+async def luna_chat(request: Request, payload: ChatInput, db: Session = Depends(db_session)):
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
     if not api_key:
         return {"reply": "주 AI 연결이 준비 중입니다. 잠시 후 다시 시도해 주세요.", "status": "no_key"}
@@ -1458,7 +1476,9 @@ ANALYZE_SYSTEM_PROMPT = """당신은 Luna입니다. Mulberry Research Lab의 AI 
 답변은 명확하고 간결하게 작성하세요."""
 
 @app.post("/api/analyze-file")
+@limiter.limit("10/minute")
 async def analyze_file(
+    request: Request,
     file: UploadFile = File(...),
     page: Annotated[Literal["inje", "wanju"], Form()] = "inje",
     db: Session = Depends(db_session),
