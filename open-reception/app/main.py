@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import hashlib
 import hmac
 from collections import defaultdict
@@ -287,6 +285,14 @@ class _AnalyzeFileRateLimiter:
 
 
 _analyze_file_limiter = _AnalyzeFileRateLimiter(calls=10, period=60)
+
+
+async def check_analyze_file_rate_limit(request: Request) -> None:
+    """모듈 수준 래퍼 — callable instance를 직접 Depends에 넘기면
+    from __future__ import annotations 제거 후에도 __globals__ 문제가 남으므로
+    일반 함수로 위임한다."""
+    await _analyze_file_limiter(request)
+
 
 limiter = Limiter(key_func=_client_ip, enabled=not _TESTING)
 
@@ -1516,7 +1522,7 @@ async def analyze_file(
     file: UploadFile = File(...),
     page: Annotated[Literal["inje", "wanju"], Form()] = "inje",
     db: Session = Depends(db_session),
-    _rl: Annotated[None, Depends(_analyze_file_limiter)] = None,
+    _rl: Annotated[None, Depends(check_analyze_file_rate_limit)] = None,
 ):
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
     if not api_key:
