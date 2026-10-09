@@ -1,0 +1,39 @@
+# Cost targets (Phase 0.1). Targets are OUR GOALS, not results.
+# Each optimization cycle: measure -> find biggest driver -> improve one lever -> re-measure -> record in ledger.
+# A cycle's savings count only if the quality gate passes (no trading safety for tokens).
+version: 0.1
+krw_per_usd: 1400
+
+quality_gate:
+  dialogue_suite_must_pass_all: true    # approval gate, refusal, offline tests must stay 7/7
+
+stages:
+  - id: S0
+    name: "기준선 증명 · Decider 76% 절감을 실측으로 확인"
+    config: B
+    checks:
+      savings_pct_p50: {min: 75}
+      savings_pct_p10: {min: 60}         # worst-case side must still save
+  - id: S1
+    name: "1차 최적화 · 레버 목표 달성 시 (Decider)"
+    config: B
+    checks:
+      cost_krw_p50: {max: 4.8}           # per resident interaction
+      savings_pct_p50: {min: 82}
+      llm_calls_p50: {max: 1.4}
+  - id: S2
+    name: "2차 최적화 · Edge 허브 (가게·마을회관, 하루 100회)"
+    config: C
+    overrides: {interactions_per_day: 100}
+    checks:
+      cost_krw_p50: {max: 4.3}
+      savings_pct_p50: {min: 83}
+
+# Levers to push each cycle (measured values replace assumptions as they arrive)
+levers:
+  decider_fallback_rate: {now: "0.10~0.30 (가정)", target: "0.15 이하"}
+  edge_share_of_generation: {now: "0.30~0.70 (가정)", target: "0.50 이상"}
+  generative_share_of_turns: {now: "0.30~0.70 (가정)", target: "0.40 이하"}
+  input_tokens_per_call_b: {now: "800~1800 (가정)", target: "1000 이하 (프롬프트 압축·캐시)"}
+  token_reduction_own_models: {now: "0~0.30 (가정)", target: "0.15 이상 (인제 토크나이저)"}
+  interactions_per_device_per_day: {now: "5~50 (가정)", target: "Edge는 하루 54회 이상 장소 우선"}
